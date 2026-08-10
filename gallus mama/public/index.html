@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GALLUS - MAMA & YUMURTA | Taze Çiftlik Yumurtası & Gurme Pet Market</title>
+  <meta name="description" content="GALLUS MAMA & YUMURTA - Değirmenköy Köy-Pet Market ve Gezen Tavuk Üretim Çiftliği. Taze yumurta, gurme kedi/köpek mamaları, çoban köpeği özel serileri, çiftlik yemleri ve B2B toptan satış.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Style -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Background Video with Darkened Overlay -->
+  <div class="video-bg-container">
+    <video autoplay loop muted playsinline class="video-bg-element">
+      <source src="/images/bg-video.mp4" type="video/mp4">
+    </video>
+    <div class="video-bg-overlay"></div>
+  </div>
+
+  <!-- Floating WhatsApp Button (Bottom Right) -->
+  <a href="https://wa.me/905516553637?text=Merhaba%21%20GALLUS%20MAMA%20%26%20YUMURTA%20sitenizden%20ula%C5%9F%C4%B1yorum." target="_blank" rel="noopener noreferrer" class="whatsapp-float" id="whatsapp-float-btn">
+    <span class="whatsapp-icon">💬</span>
+    <span>WhatsApp Sipariş & Destek</span>
+  </a>
+
+  <!-- Mobile Navigation Overlay Drawer -->
+  <div id="mobile-nav" class="mobile-nav-overlay">
+    <button class="mobile-nav-close" onclick="toggleMobileNav()">✕</button>
+    <a href="#hero" onclick="toggleMobileNav()">Ana Sayfa</a>
+    <a href="#about" onclick="toggleMobileNav()">Hakkımızda & Çiftlik</a>
+    <a href="#menu" onclick="toggleMobileNav()">E-Katalog</a>
+    <a href="#technology" onclick="toggleMobileNav()">Teknoloji & Standartlar</a>
+    <a href="#b2b" onclick="toggleMobileNav()">Toptan Satış (B2B)</a>
+    <a href="#social-maps" onclick="toggleMobileNav()">Sosyal Medya & Harita</a>
+    <a href="#contact" onclick="toggleMobileNav()">İletişim & Lokasyon</a>
+    <button class="btn btn-primary" onclick="toggleMobileNav(); openCartModal();">
+      <span>🛒 Sepetim (<span class="cart-badge-count-mobile">0</span>)</span>
+    </button>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-wrapper">
+      <!-- Left Logo - GALLUS / MAMA & YUMURTA - Right Logo Layout -->
+      <a href="#" class="logo">
+        <img src="/images/logo-mama.jpg" alt="Gallus Mama Logo" class="brand-logo-img" title="Gallus Mama">
+        
+        <div class="brand-title-group">
+          <span class="brand-title" style="font-size: 1.6rem; letter-spacing: 1.5px; font-weight: 900; line-height: 1;">GALLUS</span>
+          <span class="brand-subtitle text-gradient" style="font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; margin-top: 2px;">MAMA & YUMURTA</span>
+        </div>
+
+        <img src="/images/logo-ciftlik.jpg" alt="Gallus Gezen Tavuk Çiftliği Logo" class="brand-logo-img" title="Gallus Çiftlik">
+      </a>
+      
+      <ul class="nav-links">
+        <li><a href="#hero" class="active">Ana Sayfa</a></li>
+        <li><a href="#about">Hakkımızda</a></li>
+        <li><a href="#menu">E-Katalog</a></li>
+        <li><a href="#technology">Teknoloji</a></li>
+        <li><a href="#b2b">Toptan (B2B)</a></li>
+        <li><a href="#contact">İletişim</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="cart-toggle-btn" id="header-cart-btn" type="button" onclick="openCartModal()">
+          <span>🛒 Sepetim</span>
+          <span class="cart-badge-count" id="cart-count-badge">0</span>
+        </button>
+        <button class="mobile-toggle" aria-label="Menü" onclick="toggleMobileNav()">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section (Vitrin ve Yönlendirme) -->
+  <header id="hero" class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-tag">
+          <span>🥚🐕</span>
+          <span>Değirmenköy Mağazası & Gezen Tavuk Çiftliği</span>
+        </div>
+        <h1 class="hero-title" id="hero-title-el">
+          Doğal Çiftlik Yumurtası ve <br>
+          <span class="text-gradient" id="hero-slogan">Gurme Pet Market Lezzetleri</span>
+        </h1>
+        <p class="hero-desc" id="hero-about-short">
+          GALLUS MAMA & YUMURTA olarak Değirmenköy PTT karşısındaki mağazamız ve yüksek teknolojili biyogüvenlikli gezen tavuk çiftliğimizle hem perakende hem de toptan alıcılarımıza hizmet sunuyoruz.
+        </p>
+        <div class="hero-buttons">
+          <a href="#menu" class="btn btn-primary">
+            <span>🔥 E-Kataloğu İncele</span>
+          </a>
+          <a href="#b2b" class="btn btn-secondary">
+            <span>🚚 Toptan Yumurta/Yem Alımı</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-image-wrapper">
+        <img src="/images/mutlu-patiler-banner.jpg" alt="Mutlu Patilerin Değirmenköy'deki Adresi - GALLUS" id="hero-img">
+        <div class="hero-floating-badge">
+          <div class="floating-icon">⭐</div>
+          <div class="floating-text">
+            <div class="title">%100 Taze & Güvenli Teslimat</div>
+            <div class="sub">Silivri, Değirmenköy, Çorlu, Çerkezköy Bölgelerine</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Quick Category Shortcuts -->
+  <section class="container">
+    <div class="quick-shortcuts-grid">
+      <div class="shortcut-card" onclick="filterCategory('cat-pet'); scrollToSection('menu');">
+        <div class="shortcut-icon">🐶</div>
+        <div>
+          <h4 style="font-size: 1.15rem; margin-bottom: 4px;">Evcil Hayvan Ürünleri</h4>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted);">Kedi, köpek, çoban köpeği özel serileri ve bakım ürünleri</p>
+        </div>
+      </div>
+
+      <div class="shortcut-card" onclick="filterCategory('cat-yumurta'); scrollToSection('menu');">
+        <div class="shortcut-icon">🥚</div>
+        <div>
+          <h4 style="font-size: 1.15rem; margin-bottom: 4px;">Taze Çiftlik Yumurtası</h4>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted);">Gezen tavuk çiftliğimizden günlük taze yumurta</p>
+        </div>
+      </div>
+
+      <div class="shortcut-card" onclick="scrollToSection('b2b');">
+        <div class="shortcut-icon">🚚</div>
+        <div>
+          <h4 style="font-size: 1.15rem; margin-bottom: 4px;">Toptan Satış (B2B)</h4>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted);">Marketler, şarküteriler ve alıcılar için toptan teklif alma</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Delivery Regions Banner (Adrese Teslimatımız Vardır Real Banner) -->
+  <section id="delivery" class="container">
+    <div style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; padding: 24px; margin: 30px 0 50px; box-shadow: var(--shadow-md);">
+      <div>
+        <div class="delivery-title-group" style="margin-bottom: 16px;">
+          <div class="delivery-icon">🛵</div>
+          <div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 4px;">Adrese Teslimatımız Vardır</h3>
+            <p style="color: var(--color-text-muted); font-size: 0.95rem;">Siparişleriniz taze ve soğuk zincir korumasıyla kapınıza kadar getirilir:</p>
+          </div>
+        </div>
+
+        <div class="delivery-regions-list" id="delivery-regions-list" style="margin-bottom: 20px;">
+          <span class="region-pill">📍 Silivri</span>
+          <span class="region-pill">📍 Değirmenköy</span>
+          <span class="region-pill">📍 Çantaköy</span>
+          <span class="region-pill">📍 Gümüşyaka</span>
+          <span class="region-pill">📍 Çerkezköy</span>
+          <span class="region-pill">📍 Çorlu</span>
+          <span class="region-pill">📍 Kapaklı</span>
+        </div>
+
+        <a href="https://wa.me/905516553637?text=Merhaba%21%20Adrese%20teslimat%20sipari%C5%9Fi%20vermek%20istiyorum." target="_blank" class="btn btn-primary">
+          <span>📲 Hemen Adrese Sipariş Ver (0551 655 3637)</span>
+        </a>
+      </div>
+
+      <div style="border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border); height: 260px;">
+        <img src="/images/adrese-teslimat-banner.jpg" alt="ADRESE TESLİMATIMIZ VARDIR - GALLUS Gezen Tavuk Çiftliği" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+    </div>
+  </section>
+
+  <!-- Special Organic Eggs Banner Showcase -->
+  <section class="container" style="margin-bottom: 60px;">
+    <div style="background: linear-gradient(135deg, rgba(255, 199, 0, 0.1), rgba(255, 59, 48, 0.1)); border: 1px solid var(--color-accent); border-radius: var(--radius-lg); overflow: hidden; display: grid; grid-template-columns: 1fr 1.2fr; gap: 32px; align-items: center; padding: 32px; box-shadow: var(--shadow-md);">
+      <div style="border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border); height: 320px;">
+        <img src="/images/yumurta-koli-banner.jpg" alt="Organik Gezen Tavuk Yumurtası 1 Koli 150 TL" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <div>
+        <span class="hero-tag" style="background: rgba(255, 199, 0, 0.15); color: var(--color-accent); border-color: rgba(255, 199, 0, 0.4);">
+          ⭐ %100 DOĞAL & ORGANİK
+        </span>
+        <h2 style="font-size: 2.2rem; margin-bottom: 12px;">Gezen Tavuk Yumurtası (1 Koli 150 TL)</h2>
+        <p style="color: var(--color-text-muted); font-size: 1.05rem; margin-bottom: 20px;">
+          Kümeslerimizden günlük toplanan katkısız, tamamen doğal ve taze sarılı 30'lu L boy koli gezen tavuk yumurtası.
+        </p>
+        <button class="btn btn-primary" onclick="addToCart('prod-102'); openCartModal();">
+          <span>🛒 150 TL - Sepete Ekle</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us & Farm Vision Section (Kurumsal / Hakkımızda) -->
+  <section id="about" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Hikayemiz & Çiftlik Vizyonumuz</span>
+        <h2 class="section-title">Kurumsal ve Üretim Standartları</h2>
+      </div>
+
+      <div class="about-card">
+        <div class="about-text-content">
+          <h3 id="about-title-el" style="font-size: 1.8rem; margin-bottom: 16px;">Değirmenköy'den Doğan Güven ve Kalite</h3>
+          <p id="about-full-text" style="color: var(--color-text-muted); font-size: 1.05rem; margin-bottom: 24px;">
+            GALLUS MAMA & YUMURTA olarak Değirmenköy PTT karşısındaki fiziki mağazamız ve otomasyonlu üretim çiftliğimiz ile doğallık ve yüksek teknolojik altyapıyı bir araya getiriyoruz. Hem mağazamızda barkodlu düzenli stok yönetimi sunuyor, hem de çiftliğimizde hayvan refahını en üst seviyede tutarak üretim yapıyoruz.
+          </p>
+
+          <div class="about-features">
+            <div class="about-feature-item">
+              <h4><span>🏡</span> Değirmenköy Mağazası</h4>
+              <p style="font-size: 0.85rem; color: var(--color-text-muted);">PTT karşısındaki Köy-Pet Market alanımızda geniş ürün stoku.</p>
+            </div>
+            <div class="about-feature-item">
+              <h4><span>🐓</span> Gezen Tavuk Çiftliği</h4>
+              <p style="font-size: 0.85rem; color: var(--color-text-muted);">Biyogüvenlikli, şeffaf ve düzenli iklimlendirmeli kümes sistemi.</p>
+            </div>
+            <div class="about-feature-item">
+              <h4><span>🐕</span> Özel Çoban Köpeği Serileri</h4>
+              <p style="font-size: 0.85rem; color: var(--color-text-muted);">Çiftlik ve çalışma köpeklerine özel yüksek proteinli besleyici içerikler.</p>
+            </div>
+            <div class="about-feature-item">
+              <h4><span>🌾</span> Dengeli Yem Rasyonları</h4>
+              <p style="font-size: 0.85rem; color: var(--color-text-muted);">Kümes ve karma hayvan yemlerinde laboratuvar onaylı dengeli rasyonlar.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-radius: var(--radius-md); overflow: hidden; height: 100%; min-height: 360px; border: 1px solid var(--color-border);">
+          <img src="/images/tavuklar.jpg" alt="GALLUS Gezen Tavuk Çiftliği Gerçek Kümes Fotoğrafı" id="about-img" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products & E-Catalog Section -->
+  <section id="menu" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Dijital E-Katalog</span>
+        <h2 class="section-title">Ürünlerimiz ve Çözümlerimiz</h2>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs" id="category-tabs">
+        <button class="category-tab active" data-id="all">🔥 Tüm Ürünler</button>
+      </div>
+
+      <!-- All Products Grid -->
+      <div class="products-grid" id="all-products-grid">
+        <div class="text-center" style="grid-column: 1/-1; padding: 40px; color: var(--color-text-muted);">
+          Yükleniyor...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technology and Production Standards Section -->
+  <section id="technology" class="section" style="background: rgba(15, 23, 42, 0.4);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Fark Yaratan Mühendislik Altyapısı</span>
+        <h2 class="section-title">Teknoloji ve Üretim Standartlarımız</h2>
+      </div>
+
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="tech-icon">💨</div>
+          <h3 style="font-size: 1.3rem; margin-bottom: 12px;">Biyogüvenlik ve İklimlendirme</h3>
+          <p style="color: var(--color-text-muted); font-size: 0.95rem;">Kümeslerimizde özel tasarlanmış egzoz havalandırma fanları, motor koruma otomasyonları ve hassas ısı/nem kontrol sistemleri ile maksimum hayvan refahı ve biyogüvenlik sağlıyoruz.</p>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-icon">📡</div>
+          <h3 style="font-size: 1.3rem; margin-bottom: 12px;">5GHz Kablosuz Ağ Köprüleri</h3>
+          <p style="color: var(--color-text-muted); font-size: 0.95rem;">Tesislerimiz ve Değirmenköy mağazamız arasında kurulan yüksek hızlı 5GHz kablosuz kablosuz ağ köprüsü sayesinde stok ve sipariş verileri anlık ve hatasız yönetilmektedir.</p>
+        </div>
+
+        <div class="tech-card">
+          <div class="tech-icon">🏷️</div>
+          <h3 style="font-size: 1.3rem; margin-bottom: 12px;">Dijital Barkod & Lojistik Takip</h3>
+          <p style="color: var(--color-text-muted); font-size: 0.95rem;">Fiziksel mağazamızdaki barkod entegrasyonu ve dijital takip ağı sayesinde ürünlerimiz tazeliğini koruyarak zamanında teslim edilir.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- B2B Wholesale Section (Toptan Satış) -->
+  <section id="b2b" class="section">
+    <div class="container">
+      <div class="b2b-banner-box">
+        <div>
+          <span class="section-subtitle" style="text-align: left;">B2B Kurumsal Çözümler</span>
+          <h2 style="font-size: 2.2rem; margin-bottom: 16px;">Toptan Yumurta ve Yem Alıcıları İçin Özel Şartlar</h2>
+          <p style="color: var(--color-text-muted); font-size: 1.05rem; margin-bottom: 24px;">
+            Marketler, şarküteriler, pet shoplar ve hayvancılık işletmeleri için toptan yumurta dağıtımı ve özel yem rasyonlarımızla hizmetinizdeyiz. Soğuk zincir lojistik ağımız ve uygun minimum sipariş miktarlarımızla fiyat teklifi alın.
+          </p>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            <a href="https://wa.me/905516553637?text=Merhaba%2C%20GALLUS%20MAMA%20%26%20YUMURTA%20sitenizden%20toptan%20fiyat%20teklifi%20almak%20istiyorum." target="_blank" class="btn btn-primary">
+              <span>🚚 Toptan Fiyat Teklifi Al</span>
+            </a>
+          </div>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 28px;">
+          <h4 style="font-size: 1.2rem; color: var(--color-accent); margin-bottom: 14px;">B2B Lojistik & Dağıtım Koşulları</h4>
+          <ul style="list-style: none; color: var(--color-text-muted); font-size: 0.95rem; display: flex; flex-direction: column; gap: 10px;">
+            <li>✓ <strong>Günlük Taze Üretim:</strong> Gezen tavuk çiftliğimizden toplanan yumurtalar anında kolilenir.</li>
+            <li>✓ <strong>Minimum Sipariş:</strong> Toptan yumurta dağıtımında esnek koli paketleri.</li>
+            <li>✓ <strong>Bölgesel Lojistik:</strong> Silivri, Çorlu, Çerkezköy ve Tekirdağ hatlarına doğrudan teslimat.</li>
+            <li>✓ <strong>Kurumsal Fatura:</strong> Tam kurumsal fatura ve irsaliyeli teslimat.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Media & Maps Section -->
+  <section id="social-maps" class="section" style="background: rgba(15, 23, 42, 0.3);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Sosyal Medya & Konum</span>
+        <h2 class="section-title">Bizi Takip Edin & Ziyaret Edin</h2>
+      </div>
+
+      <div class="social-preview-grid">
+        <!-- Instagram Gallus Mama -->
+        <div class="social-card">
+          <div>
+            <div class="social-card-header">
+              <div class="social-badge-icon ig-mama">
+                <img src="/images/logo-mama.jpg" alt="Gallus Mama Logo">
+              </div>
+              <div class="social-card-info">
+                <h4>@gallus_mama</h4>
+                <p>Her Canlı İçin En İyisi</p>
+              </div>
+            </div>
+            <div class="social-card-preview">
+              <div>
+                <div style="font-size: 2rem; margin-bottom: 6px;">🐶🐱</div>
+                <p style="font-size: 0.9rem; color: var(--color-text-muted);">Günlük taze lezzet paylaşımları, pet market fırsatları Instagram hesabımızda!</p>
+              </div>
+            </div>
+          </div>
+          <a href="https://www.instagram.com/gallus_mama/" target="_blank" rel="noopener noreferrer" id="link-ig-mama" class="btn btn-instagram" style="width: 100%;">
+            <span>📸 Instagram'da Takip Et (@gallus_mama)</span>
+          </a>
+        </div>
+
+        <!-- Instagram Gallus Yumurta -->
+        <div class="social-card">
+          <div>
+            <div class="social-card-header">
+              <div class="social-badge-icon ig-yumurta">
+                <img src="/images/logo-ciftlik.jpg" alt="Gallus Gezen Tavuk Çiftliği Logo">
+              </div>
+              <div class="social-card-info">
+                <h4>@gallusyumurta</h4>
+                <p>Gezen Tavuk Çiftliği</p>
+              </div>
+            </div>
+            <div class="social-card-preview">
+              <div>
+                <div style="font-size: 2rem; margin-bottom: 6px;">🥚🐓</div>
+                <p style="font-size: 0.9rem; color: var(--color-text-muted);">%100 taze ve doğal gezen tavuk yumurta ürünlerimiz ve çiftliğimizden kareler.</p>
+              </div>
+            </div>
+          </div>
+          <a href="https://www.instagram.com/gallusyumurta/" target="_blank" rel="noopener noreferrer" id="link-ig-yumurta" class="btn btn-instagram" style="width: 100%;">
+            <span>🥚 Instagram'da Takip Et (@gallusyumurta)</span>
+          </a>
+        </div>
+
+        <!-- Google Maps Location Card -->
+        <div class="social-card">
+          <div>
+            <div class="social-card-header">
+              <div class="social-badge-icon g-maps">📍</div>
+              <div class="social-card-info">
+                <h4>Değirmenköy PTT Karşısı</h4>
+                <p>Kayıtlı İşletme Konumumuz</p>
+              </div>
+            </div>
+            <div class="social-card-preview">
+              <div>
+                <div style="font-size: 2rem; margin-bottom: 6px;">🗺️📍</div>
+                <p style="font-size: 0.9rem; color: var(--color-text-muted);">Google Haritalar üzerinden mağazamızı bulun ve yol tarifi alın.</p>
+              </div>
+            </div>
+          </div>
+          <a href="https://share.google/VRb7DUDWCXpFwqWJx" target="_blank" rel="noopener noreferrer" id="link-google-maps" class="btn btn-maps" style="width: 100%;">
+            <span>📍 Google Haritalar'da Aç</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact & Info Section -->
+  <section id="contact" class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-subtitle">Ulaşın & Uğrayın</span>
+        <h2 class="section-title">İletişim & Tam Adresimiz</h2>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info-box">
+          <h3 style="font-size: 1.5rem; margin-bottom: 24px;">Mağaza & Çiftlik İletişim Bilgileri</h3>
+          
+          <div class="info-item">
+            <div class="info-icon">📍</div>
+            <div class="info-content">
+              <h4>Tam Adresimiz</h4>
+              <p id="info-address">Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon">📞</div>
+            <div class="info-content">
+              <h4>Telefon / WhatsApp</h4>
+              <p id="info-phone">0551 655 3637</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon">✉️</div>
+            <div class="info-content">
+              <h4>Kurumsal E-Posta</h4>
+              <p id="info-email">iletisim@gallusmama.com</p>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon">⏰</div>
+            <div class="info-content">
+              <h4>Çalışma Saatlerimiz</h4>
+              <p id="info-hours">Haftanın Her Günü: 08:30 - 21:00</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-info-box" style="display: flex; flex-direction: column; justify-content: space-between; background: var(--color-bg-card);">
+          <div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 12px;">Değirmenköy Canlı Harita</h3>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 16px;">Değirmenköy PTT karşısındaki mağazamızın haritadaki canlı görünümü:</p>
+            
+            <!-- Map Embed Container -->
+            <div class="map-container">
+              <iframe id="google-maps-iframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px;">
+            <a href="https://share.google/VRb7DUDWCXpFwqWJx" target="_blank" rel="noopener noreferrer" class="btn btn-maps" style="width: 100%;">
+              <span>🗺️ Google Haritalar'da Yol Tarifi Al</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <a href="#" class="logo">
+          <img src="/images/logo-mama.jpg" alt="Gallus Mama Logo" class="brand-logo-img" style="width: 48px; height: 48px;">
+          <div class="brand-title-group" style="text-align: left;">
+            <span class="brand-title" style="font-size: 1.2rem;">GALLUS</span>
+            <span class="brand-subtitle text-gradient" style="font-size: 0.75rem; font-weight: 800;">MAMA & YUMURTA</span>
+          </div>
+          <img src="/images/logo-ciftlik.jpg" alt="Gallus Gezen Tavuk Çiftliği Logo" class="brand-logo-img" style="width: 48px; height: 48px;">
+        </a>
+        <div style="color: var(--color-text-muted); font-size: 0.9rem;">
+          Değirmenköy, Silivri, Çorlu, Çerkezköy Teslimat & Sipariş Hattı: <strong>0551 655 3637</strong>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 GALLUS MAMA & YUMURTA. Tüm hakları saklıdır. Değirmenköy PTT Karşısı.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Shopping Cart Modal / Drawer (Z-Index 999999) -->
+  <div id="cart-modal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🛒 Sepetim</h3>
+        <button type="button" class="modal-close" onclick="closeCartModal()">✕</button>
+      </div>
+
+      <div id="cart-items-container" style="margin-bottom: 24px; min-height: 120px;">
+        <!-- Dynamic Cart Items -->
+      </div>
+
+      <div style="border-top: 1px solid var(--color-border); padding-top: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 1.1rem; color: var(--color-text-muted);">Toplam Tutar:</span>
+        <span id="cart-total-price" style="font-size: 1.6rem; font-weight: 900; color: var(--color-accent);">0 ₺</span>
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <button type="button" class="btn btn-secondary" onclick="closeCartModal()" style="flex: 1;">Alışverişe Devam</button>
+        <button type="button" class="btn btn-primary" onclick="openCheckoutModal()" id="cart-checkout-btn" style="flex: 1;" disabled>Siparişi Tamamla →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal (Trendyol Style Address & Credit Card Form) -->
+  <div id="checkout-modal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 720px;">
+      <div class="modal-header">
+        <h3>🛍️ Sipariş & Adres Bilgileri</h3>
+        <button type="button" class="modal-close" onclick="closeCheckoutModal()">✕</button>
+      </div>
+
+      <form id="checkout-form" onsubmit="handlePlaceOrder(event)">
+        <h4 style="color: var(--color-primary); margin-bottom: 16px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">1. İletişim & Türkiye Teslimat Adresi</h4>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">Adınız Soyadınız *</label>
+            <input type="text" id="order-name" class="form-input" placeholder="Örn: Ahmet Yılmaz" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Telefon Numarası *</label>
+            <input type="tel" id="order-phone" class="form-input" value="0551 655 3637" required>
+          </div>
+        </div>
+
+        <!-- Trendyol Style Cascading Turkey Address Selector -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label">İl Seçin *</label>
+            <select id="order-city" class="form-select" onchange="updateDistrictsDropdown()" required>
+              <option value="İstanbul">İstanbul</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">İlçe Seçin *</label>
+            <select id="order-district" class="form-select" required>
+              <option value="Silivri (Değirmenköy / Gümüşyaka / Çantaköy)">Silivri (Değirmenköy / Gümüşyaka / Çantaköy)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mahalle / Semt *</label>
+          <input type="text" id="order-neighborhood" class="form-input" placeholder="Örn: Değirmenköy İsmetpaşa Mah." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Açık Adres (Cadde, Sokak, Bina No, Daire) *</label>
+          <textarea id="order-address" class="form-textarea" rows="2" placeholder="Örn: PTT karşısı No:14 Daire:2" required></textarea>
+        </div>
+
+        <!-- Ödeme Yöntemi Seçimi -->
+        <h4 style="color: var(--color-primary); margin-top: 24px; margin-bottom: 16px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">2. Ödeme Yöntemi</h4>
+
+        <div class="form-group">
+          <div class="payment-method-grid">
+            <div class="payment-option-card selected" id="pay-card" onclick="selectPaymentMethod('card')">
+              <div class="icon">💳</div>
+              <div class="title">Kredi / Banka Kartı</div>
+              <small style="color: var(--color-text-muted); font-size: 0.75rem;">Kart Bilgileri İle Ödeme</small>
+            </div>
+
+            <div class="payment-option-card" id="pay-cash" onclick="selectPaymentMethod('cash')">
+              <div class="icon">💵</div>
+              <div class="title">Kapıda Nakit</div>
+              <small style="color: var(--color-text-muted); font-size: 0.75rem;">Teslimatta Nakit Ödeme</small>
+            </div>
+          </div>
+          <input type="hidden" id="order-payment-method" value="Kredi / Banka Kartı">
+        </div>
+
+        <!-- CREDIT CARD DETAILS CONTAINER (Shown when Kart is selected) -->
+        <div id="credit-card-details-section">
+          <!-- Interactive Visual Card Preview -->
+          <div class="credit-card-preview-box">
+            <div class="card-chip"></div>
+            <div class="card-number-display" id="card-num-preview">**** **** **** ****</div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+              <div class="card-holder-display" id="card-holder-preview">İSİM SOYİSİM</div>
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--color-accent);" id="card-exp-preview">MM/YY</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Kart Numarası *</label>
+            <input type="text" id="card-number" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCardNumber(this)">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Kart Üzerindeki İsim *</label>
+              <input type="text" id="card-holder" class="form-input" placeholder="Ahmet Yılmaz" oninput="updateCardHolderPreview(this)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Son Kullanma *</label>
+              <input type="text" id="card-expiry" class="form-input" placeholder="MM/YY" maxlength="5" oninput="formatCardExpiry(this)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVC / CVV *</label>
+              <input type="password" id="card-cvc" class="form-input" placeholder="123" maxlength="4">
+            </div>
+          </div>
+
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--color-success); border-radius: var(--radius-sm); padding: 10px 16px; font-size: 0.825rem; color: var(--color-success); display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+            <span>🔒</span>
+            <span>256-Bit SSL Şifreli Güvenli Ödeme Altyapısı</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sipariş Notu (Opsiyonel)</label>
+          <input type="text" id="order-note" class="form-input" placeholder="Zil çalmayın, kapıya bırakın vs.">
+        </div>
+
+        <div style="background: rgba(255, 59, 48, 0.1); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 1.15rem;">
+            <span>Ödenecek Toplam Tutar:</span>
+            <span id="checkout-total-price" style="color: var(--color-accent);">0 ₺</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeCheckoutModal()">Geri</button>
+          <button type="submit" class="btn btn-primary" style="flex: 1;">🚀 Ödemeyi Yap & Siparişi Tamamla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- App JavaScript -->
+  <script src="js/app.js"></script>
+</body>
+</html>

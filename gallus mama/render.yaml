@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: gallus-mama
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: ADMIN_PASSWORD
+        value: 19071907

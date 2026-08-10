@@ -1,0 +1,109 @@
+{
+  "siteInfo": {
+    "title": "GALLUS MAMA & YUMURTA",
+    "slogan": "MAMA & YUMURTA",
+    "logoMamaUrl": "/images/logo-mama.jpg",
+    "logoCiftlikUrl": "/images/logo-ciftlik.jpg",
+    "heroTitle": "Doğal Çiftlik Yumurtası ve Gurme Pet Market Lezzetleri",
+    "heroImage": "/images/mutlu-patiler-banner.jpg",
+    "aboutTitle": "GALLUS MAMA & YUMURTA - Değirmenköy'den Doğan Güven",
+    "aboutText": "GALLUS MAMA & YUMURTA olarak Değirmenköy PTT karşısındaki mağazamız ve yüksek teknolojili biyogüvenlikli gezen tavuk çiftliğimizle hem evcil hayvan dostlarımıza hem de taze yumurta/yem alıcılarına hizmet veriyoruz. %100 doğal lezzeti ve kaliteyi garanti ediyoruz.",
+    "aboutImage": "/images/tavuklar.jpg",
+    "phone": "0551 655 3637",
+    "email": "iletisim@gallusmama.com",
+    "address": "Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul",
+    "workingHours": "Haftanın Her Günü: 08:30 - 21:00",
+    "deliveryRegions": "Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı",
+    "whatsappUrl": "https://wa.me/905516553637?text=Merhaba%21%20GALLUS%20MAMA%20%26%20YUMURTA%20sitenizden%20ula%C5%9F%C4%B1yorum.&utm_source=chatgpt.com",
+    "instagramGallusMamaUrl": "https://www.instagram.com/gallus_mama/",
+    "instagramGallusYumurtaUrl": "https://www.instagram.com/gallusyumurta/",
+    "googleMapsUrl": "https://share.google/VRb7DUDWCXpFwqWJx",
+    "googleMapsEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str"
+  },
+  "categories": [
+    {
+      "id": "cat-pet",
+      "name": "Evcil Hayvan & Pet Market",
+      "slug": "pet-market",
+      "description": "Kedi, köpek, çoban köpeği ve küçük ırklara özel gurme mama, aksesuar ve bakım ürünleri",
+      "icon": "🐶"
+    },
+    {
+      "id": "cat-yumurta",
+      "name": "Taze Çiftlik Yumurtası",
+      "slug": "taze-yumurta",
+      "description": "Teknolojik havalandırmalı kümeslerimizde günlük toplanan %100 doğal taze gezen tavuk yumurtaları",
+      "icon": "🥚"
+    },
+    {
+      "id": "cat-yem",
+      "name": "Köy & Çiftlik Yemleri",
+      "slug": "ciftlik-yemleri",
+      "description": "Büyükbaş, küçükbaş ve kanatlılar için özel dengeli besleyici rasyon karma yemler",
+      "icon": "🌾"
+    },
+    {
+      "id": "cat-b2b",
+      "name": "Toptan Satış & Ekipman",
+      "slug": "toptan-ekipman",
+      "description": "Toptan yumurta/yem dağıtımı, kümes otomasyon ekipmanları ve B2B çözümleri",
+      "icon": "🚚"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-102",
+      "categoryId": "cat-yumurta",
+      "name": "GALLUS Gezen Tavuk Taze Koli Yumurta (30'lu L Boy)",
+      "price": 150,
+      "description": "%100 Doğal katkısız gezen tavuklardan günlük taze toplanan sarılı köy yumurtası.",
+      "imageUrl": "/images/yumurta-koli-banner.jpg",
+      "isPopular": true
+    },
+    {
+      "id": "prod-101",
+      "categoryId": "cat-pet",
+      "name": "Gallus Gurme Çoban Köpeği & Büyük Irk Maması (15 KG)",
+      "price": 890,
+      "description": "Değirmenköy mutlu patilerin adresinden çoban köpekleri için yüksek proteinli özel mama.",
+      "imageUrl": "/images/mutlu-patiler-banner.jpg",
+      "isPopular": true
+    },
+    {
+      "id": "prod-103",
+      "categoryId": "cat-pet",
+      "name": "Gallus Premium Somonlu Kedi Maması (5 KG)",
+      "price": 420,
+      "description": "Tüy sağlığını destekleyen omega-3 zengini, sindirimi kolay premium kısırlaştırılmış kedi maması.",
+      "imageUrl": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=600&q=80",
+      "isPopular": true
+    },
+    {
+      "id": "prod-104",
+      "categoryId": "cat-yem",
+      "name": "Kanatlı & Yumurta Yemi Özel Rasyon (50 KG Çuval)",
+      "price": 540,
+      "description": "Yüksek yumurta verimi sağlayan, doğal mısır ve soya katkılı çuvallı karma çiftlik yemi.",
+      "imageUrl": "/images/tavuklar.jpg",
+      "isPopular": false
+    },
+    {
+      "id": "prod-105",
+      "categoryId": "cat-b2b",
+      "name": "Toptan Paletli Yumurta Dağıtım Paketi (10 Koli)",
+      "price": 1350,
+      "description": "Market, şarküteri ve pet shop alıcıları için adrese teslimatlı toptan yumurta paketi.",
+      "imageUrl": "/images/adrese-teslimat-banner.jpg",
+      "isPopular": true
+    },
+    {
+      "id": "prod-106",
+      "categoryId": "cat-pet",
+      "name": "Küçük Irk & Yavru Köpek Özel Somonlu Mama (3 KG)",
+      "price": 310,
+      "description": "Küçük tane yapısı ile hassas sindirim sistemine sahip yavru ve küçük ırklar için gurme seri.",
+      "imageUrl": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=600&q=80",
+      "isPopular": false
+    }
+  ]
+}
