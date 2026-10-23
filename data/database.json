@@ -1,195 +1,553 @@
 {
   "siteInfo": {
     "title": "GALLUS MAMA & YUMURTA",
-    "slogan": "MAMA & YUMURTA",
+    "slogan": "Premium Pet Beslenmesi & Taze Çiftlik Yumurtası",
     "logoMamaUrl": "/images/logo-mama.jpg",
     "logoCiftlikUrl": "/images/logo-ciftlik.jpg",
-    "heroTitle": "Doğal Çiftlik Yumurtası ve Gurme Pet Market Lezzetleri",
+    "heroTitle": "Doğal Çiftlikten Sofranıza, Sevgiyle Beslenen Patilere",
     "heroImage": "/images/mutlu-patiler-banner.jpg",
-    "aboutTitle": "GALLUS MAMA & YUMURTA - Değirmenköy'den Doğan Güven",
-    "aboutText": "GALLUS MAMA & YUMURTA olarak Değirmenköy PTT karşısındaki mağazamız ve yüksek teknolojili biyogüvenlikli gezen tavuk çiftliğimizle hem evcil hayvan dostlarımıza hem de taze yumurta/yem alıcılarına hizmet veriyoruz. %100 doğal lezzeti ve kaliteyi garanti ediyoruz.",
+    "aboutTitle": "Değirmenköy'ün Bereketli Topraklarından Doğan Güven",
+    "aboutText": "2018 yılından bu yana Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; hem katkısız günlük taze yumurtalar hem de veteriner hekim onaylı dengeli kedi, köpek, kanatlı yemleri üretiyor ve sunuyoruz.",
     "aboutImage": "/images/tavuklar.jpg",
     "phone": "0551 655 3637",
     "email": "iletisim@gallusmama.com",
     "address": "Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul",
     "workingHours": "Haftanın Her Günü: 08:30 - 21:00",
-    "deliveryRegions": "Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Tüm Türkiye",
-    "whatsappUrl": "https://wa.me/905516553637?text=Merhaba%21%20GALLUS%20MAMA%20%26%20YUMURTA%20sitenizden%20ula%C5%9F%C4%B1yorum.",
+    "deliveryRegions": "Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Özel Korumalı Kargo İle Tüm Türkiye",
+    "whatsappUrl": "https://wa.me/905516553637?text=Merhaba%2C%20Gallus%20Mama%20ve%20Yumurta%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.",
     "instagramGallusMamaUrl": "https://www.instagram.com/gallus_mama/",
     "instagramGallusYumurtaUrl": "https://www.instagram.com/gallusyumurta/",
-    "googleMapsUrl": "https://share.google/VRb7DUDWCXpFwqWJx",
     "googleMapsEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str"
   },
   "categories": [
     {
-      "id": "yumurta",
-      "name": "Doğal Yumurta",
-      "slug": "dogal-yumurta",
-      "description": "Değirmenköy çiftliğimizden günlük taze toplanan %100 doğal gezen tavuk yumurtaları",
-      "icon": "🥚"
-    },
-    {
       "id": "kopek",
-      "name": "Köpek Maması & Ürünleri",
-      "slug": "kopek-mamasi",
-      "description": "Çoban köpekleri, büyük ve küçük ırklar ile yavrulara özel yüksek proteinli mamalar ve ödüller",
-      "icon": "🐕"
+      "slug": "kopek",
+      "name": "Köpek Ürünleri",
+      "description": "Büyük ırk, çoban köpeği, yetişkin ve yavru köpekler için yüksek proteinli mamalar ve doğal çiğneme ödülleri",
+      "icon": "dog",
+      "subcategories": [
+        { "id": "kopek-kuru-mama", "slug": "mama", "name": "Kuru Köpek Maması" },
+        { "id": "kopek-odul", "slug": "odul", "name": "Ödül & Çiğneme Kemikleri" },
+        { "id": "kopek-bakim", "slug": "bakim", "name": "Bakım & Hijyen" }
+      ]
     },
     {
       "id": "kedi",
-      "name": "Kedi Maması & Ürünleri",
-      "slug": "kedi-mamasi",
-      "description": "Kısırlaştırılmış ve yetişkin kedilere özel somonlu ve tavuklu premium mamalar",
-      "icon": "🐈"
+      "slug": "kedi",
+      "name": "Kedi Ürünleri",
+      "description": "Kısırlaştırılmış, yavru ve yetişkin kediler için gurme somonlu/tavuklu mamalar ve %100 doğal topaklanan bentonit kedi kumları",
+      "icon": "cat",
+      "subcategories": [
+        { "id": "kedi-kuru-mama", "slug": "mama", "name": "Kuru Kedi Maması" },
+        { "id": "kedi-kum", "slug": "kum", "name": "Doğal Kedi Kumu" },
+        { "id": "kedi-odul", "slug": "odul", "name": "Kedi Ödülleri & Macunlar" }
+      ]
     },
     {
-      "id": "yem",
-      "name": "Kanatlı Yem & Ekipmanları",
-      "slug": "kanatli-yem",
-      "description": "1. sınıf yumurta yemi, civciv büyütme yemi, otomatik yemlik ve nipelli suluk setleri",
-      "icon": "🌾"
+      "id": "kus",
+      "slug": "kus",
+      "name": "Kuş Ürünleri",
+      "description": "Muhabbet kuşu, kanarya, papağan ve kafes kuşları için elenmiş vitaminli tohum karışımları ve gaga taşları",
+      "icon": "feather",
+      "subcategories": [
+        { "id": "kus-yem", "slug": "yem", "name": "Kuş Yemleri" },
+        { "id": "kus-ekipman", "slug": "ekipman", "name": "Gaga Taşı & Aksesuar" }
+      ]
+    },
+    {
+      "id": "kumes-ciftlik",
+      "slug": "kumes-ciftlik",
+      "name": "Kümes & Çiftlik",
+      "description": "1. sınıf pelet yumurta yemi, civciv büyütme yemi, damlatmaz suluklar ve otomatik yemlik ekipmanları",
+      "icon": "wheat",
+      "subcategories": [
+        { "id": "ciftlik-yem", "slug": "yem", "name": "Kanatlı Çiftlik Yemleri" },
+        { "id": "ciftlik-ekipman", "slug": "ekipman", "name": "Otomatik Yemlik & Suluklar" }
+      ]
+    },
+    {
+      "id": "yumurta",
+      "slug": "yumurta",
+      "name": "Taze Çiftlik Yumurtası",
+      "description": "Değirmenköy çiftliğimizden günlük toplanan, katkısız, altın sarısı gezen tavuk köy yumurtaları",
+      "icon": "egg",
+      "subcategories": [
+        { "id": "yumurta-viyol", "slug": "viyol", "name": "Organik Viyol Yumurtalar" },
+        { "id": "yumurta-toptan", "slug": "toptan", "name": "Toptan Koli & Paketler" }
+      ]
     }
+  ],
+  "brands": [
+    { "id": "gallus-farm", "name": "Gallus Çiftlik", "slug": "gallus-ciftlik", "country": "Türkiye / Silivri", "desc": "Biyogüvenlikli gezen tavuk çiftliğimizin kendi üretimi taze yumurta ve özel rasyon yemleri." },
+    { "id": "gallus-pet", "name": "Gallus Pet Gurme", "slug": "gallus-pet", "country": "Türkiye", "desc": "Çoban köpekleri, çalışan ırklar ve kısırlaştırılmış evcil hayvanlara özel yüksek proteinli veteriner serisi." },
+    { "id": "lohmann-nutrition", "name": "Lohmann Nutrition", "slug": "lohmann-nutrition", "country": "Almanya / Türkiye", "desc": "Doğal tavuk ıslahı ve yüksek verimli kanatlı besleme premiksleri." },
+    { "id": "bentonite-gold", "name": "Bentonite Gold", "slug": "bentonite-gold", "country": "Türkiye / Fatsa", "desc": "%99.5 tozsuz, doğal beyaz sodyum bentonit hijyenik kedi kumları." },
+    { "id": "farmtech", "name": "FarmTech Automation", "slug": "farmtech", "country": "Türkiye", "desc": "Korumalı çiftlik yemlikleri, nipelli damlatmaz suluklar ve kümes ekipmanları." }
   ],
   "products": [
     {
       "id": "prod-1",
+      "slug": "lohmann-brown-gezen-tavuk-yumurtasi-30lu-organik-viyol",
       "name": "Lohmann Brown Gezen Tavuk Yumurtası (30'lu Organik Viyol)",
+      "brand": "Gallus Çiftlik",
+      "brandSlug": "gallus-ciftlik",
       "category": "yumurta",
-      "categoryName": "Doğal Yumurta",
+      "categoryName": "Taze Çiftlik Yumurtası",
+      "subCategory": "yumurta-viyol",
+      "subCategoryName": "Organik Viyol Yumurtalar",
       "price": 165,
       "originalPrice": 195,
       "stock": 42,
-      "unit": "30'lu Viyol (L Boy)",
+      "unit": "30'lu Viyol (L Boy / 63-72g)",
+      "sku": "GL-YUM-30L",
       "imageUrl": "/images/yumurta-koli-banner.jpg",
       "fallbackImageUrl": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=800&q=80",
-      "description": "Değirmenköy yüksek biyogüvenlikli çiftliğimizden günlük taze toplanan, katkısız, yüksek sarılı doğal gezen tavuk yumurtası. A vitamini ve doğal protein zengini.",
-      "isFeatured": true
+      "gallery": [
+        "/images/yumurta-koli-banner.jpg",
+        "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1506976785307-8732e854ad03?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Değirmenköy yüksek biyogüvenlikli serbest gezen tavuk çiftliğimizden her sabah gün ağarırken toplanan taze yumurtalar. Tavuklarımız açık mera arazilerinde serbestçe dolaşır, temiz hava alır ve sadece doğal tahıl rasyonlarıyla beslenir. Yüksek kıvamlı koyu sarısı ve dayanıklı kabuğuyla kahvaltılarınıza sağlık katar.",
+      "ingredients": "%100 Doğal A Sınıfı Gezen Tavuk Yumurtası (Kod 1 - Serbest Dolaşan). Hiçbir sentetik renklendirici, antibiyotik veya hormon içermez.",
+      "analysis": "100g için: Enerji 143 kcal, Protein 12.6g, Yağ 9.5g, Kolin 294mg, Vitamin A 140µg, Kalsiyum 56mg.",
+      "specs": {
+        "Boyut": "L Boy (Büyük Boy, 63-72 gram)",
+        "Yetiştirme Metodu": "1 Numaralı Gezen Tavuk (Free-Range)",
+        "Tazelik": "Günlük Toplama (Aynı Gün Sevk)",
+        "Ambalaj": "Darbeye Dayanıklı Özel Korumalı Viyol",
+        "Tüketim Ömrü": "Yumurtlama tarihinden itibaren 28 gün"
+      },
+      "isFeatured": true,
+      "isBestSeller": true,
+      "badge": "Günün En Çok Satanı"
     },
     {
       "id": "prod-2",
+      "slug": "xl-dogal-cift-sarili-gezen-tavuk-yumurtasi-15li-ozel-kutu",
       "name": "XL Doğal Çift Sarılı Gezen Tavuk Yumurtası (15'li Özel Kutu)",
+      "brand": "Gallus Çiftlik",
+      "brandSlug": "gallus-ciftlik",
       "category": "yumurta",
-      "categoryName": "Doğal Yumurta",
+      "categoryName": "Taze Çiftlik Yumurtası",
+      "subCategory": "yumurta-viyol",
+      "subCategoryName": "Organik Viyol Yumurtalar",
       "price": 95,
       "originalPrice": 110,
       "stock": 7,
-      "unit": "15'li Özel Kutu (XL Boy)",
+      "unit": "15'li Özel Kutu (XL Boy / 73g+)",
+      "sku": "GL-YUM-15XL",
       "imageUrl": "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=800&q=80",
       "fallbackImageUrl": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=800&q=80",
-      "description": "Doğal yonca ve tahılla beslenen gezen tavuklardan seçme çift sarılı kahvaltılık köy yumurtaları. Kırılmaya karşı dayanıklı koruyucu viyolde sevk edilir.",
-      "isFeatured": true
+      "gallery": [
+        "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=800&q=80",
+        "/images/yumurta-koli-banner.jpg"
+      ],
+      "description": "Genç ve güçlü gezen tavuklarımızdan özenle seçilen, ekstra büyük çift sarılı köy yumurtaları. Bol sarılı omletler, enfes kahvaltılar ve gurme sunumlar için sınırlı sayıda günlük ayrılır.",
+      "ingredients": "A Sınıfı Seçme Çift Sarılı Gezen Tavuk Köy Yumurtası.",
+      "analysis": "100g için: Protein 13.2g, Yağ 10.1g, A Vitamini 160µg.",
+      "specs": {
+        "Boyut": "XL Boy (73 gram ve üzeri)",
+        "Özellik": "Doğal Çift Sarılı",
+        "Ambalaj": "Özel Klipsli Şok Emici Kutu",
+        "Menşei": "Silivri / Değirmenköy"
+      },
+      "isFeatured": true,
+      "isBestSeller": false,
+      "badge": "Sınırlı Üretim"
     },
     {
       "id": "prod-3",
+      "slug": "gallus-gurme-coban-kopegi-mamasi-15kg",
       "name": "Gallus Gurme Çoban Köpeği & Büyük Irk Maması (15 Kg)",
+      "brand": "Gallus Pet Gurme",
+      "brandSlug": "gallus-pet",
       "category": "kopek",
-      "categoryName": "Köpek Maması & Ürünleri",
+      "categoryName": "Köpek Ürünleri",
+      "subCategory": "kopek-kuru-mama",
+      "subCategoryName": "Kuru Köpek Maması",
       "price": 980,
       "originalPrice": 1150,
       "stock": 18,
       "unit": "15 Kg Çuval",
+      "sku": "GL-DOG-COBAN15",
       "imageUrl": "/images/mutlu-patiler-banner.jpg",
       "fallbackImageUrl": "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=800&q=80",
-      "description": "Kangal, Akbaş ve büyük ırk çalışan çoban köpeklerine özel %30 protein, glukozamin ve kondroitin takviyeli, kemik ve kas yapısını güçlendiren tam formül.",
-      "isFeatured": true
+      "gallery": [
+        "/images/mutlu-patiler-banner.jpg",
+        "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Kangal, Akbaş, Kafkas Çoban ve büyük ırk çalışan köpeklerin yoğun enerji, kas ve iskelet gereksinimlerini karşılamak için formüle edilmiştir. %30 yüksek kaliteli hayvansal protein içeriği, eklem sağlığını destekleyen glukozamin ve kondroitin takviyesi ile zorlu iklim koşullarında maksimum performans sağlar.",
+      "ingredients": "Kurutulmuş kuzu ve dana proteini (%35), baldo pirinç, mısır, rafine tavuk yağı, hamsi unu ve balık yağı (Omega-3 zengini), bira mayası, hidrolize tavuk ciğeri, glukozamin (1000 mg/kg), kondroitin sülfat (700 mg/kg), doğal prebiyotikler (FOS ve MOS), keten tohumu.",
+      "analysis": "Ham Protein: %30.0, Ham Yağ: %16.0, Ham Kül: %7.5, Ham Selüloz: %2.8, Omega-6: %3.4, Omega-3: %0.7.",
+      "specs": {
+        "Ağırlık": "15 Kilogram",
+        "Hedef Irklar": "Kangal, Akbaş, Çoban Köpekleri ve İri Irklar",
+        "Tane Yapısı": "Çiğnemeyi Teşvik Eden Büyük Gevrek Tane",
+        "Özel Destek": "Glukozamin & Kondroitin Eklem Desteği"
+      },
+      "isFeatured": true,
+      "isBestSeller": true,
+      "badge": "Çobanların Tercihi"
     },
     {
       "id": "prod-4",
-      "name": "Gallus Premium Somonlu Kısırlaştırılmış Kedi Maması (10 Kg)",
-      "category": "kedi",
-      "categoryName": "Kedi Maması & Ürünleri",
-      "price": 760,
-      "originalPrice": 890,
-      "stock": 14,
-      "unit": "10 Kg Çuval",
-      "imageUrl": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80",
-      "fallbackImageUrl": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80",
-      "description": "Kısırlaştırılmış yetişkin kediler için özel idrar yolu koruyucu formül, dengeli mineral yapısı, Omega 3 & 6 ile parlak ve dökülmeyen tüy desteği.",
-      "isFeatured": true
-    },
-    {
-      "id": "prod-5",
+      "slug": "gallus-puppy-junior-kuzu-etli-yavru-kopek-mamasi-12kg",
       "name": "Gallus Puppy & Junior Kuzu Etli Yavru Köpek Maması (12 Kg)",
+      "brand": "Gallus Pet Gurme",
+      "brandSlug": "gallus-pet",
       "category": "kopek",
-      "categoryName": "Köpek Maması & Ürünleri",
+      "categoryName": "Köpek Ürünleri",
+      "subCategory": "kopek-kuru-mama",
+      "subCategoryName": "Kuru Köpek Maması",
       "price": 840,
       "originalPrice": 960,
       "stock": 4,
       "unit": "12 Kg Çuval",
+      "sku": "GL-DOG-PUPPY12",
       "imageUrl": "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
       "fallbackImageUrl": "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80",
-      "description": "12 aya kadar tüm ırk yavru köpeklerin sağlıklı iskelet ve beyin gelişimi için DHA, prebiyotik lifler ve hipoalerjenik taze kuzu eti içeriği.",
-      "isFeatured": false
+      "gallery": [
+        "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "2 aydan 12 aya kadar yavru köpeklerin hızlı büyüme evresini destekleyen kuzu etli ve pirinçli hassas sindirim formülü. Beyin ve göz gelişimini destekleyen saf somon yağı kaynaklı DHA, sağlam diş ve kemik gelişimi için optimize edilmiş kalsiyum/fosfor dengesi içerir.",
+      "ingredients": "Kurutulmuş kuzu proteini (%32), baldo pirinç (%22), hidrolize kuzu proteini, somon yağı (DHA kaynağı), keten tohumu, bezelye lifi, bira mayası, vitamin ve mineral premiksi.",
+      "analysis": "Ham Protein: %29.0, Ham Yağ: %15.0, Ham Kül: %7.0, Kalsiyum: %1.4, Fosfor: %1.0.",
+      "specs": {
+        "Ağırlık": "12 Kilogram",
+        "Yaş Aralığı": "2 - 12 Ay Arası Tüm Yavru Köpekler",
+        "Tane Boyutu": "Kolay Isırılabilir Küçük Tane"
+      },
+      "isFeatured": false,
+      "isBestSeller": false,
+      "badge": "Kritik Stok"
+    },
+    {
+      "id": "prod-5",
+      "slug": "gallus-dogal-dana-ilikli-kemik-kuzu-kulak-odul-paketi",
+      "name": "Gallus Doğal Dana İlikli Kemik & Kuzu Kulak Ödül Paketi",
+      "brand": "Gallus Pet Gurme",
+      "brandSlug": "gallus-pet",
+      "category": "kopek",
+      "categoryName": "Köpek Ürünleri",
+      "subCategory": "kopek-odul",
+      "subCategoryName": "Ödül & Çiğneme Kemikleri",
+      "price": 135,
+      "originalPrice": 160,
+      "stock": 32,
+      "unit": "5'li Karışık Paket (250g)",
+      "sku": "GL-DOG-ODUL05",
+      "imageUrl": "https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=800&q=80",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Taş fırında düşük ısıda hava sirkülasyonu ile yavaşça kurutulmuş %100 doğal dana kaval kemiği ve kuzu kulakları. Hiçbir kimyasal ağartıcı, koruyucu veya tatlandırıcı içermez. Doğal çiğneme içgüdüsünü doyurur, diş taşlarını mekanik olarak temizler.",
+      "ingredients": "%100 Fırınlanmış Doğal Dana İlikli Kaval Kemiği ve Kuzu Kulağı.",
+      "analysis": "Ham Protein: %68.0, Ham Yağ: %11.5, Nem: %8.0.",
+      "specs": {
+        "İçerik": "3 Adet Kuzu Kulağı + 2 Adet İlikli Kemik",
+        "Katkı Maddesi": "%0 Katkısız, Kimyasalsız",
+        "Kullanım": "Günde 1 adet çiğneme ödülü olarak verilebilir"
+      },
+      "isFeatured": true,
+      "isBestSeller": false,
+      "badge": "%100 Doğal"
     },
     {
       "id": "prod-6",
-      "name": "Gallus Tavuklu & Pirinçli Yetişkin Kedi Maması (15 Kg)",
+      "slug": "gallus-premium-somonlu-kisirlastirilmis-kedi-mamasi-10kg",
+      "name": "Gallus Premium Somonlu Kısırlaştırılmış Kedi Maması (10 Kg)",
+      "brand": "Gallus Pet Gurme",
+      "brandSlug": "gallus-pet",
       "category": "kedi",
-      "categoryName": "Kedi Maması & Ürünleri",
+      "categoryName": "Kedi Ürünleri",
+      "subCategory": "kedi-kuru-mama",
+      "subCategoryName": "Kuru Kedi Maması",
+      "price": 760,
+      "originalPrice": 890,
+      "stock": 14,
+      "unit": "10 Kg Çuval",
+      "sku": "GL-CAT-STERIL10",
+      "imageUrl": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Kısırlaştırma operasyonu sonrası yavaşlayan metabolizma ve kilo alma eğilimine karşı dengelenmiş yağ oranı ve yüksek L-Karnitin içeriği. İdrar yolu taşı (strüvit) oluşumunu önlemek için hedeflenen idrar pH (6.2 - 6.5) dengesi. Kuzey Denizi somonu ile karşı konulmaz lezzet.",
+      "ingredients": "Kurutulmuş somon proteini (%34), baldo pirinç, mısır, rafine tavuk yağı, hamsi unu ve yağı (Omega-3 kaynağı), bira mayası, hidrolize tavuk ciğeri, psyllium lifi, taurin (2200 mg/kg), L-karnitin (300 mg/kg), kızılcık tozu (idrar yolu koruyucu).",
+      "analysis": "Ham Protein: %34.0, Ham Yağ: %12.0, Ham Kül: %7.0, Ham Selüloz: %3.5, Magnezyum: %0.08, Taurin: 2200 mg/kg.",
+      "specs": {
+        "Ağırlık": "10 Kilogram",
+        "Durum": "Kısırlaştırılmış Yetişkin Kediler İçin",
+        "Özel İçerik": "L-Karnitin & Kızılcık (İdrar Yolu Koruyucu)",
+        "Omega Desteği": "Omega-3 & Omega-6 Dökülmeyen Parlak Tüyler"
+      },
+      "isFeatured": true,
+      "isBestSeller": true,
+      "badge": "Veteriner Onaylı"
+    },
+    {
+      "id": "prod-7",
+      "slug": "gallus-tavuklu-pirincli-yetiskin-kedi-mamasi-15kg",
+      "name": "Gallus Tavuklu & Pirinçli Yetişkin Kedi Maması (15 Kg)",
+      "brand": "Gallus Pet Gurme",
+      "brandSlug": "gallus-pet",
+      "category": "kedi",
+      "categoryName": "Kedi Ürünleri",
+      "subCategory": "kedi-kuru-mama",
+      "subCategoryName": "Kuru Kedi Maması",
       "price": 890,
       "originalPrice": 990,
       "stock": 0,
       "unit": "15 Kg Çuval",
+      "sku": "GL-CAT-ADULT15",
       "imageUrl": "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=800&q=80",
       "fallbackImageUrl": "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=800&q=80",
-      "description": "Yoğun lezzetli taze tavuk eti ve sindirimi kolay pirinç taneleri. Tüy yumağı oluşumunu önleyici lif kompleksi ve taurin desteği.",
-      "isFeatured": false
-    },
-    {
-      "id": "prod-7",
-      "name": "1. Sınıf Gezen Tavuk & Kanatlı Yumurta Yemi (50 Kg Çuval)",
-      "category": "yem",
-      "categoryName": "Kanatlı Yem & Ekipmanları",
-      "price": 580,
-      "originalPrice": 650,
-      "stock": 26,
-      "unit": "50 Kg Çuval",
-      "imageUrl": "/images/tavuklar.jpg",
-      "fallbackImageUrl": "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80",
-      "description": "Doğal mısır, soya küspesi ve organik kalsiyum takviyeli özel yumurta rasyonu. Yumurta sarısı rengini koyulaştırır ve kabuk mukavemetini artırır.",
-      "isFeatured": true
+      "gallery": [
+        "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "1 yaş üzeri tüm ırk yetişkin kediler için taze tavuk eti ve sindirimi rahatlatıcı pirinç taneleri. Tüy yumağı oluşumunu önleyici doğal bitkisel lifler ve kalp sağlığını destekleyen taurin kompleksi içerir.",
+      "ingredients": "Kurutulmuş tavuk proteini (%38), pirinç (%20), mısır, tavuk yağı, pancar posası, hidrolize ciğer, taurin, vitaminler ve mineraller.",
+      "analysis": "Ham Protein: %32.0, Ham Yağ: %15.0, Ham Kül: %7.2, Selüloz: %2.5.",
+      "specs": {
+        "Ağırlık": "15 Kilogram",
+        "Yaş": "1 Yaş Üzeri Yetişkin Kediler",
+        "Lezzet": "Taze Tavuk & Esmer Pirinç"
+      },
+      "isFeatured": false,
+      "isBestSeller": false,
+      "badge": "Tükendi"
     },
     {
       "id": "prod-8",
-      "name": "Pelet Civciv & Piliç Büyütme Geliştirme Yemi (25 Kg)",
-      "category": "yem",
-      "categoryName": "Kanatlı Yem & Ekipmanları",
-      "price": 410,
-      "originalPrice": 470,
-      "stock": 15,
-      "unit": "25 Kg Çuval",
+      "slug": "gallus-natural-bentonit-kedi-kumu-aktif-karbonlu-10l",
+      "name": "Gallus Natural Aktif Karbonlu Doğal Bentonit Kedi Kumu (10 L)",
+      "brand": "Bentonite Gold",
+      "brandSlug": "bentonite-gold",
+      "category": "kedi",
+      "categoryName": "Kedi Ürünleri",
+      "subCategory": "kedi-kum",
+      "subCategoryName": "Doğal Kedi Kumu",
+      "price": 145,
+      "originalPrice": 175,
+      "stock": 28,
+      "unit": "10 Litre Torba (8.5 Kg)",
+      "sku": "GL-CAT-KUM10L",
       "imageUrl": "https://images.unsplash.com/photo-1563281577-a7be47e20db9?auto=format&fit=crop&w=800&q=80",
-      "fallbackImageUrl": "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80",
-      "description": "0-8 haftalık civciv ve genç piliçlerin hızlı ve kemikli gelişimini sağlayan zenginleştirilmiş dengeli vitamin-mineral formülü.",
-      "isFeatured": false
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1563281577-a7be47e20db9?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Fatsa havzasının %100 doğal beyaz sodyum bentonitinden üretilmiştir. Aktif karbon tanecikleri amonyak ve kötü kokuları anında moleküler düzeyde hapseder. %99.5 tozsuz özel fırınlama teknolojisi ile kedinizin ve sizin solunum yollarını korur, patiye yapışmaz.",
+      "ingredients": "%100 Doğal Beyaz Sodyum Bentonit Kili, Aktif Hindistan Cevizi Karbonu.",
+      "analysis": "Tozsuzluk Oranı: %99.5, Sıvı Emme Kapasitesi: %320, Topaklanma Süresi: < 3 Saniye.",
+      "specs": {
+        "Hacim": "10 Litre",
+        "Koku Teknolojisi": "Aktif Karbonlu Koku Hapsedici",
+        "Toz Durumu": "%99.5 Tozsuz",
+        "Topaklanma": "Ekstra Sert ve Dağılmayan Topaklar"
+      },
+      "isFeatured": true,
+      "isBestSeller": true,
+      "badge": "%99.5 Tozsuz"
     },
     {
       "id": "prod-9",
-      "name": "Otomatik Koruyucu Çiftlik Tavuk Yemliği & Nipelli Suluk Seti",
-      "category": "yem",
-      "categoryName": "Kanatlı Yem & Ekipmanları",
-      "price": 340,
-      "originalPrice": 390,
-      "stock": 6,
-      "unit": "2'li Set (10L Kapasite)",
-      "imageUrl": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80",
-      "fallbackImageUrl": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=800&q=80",
-      "description": "Yem zayiatını ve kuş dökülmesini önleyen özel ızgaralı tasarım, antibakteriyel UV dayanıklı plastik gövde ve damlatmaz nipelli temiz su sistemi.",
-      "isFeatured": false
+      "slug": "gallus-gold-tohum-karisimli-muhabbet-kusu-yemi-1kg",
+      "name": "Gallus Gold Özel Tohum Karışımlı Muhabbet Kuşu Yemi (1 Kg)",
+      "brand": "Gallus Pet Gurme",
+      "brandSlug": "gallus-pet",
+      "category": "kus",
+      "categoryName": "Kuş Ürünleri",
+      "subCategory": "kus-yem",
+      "subCategoryName": "Kuş Yemleri",
+      "price": 85,
+      "originalPrice": 105,
+      "stock": 22,
+      "unit": "1 Kg Özel Kilitli Doypack",
+      "sku": "GL-BIRD-MUH01",
+      "imageUrl": "https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=800&q=80",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Muhabbet kuşlarının doğal ortamlarındaki beslenme alışkanlıklarına uygun sarı, kırmızı ve ak darı, kanarya tohumu ve aspir taneleriyle harmanlanmış 1. kalite tohum karışımı. Tozdan arındırılmış, parlak tüyleri ve ötüş neşesini artıran vitamin peletleri içerir.",
+      "ingredients": "Sarı darı (%50), Beyaz darı (%20), Kırmızı darı (%15), Sade kanarya tohumu (%10), Keten tohumu (%3), Nijer tohumu (%2), Vitamin ve mineral peletleri.",
+      "analysis": "Ham Protein: %12.5, Ham Yağ: %5.2, Ham Selüloz: %6.8, Nem: %10.0.",
+      "specs": {
+        "Ağırlık": "1 Kilogram",
+        "Ambalaj": "Kilitli Nem Geçirmez Doypack",
+        "Hedef Tür": "Muhabbet Kuşları ve Küçük Paraketler"
+      },
+      "isFeatured": false,
+      "isBestSeller": false,
+      "badge": "Elenmiş Tozsuz"
     },
     {
       "id": "prod-10",
-      "name": "Gallus Doğal Dana İlikli Kemik & Kuzu Kulak Ödül Paketi",
-      "category": "kopek",
-      "categoryName": "Köpek Maması & Ürünleri",
-      "price": 135,
-      "originalPrice": 160,
-      "stock": 32,
-      "unit": "5'li Paket (250g)",
-      "imageUrl": "https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?auto=format&fit=crop&w=800&q=80",
-      "fallbackImageUrl": "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=800&q=80",
-      "description": "Taş fırında yavaşça kurutulmuş %100 doğal dana kaval kemiği ve kuzu kulağı. Köpeğinizin tartar oluşumunu engeller ve çiğneme dürtüsünü doyurur.",
-      "isFeatured": true
+      "slug": "dogal-murekkep-baligi-kemigi-mineral-gaga-tasi-3lu",
+      "name": "Doğal Mürekkep Balığı Kemiği & İyotlu Gaga Taşı (3'lü Paket)",
+      "brand": "Gallus Pet Gurme",
+      "brandSlug": "gallus-pet",
+      "category": "kus",
+      "categoryName": "Kuş Ürünleri",
+      "subCategory": "kus-ekipman",
+      "subCategoryName": "Gaga Taşı & Aksesuar",
+      "price": 65,
+      "originalPrice": 80,
+      "stock": 19,
+      "unit": "3'lü Paket (Askı Klipsli)",
+      "sku": "GL-BIRD-GAGA03",
+      "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Tüm kafes kuşları için zengin biyolojik kalsiyum ve iz mineral kaynağı olan kurutulmuş doğal mürekkep balığı kemiği ve iyotlu mineral blokları. Gaga yapısını törpüler, yumurtlama döneminde kabuk oluşumunu destekler.",
+      "ingredients": "%100 Doğal Kurutulmuş Mürekkep Balığı Kemiği (Cuttlebone), Kalsiyum Karbonat, İyot, Deniz Yosunu.",
+      "analysis": "Kalsiyum: %85.0, Fosfor: %0.08, Nem: %2.5.",
+      "specs": {
+        "Paket İçeriği": "2 Adet Kalamar Kemiği + 1 Adet İyotlu Blok",
+        "Bağlantı": "Kafes Teline Kolay Takılan Metal Klips"
+      },
+      "isFeatured": false,
+      "isBestSeller": false,
+      "badge": "Kalsiyum Deposu"
+    },
+    {
+      "id": "prod-11",
+      "slug": "1-sinif-gezen-tavuk-kanatli-yumurta-yemi-50kg",
+      "name": "1. Sınıf Gezen Tavuk & Kanatlı Yumurta Yemi (50 Kg Çuval)",
+      "brand": "Gallus Çiftlik",
+      "brandSlug": "gallus-ciftlik",
+      "category": "kumes-ciftlik",
+      "categoryName": "Kümes & Çiftlik",
+      "subCategory": "ciftlik-yem",
+      "subCategoryName": "Kanatlı Çiftlik Yemleri",
+      "price": 580,
+      "originalPrice": 650,
+      "stock": 26,
+      "unit": "50 Kg Çuval (Granül Pelet)",
+      "sku": "GL-FARM-YEM50",
+      "imageUrl": "/images/tavuklar.jpg",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "/images/tavuklar.jpg",
+        "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Kendi çiftliğimizde de kullandığımız, gezen tavukların yumurtlama periyodunda maksimum verim ve kabuk dayanıklılığı sağlayan yüksek rasyonlu karma pelet yem. Doğal sarı mısır, soya küspesi, buğday kepeği ve organik kalsiyum karbonat ile formüle edilmiştir. Yumurta sarısının doğal altın sarısı rengini güçlendirir.",
+      "ingredients": "Sarı Mısır, Soya Küspesi, Buğday ve Kepeği, Ayçiçeği Tohumu Küspesi, Kalsiyum Karbonat (Mermer Tozu), Dikalsiyum Fosfat, Tuz, Vitamin ve Mineral Premiksi, Doğal Lutein (Kadife Çiçeği Özü).",
+      "analysis": "Ham Protein: %17.5, Ham Yağ: %3.5, Ham Selüloz: %5.0, Ham Kül: %12.5, Kalsiyum: %3.8, Fosfor: %0.55, Metiyonin: %0.42.",
+      "specs": {
+        "Ağırlık": "50 Kilogram Dokuma Çuval",
+        "Form": "Dağılmayan Pelet (Yem Zayiatını Önler)",
+        "Hedef Hayvan": "Yumurtlama Dönemindeki Gezen ve Salma Tavuklar",
+        "Tüketim": "Tavuk başına günlük ortalama 110-125 gram"
+      },
+      "isFeatured": true,
+      "isBestSeller": true,
+      "badge": "Çiftlik Rasyonu"
+    },
+    {
+      "id": "prod-12",
+      "slug": "pelet-civciv-pilic-buyutme-gelistirme-yemi-25kg",
+      "name": "Pelet Civciv & Piliç Büyütme Geliştirme Yemi (25 Kg)",
+      "brand": "Gallus Çiftlik",
+      "brandSlug": "gallus-ciftlik",
+      "category": "kumes-ciftlik",
+      "categoryName": "Kümes & Çiftlik",
+      "subCategory": "ciftlik-yem",
+      "subCategoryName": "Kanatlı Çiftlik Yemleri",
+      "price": 410,
+      "originalPrice": 470,
+      "stock": 15,
+      "unit": "25 Kg Çuval (İnce Kırma Pelet)",
+      "sku": "GL-FARM-CIV25",
+      "imageUrl": "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1563281577-a7be47e20db9?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "0-8 haftalık civcivlerin ve genç piliçlerin iskelet yapısını, bağışıklık sistemini ve tüylenme evresini hızlandıran yüksek proteinli başlangıç ve büyütme yemi. Sindirilebilirliği yüksek mikronize tahıllar ile bağırsak sağlığını korur.",
+      "ingredients": "Yüksek proteinli soya küspesi, mısır, buğday, bitkisel yağ, aminoasitler, vitamin ve mineral takviyeleri.",
+      "analysis": "Ham Protein: %20.5, Ham Yağ: %3.8, Ham Selüloz: %4.2, Kalsiyum: %1.1, Fosfor: %0.75.",
+      "specs": {
+        "Ağırlık": "25 Kilogram",
+        "Kullanım Evresi": "0 - 8 Hafta Arası Civciv ve Piliçler",
+        "Yapı": "İnce Granül Pelet"
+      },
+      "isFeatured": false,
+      "isBestSeller": false,
+      "badge": "%20.5 Yüksek Protein"
+    },
+    {
+      "id": "prod-13",
+      "slug": "otomatik-koruyucu-ciftlik-tavuk-yemligi-nipelli-suluk-seti",
+      "name": "Otomatik Koruyucu Çiftlik Tavuk Yemliği & Nipelli Suluk Seti",
+      "brand": "FarmTech Automation",
+      "brandSlug": "farmtech",
+      "category": "kumes-ciftlik",
+      "categoryName": "Kümes & Çiftlik",
+      "subCategory": "ciftlik-ekipman",
+      "subCategoryName": "Otomatik Yemlik & Suluklar",
+      "price": 340,
+      "originalPrice": 390,
+      "stock": 6,
+      "unit": "2'li Set (10 Litre Kapasite)",
+      "sku": "GL-FARM-SET10L",
+      "imageUrl": "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=800&q=80"
+      ],
+      "description": "Kümeslerde yem zayiatını ve su kirlenmesini tamamen önleyen profesyonel çiftlik seti. Yem saçılmasını engelleyen özel iç ızgaralı hazne ve tavukların gagalamasıyla damlatmadan temiz su veren paslanmaz çelik 360° döner nipelli suluk.",
+      "ingredients": "Gıda temasına uygun, UV ışınlarına ve kırılmaya dayanıklı antibakteriyel polipropilen gövde, paslanmaz çelik 304 nipel mekanizması.",
+      "analysis": "Kapasite: 10 Litre Su + 8 Kg Yem.",
+      "specs": {
+        "Kapasite": "15-20 Tavuk İçin 3-4 Günlük Kesintisiz İhtiyaç",
+        "Özellik": "Zayiat Önleyici Izgara & Damlatmaz Çelik Nipel",
+        "Temizlik": "Sökülebilir Kolay Yıkanabilir Parçalar"
+      },
+      "isFeatured": false,
+      "isBestSeller": false,
+      "badge": "Son 6 Ürün!"
+    },
+    {
+      "id": "prod-14",
+      "slug": "toptan-paletli-ciftlik-yumurtasi-dagitim-paketi-10-koli",
+      "name": "Toptan Paletli Çiftlik Yumurtası Dağıtım Paketi (10 Koli / 300 Adet)",
+      "brand": "Gallus Çiftlik",
+      "brandSlug": "gallus-ciftlik",
+      "category": "yumurta",
+      "categoryName": "Taze Çiftlik Yumurtası",
+      "subCategory": "yumurta-toptan",
+      "subCategoryName": "Toptan Koli & Paketler",
+      "price": 1450,
+      "originalPrice": 1650,
+      "stock": 12,
+      "unit": "10 Koli (Toplam 300 Adet Gezen Tavuk Yumurtası)",
+      "sku": "GL-YUM-B2B10K",
+      "imageUrl": "/images/adrese-teslimat-banner.jpg",
+      "fallbackImageUrl": "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=800&q=80",
+      "gallery": [
+        "/images/adrese-teslimat-banner.jpg",
+        "/images/yumurta-koli-banner.jpg"
+      ],
+      "description": "Şarküteri, market, gurme restoran, fırın ve pastaneler için Silivri / Değirmenköy çiftliğimizden taze çıkışlı toptan yumurta paketi. Özel çift oluklu kraft mukavva korumalı koli içinde kırılma sigortasıyla sevk edilir. Kendi sevkiyat araçlarımızla Silivri, Çorlu, Çerkezköy ve İstanbul Avrupa yakasına kapı teslimatı yapılabilir.",
+      "ingredients": "A Sınıfı %100 Doğal Gezen Tavuk Yumurtası (30'luk 10 viyol).",
+      "analysis": "300 Adet L Boy Yumurta.",
+      "specs": {
+        "Miktar": "10 Koli x 30 Adet = 300 Adet",
+        "Hedef": "İşletmeler, Oteller, Restoranlar ve Toptan Alıcılar",
+        "Sevkiyat": "Özel Korumalı İklimlendirmeli Dağıtım"
+      },
+      "isFeatured": true,
+      "isBestSeller": false,
+      "badge": "Toptan Avantajı"
     }
   ]
 }
