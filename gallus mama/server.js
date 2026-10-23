@@ -251,11 +251,16 @@ const server = http.createServer(async (req, res) => {
     const newProduct = {
       id: 'prod-' + Date.now(),
       name: body.name.trim(),
-      categoryId: body.categoryId || '',
+      category: body.category || body.categoryId || '',
+      categoryId: body.category || body.categoryId || '',
       price: Number(body.price) || 0,
+      originalPrice: body.originalPrice !== undefined ? Number(body.originalPrice) : null,
+      stock: body.stock !== undefined ? Math.max(0, Number(body.stock)) : 0,
+      unit: body.unit ? body.unit.trim() : 'Adet',
       description: body.description || '',
       imageUrl: body.imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-      isPopular: Boolean(body.isPopular)
+      isPopular: Boolean(body.isPopular),
+      isFeatured: Boolean(body.isFeatured || body.isPopular)
     };
     db.products.unshift(newProduct);
     saveDatabase(db);
@@ -276,11 +281,16 @@ const server = http.createServer(async (req, res) => {
       db.products[idx] = {
         ...db.products[idx],
         name: body.name !== undefined ? body.name.trim() : db.products[idx].name,
-        categoryId: body.categoryId !== undefined ? body.categoryId : db.products[idx].categoryId,
+        category: body.category !== undefined ? body.category : (body.categoryId !== undefined ? body.categoryId : db.products[idx].category),
+        categoryId: body.category !== undefined ? body.category : (body.categoryId !== undefined ? body.categoryId : db.products[idx].categoryId),
         price: body.price !== undefined ? Number(body.price) : db.products[idx].price,
+        originalPrice: body.originalPrice !== undefined ? Number(body.originalPrice) : db.products[idx].originalPrice,
+        stock: body.stock !== undefined ? Math.max(0, Number(body.stock)) : (db.products[idx].stock !== undefined ? db.products[idx].stock : 0),
+        unit: body.unit !== undefined ? body.unit.trim() : (db.products[idx].unit || 'Adet'),
         description: body.description !== undefined ? body.description : db.products[idx].description,
         imageUrl: body.imageUrl !== undefined ? body.imageUrl : db.products[idx].imageUrl,
-        isPopular: body.isPopular !== undefined ? Boolean(body.isPopular) : db.products[idx].isPopular
+        isPopular: body.isPopular !== undefined ? Boolean(body.isPopular) : db.products[idx].isPopular,
+        isFeatured: body.isFeatured !== undefined ? Boolean(body.isFeatured) : db.products[idx].isFeatured
       };
       saveDatabase(db);
       return sendJson(res, 200, db.products[idx]);

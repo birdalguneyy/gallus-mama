@@ -2,336 +2,50 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=index.html#admin">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gallus Mama | Yönetim Paneli</title>
-  
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
-  <!-- Style -->
-  <link rel="stylesheet" href="css/style.css">
+  <title>Gallus Mama | Yönetim Paneli Yönlendiriliyor...</title>
+  <script>
+    window.location.href = "index.html#admin";
+  </script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #FAF8F5;
+      color: #1B4332;
+      text-align: center;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      padding: 32px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      border: 1px solid #E5E7EB;
+      max-width: 400px;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 16px;
+      background: #1B4332;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-
-  <!-- Login Modal Overlay (Shown when logged out) -->
-  <div id="login-overlay" class="modal-backdrop open" style="z-index: 9999;">
-    <div class="modal-card" style="text-align: center;">
-      <div style="font-size: 3.5rem; margin-bottom: 12px;">🔑</div>
-      <h2 style="font-size: 2rem; margin-bottom: 8px;">Gallus Mama Panel</h2>
-      <p style="color: var(--color-text-muted); margin-bottom: 28px;">Yönetim paneline erişmek için lütfen şifrenizi girin.</p>
-      
-      <form id="login-form" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <input type="password" id="login-password" class="form-input" placeholder="Şifreniz" required style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;">
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-          <span>Giriş Yap</span>
-        </button>
-      </form>
-    </div>
+  <div class="card">
+    <div style="font-size: 40px; margin-bottom: 12px;">🛡️</div>
+    <h2 style="margin: 0 0 8px 0;">Yönetim Paneline Yönlendiriliyorsunuz</h2>
+    <p style="color: #6B7280; font-size: 14px; margin: 0;">Sayfa otomatik yönlenmezse aşağıdaki butona tıklayabilirsiniz:</p>
+    <a href="index.html#admin" class="btn">Yönetim Panelini Aç</a>
   </div>
-
-  <!-- Admin Main Dashboard (Hidden until logged in) -->
-  <div id="admin-dashboard" style="display: none;">
-    <!-- Admin Header -->
-    <header class="admin-header">
-      <div class="container admin-title-row">
-        <a href="index.html" class="logo">
-          <div class="logo-badge">🐓</div>
-          <span>Gallus <span class="text-gradient">Mama Admin</span></span>
-        </a>
-        
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <a href="index.html" target="_blank" class="btn btn-secondary btn-sm">🌐 Siteyi Önizle</a>
-          <button class="btn btn-danger btn-sm" onclick="handleLogout()">🚪 Çıkış Yap</button>
-        </div>
-      </div>
-    </header>
-
-    <main class="container">
-      <!-- Stats Row -->
-      <div class="stat-cards-grid">
-        <div class="stat-card">
-          <div class="stat-icon">📦</div>
-          <div>
-            <div class="stat-number" id="stat-products-count">0</div>
-            <div class="stat-label">Toplam Ürün</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">🏷️</div>
-          <div>
-            <div class="stat-number" id="stat-categories-count">0</div>
-            <div class="stat-label">Aktif Kategori</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">⭐</div>
-          <div>
-            <div class="stat-number" id="stat-popular-count">0</div>
-            <div class="stat-label">Popüler Öne Çıkan</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Navigation Tabs -->
-      <div class="category-tabs" style="justify-content: flex-start; margin-bottom: 30px;">
-        <button class="category-tab active" onclick="switchAdminTab('products')" id="tab-btn-products">📦 Ürün Yönetimi</button>
-        <button class="category-tab" onclick="switchAdminTab('categories')" id="tab-btn-categories">🏷️ Kategori Yönetimi</button>
-        <button class="category-tab" onclick="switchAdminTab('info')" id="tab-btn-info">⚙️ Site İçerik, Teslimat & Bağlantılar</button>
-      </div>
-
-      <!-- TAB 1: PRODUCTS MANAGEMENT -->
-      <section id="tab-section-products">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3>Ürün Listesi</h3>
-          <button class="btn btn-primary btn-sm" onclick="openProductModal()">+ Yeni Ürün Ekle</button>
-        </div>
-
-        <div class="admin-table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Görsel</th>
-                <th>Ürün Adı</th>
-                <th>Kategori</th>
-                <th>Fiyat</th>
-                <th>Popüler mi?</th>
-                <th>İşlemler</th>
-              </tr>
-            </thead>
-            <tbody id="admin-products-tbody">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- TAB 2: CATEGORIES MANAGEMENT -->
-      <section id="tab-section-categories" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-          <h3>Kategori Listesi</h3>
-          <button class="btn btn-primary btn-sm" onclick="openCategoryModal()">+ Yeni Kategori Ekle</button>
-        </div>
-
-        <div class="admin-table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>İkon</th>
-                <th>Kategori Adı</th>
-                <th>Açıklama</th>
-                <th>İşlemler</th>
-              </tr>
-            </thead>
-            <tbody id="admin-categories-tbody">
-              <!-- Rendered dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- TAB 3: SITE CONTENT, DELIVERY REGIONS & LINKS MANAGEMENT -->
-      <section id="tab-section-info" style="display: none;">
-        <div class="contact-info-box" style="max-width: 900px; margin: 0 auto;">
-          <h3 style="margin-bottom: 24px;">Site Görselleri, Metinler, Teslimat Bölgeleri ve Harita</h3>
-          <form id="info-form" onsubmit="handleSaveInfo(event)">
-            
-            <h4 style="color: var(--color-primary); margin-bottom: 16px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">1. Hero (Giriş) Bölümü</h4>
-            <div class="form-group">
-              <label class="form-label">Hero Başlığı</label>
-              <input type="text" id="info-form-hero-title" class="form-input" required>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label">Slogan / Vurgulu Alt Başlık</label>
-              <input type="text" id="info-form-slogan" class="form-input" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Hero Görsel URL</label>
-              <input type="url" id="info-form-hero-image" class="form-input" placeholder="https://..." required>
-            </div>
-
-            <h4 style="color: var(--color-primary); margin-top: 32px; margin-bottom: 16px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">2. Teslimat Bölgeleri Yönetimi</h4>
-            <div class="form-group">
-              <label class="form-label">Teslimat Yapılan Bölgeler (Virgülle Ayırın)</label>
-              <input type="text" id="info-form-delivery-regions" class="form-input" required placeholder="Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı">
-            </div>
-
-            <h4 style="color: var(--color-primary); margin-top: 32px; margin-bottom: 16px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">3. Biz Kimiz (Hakkımızda) Bölümü</h4>
-            <div class="form-group">
-              <label class="form-label">Biz Kimiz Başlığı</label>
-              <input type="text" id="info-form-about-title" class="form-input" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Biz Kimiz Detaylı Metni</label>
-              <textarea id="info-form-about" class="form-textarea" rows="4" required></textarea>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Biz Kimiz Görsel URL</label>
-              <input type="url" id="info-form-about-image" class="form-input" placeholder="https://..." required>
-            </div>
-
-            <h4 style="color: var(--color-primary); margin-top: 32px; margin-bottom: 16px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">4. WhatsApp & Sosyal Medya & Harita Bağlantıları</h4>
-            
-            <div class="form-group">
-              <label class="form-label">💬 WhatsApp Yönlendirme Linki (Sağ alt baloncuk & Butonlar için)</label>
-              <input type="url" id="info-form-whatsapp" class="form-input" required placeholder="https://wa.me/905516553637...">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div class="form-group">
-                <label class="form-label">📸 Instagram @gallus_mama Linki</label>
-                <input type="url" id="info-form-ig-mama" class="form-input" required placeholder="https://www.instagram.com/gallus_mama/">
-              </div>
-              <div class="form-group">
-                <label class="form-label">🥚 Instagram @gallusyumurta Linki</label>
-                <input type="url" id="info-form-ig-yumurta" class="form-input" required placeholder="https://www.instagram.com/gallusyumurta/">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">📍 Google Haritalar Konum Linki</label>
-              <input type="url" id="info-form-maps" class="form-input" required placeholder="https://share.google/VRb7DUDWCXpFwqWJx">
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">🗺️ Google Haritalar Canlı Embed Iframe URL</label>
-              <input type="url" id="info-form-maps-embed" class="form-input" required placeholder="https://www.google.com/maps/embed?pb=...">
-            </div>
-
-            <h4 style="color: var(--color-primary); margin-top: 32px; margin-bottom: 16px; border-bottom: 1px solid var(--color-border); padding-bottom: 8px;">5. İletişim Detayları</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div class="form-group">
-                <label class="form-label">Telefon Numarası</label>
-                <input type="text" id="info-form-phone" class="form-input" required placeholder="0551 655 3637">
-              </div>
-              <div class="form-group">
-                <label class="form-label">E-Posta Adresi</label>
-                <input type="email" id="info-form-email" class="form-input" required>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Adres / Lokasyon Metni</label>
-              <input type="text" id="info-form-address" class="form-input" required>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Çalışma Saatleri Metni</label>
-              <input type="text" id="info-form-hours" class="form-input" required>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="margin-top: 20px; width: 100%; font-size: 1.1rem;">💾 Tüm İçerik ve Bağlantıları Kaydet</button>
-          </form>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- Product Modal (Add / Edit) -->
-  <div id="product-modal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="product-modal-title">Yeni Ürün Ekle</h3>
-        <button class="modal-close" onclick="closeProductModal()">✕</button>
-      </div>
-
-      <form id="product-form" onsubmit="handleSaveProduct(event)">
-        <input type="hidden" id="product-edit-id">
-
-        <div class="form-group">
-          <label class="form-label">Ürün Adı *</label>
-          <input type="text" id="product-form-name" class="form-input" placeholder="Örn: Çıtır Kovası" required>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-          <div class="form-group">
-            <label class="form-label">Kategori</label>
-            <select id="product-form-category" class="form-select"></select>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Fiyat (TL) *</label>
-            <input type="number" step="0.01" id="product-form-price" class="form-input" placeholder="150" required>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Görsel Bağlantısı (URL)</label>
-          <input type="url" id="product-form-image" class="form-input" placeholder="https://images.unsplash.com/...">
-          <small style="color: var(--color-text-muted); font-size: 0.8rem; display: block; margin-top: 4px;">Örnek hazır Unsplash URL butonları:</small>
-          <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="setPresetImg('https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=80')">🍗 Çıtır Tavuk</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="setPresetImg('https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=600&q=80')">🔥 Kanat</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="setPresetImg('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80')">🍔 Burger</button>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="setPresetImg('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80')">🌿 Gurme Kase</button>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Ürün Açıklaması</label>
-          <textarea id="product-form-desc" class="form-textarea" rows="3" placeholder="Ürün içeriği ve lezzet detayları..."></textarea>
-        </div>
-
-        <div class="form-group form-checkbox-group">
-          <input type="checkbox" id="product-form-popular" class="form-checkbox">
-          <label for="product-form-popular" class="form-label" style="margin-bottom:0; cursor:pointer;">⭐ Bu ürünü ana sayfada "Popüler Ürünler" arasında göster</label>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-          <button type="button" class="btn btn-secondary" onclick="closeProductModal()">İptal</button>
-          <button type="submit" class="btn btn-primary">Kaydet</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Category Modal (Add / Edit) -->
-  <div id="category-modal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 id="category-modal-title">Yeni Kategori Ekle</h3>
-        <button class="modal-close" onclick="closeCategoryModal()">✕</button>
-      </div>
-
-      <form id="category-form" onsubmit="handleSaveCategory(event)">
-        <input type="hidden" id="category-edit-id">
-
-        <div class="form-group">
-          <label class="form-label">Kategori Adı *</label>
-          <input type="text" id="category-form-name" class="form-input" placeholder="Örn: Özel Soslar" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">İkon (Emoji veya Metin)</label>
-          <input type="text" id="category-form-icon" class="form-input" placeholder="🍗 veya 🔥 veya 🥤" value="🏷️">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Açıklama</label>
-          <textarea id="category-form-desc" class="form-textarea" rows="2" placeholder="Kategori kısa açıklaması..."></textarea>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-          <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">İptal</button>
-          <button type="submit" class="btn btn-primary">Kaydet</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Toast Notifications Container -->
-  <div id="toast-container" class="toast-container"></div>
-
-  <!-- Admin JavaScript -->
-  <script src="js/admin.js"></script>
 </body>
 </html>

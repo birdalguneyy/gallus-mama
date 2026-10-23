@@ -1,0 +1,17 @@
+{
+  "name": "gallus-mama",
+  "version": "1.0.0",
+  "description": "GALLUS MAMA & YUMURTA - Web Sitesi ve Yönetim Paneli",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "gallus-mama",
+    "render",
+    "node"
+  ],
+  "author": "GALLUS MAMA & YUMURTA",
+  "license": "ISC",
+  "dependencies": {}
+}
