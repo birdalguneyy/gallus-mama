@@ -1,0 +1,241 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model & Architecture
+    // ===============================================================
+    // Project: stoktakip-1fe40 (Gallus Mama E-Commerce & Stok Satış Takip sync)
+    //
+    // Architecture & Trust Model:
+    // - Web Clients (Public / Guest / Customers):
+    //     * Have public read access to catalog collections (`products`, `public_products`, `product_web_meta`).
+    //     * Have create-only access to submit orders to `orders` (read, update, delete denied to protect PII).
+    //     * Absolutely NO write access to catalogs (prevents price or stock tampering).
+    // - Backend Server & Desktop App:
+    //     * Use Firebase Admin SDK (service account credentials), which operates with full administrative
+    //       privileges and entirely bypasses Firestore Security Rules.
+    //     * Handle inventory management, stock deductions, order status updates, and private operations.
+    //
+    // Assumed Collection Schemas:
+    //
+    // 1. Collection: products
+    //    Document ID: Product SKU or ID (e.g., prod-1, GL-...)
+    //    Fields:
+    //      - id / slug: string - Unique product identifier
+    //      - name: string - Product title
+    //      - price: number - Sales price (TL)
+    //      - stock: number - Available inventory
+    //      - category / categoryName: string - Category hierarchy
+    //      - brand / brandSlug: string - Product brand
+    //      - imageUrl / gallery: string / list - Product imagery
+    //      - specs / analysis / ingredients: map / string - Nutritional / technical specs
+    //    Access: Read-only for web clients (allow read: if true; allow write: if false;).
+    //
+    // 2. Collection: public_products
+    //    Document ID: Product ID or slug
+    //    Fields: Sanitized product catalog excluding sensitive purchase costs and supplier margins.
+    //    Access: Read-only for web clients (allow read: if true; allow write: if false;).
+    //
+    // 3. Collection: product_web_meta
+    //    Document ID: Product ID or slug
+    //    Fields: Web descriptions, marketing badges, SEO titles/descriptions, and rich category metadata.
+    //    Access: Read-only for web clients (allow read: if true; allow write: if false;).
+    //
+    // 4. Collection: orders
+    //    Document ID: Auto-generated or order code (e.g., GL-XXXXXX)
+    //    Fields:
+    //      - items: list (required, 1..100 items) - Line items with product details and quantities
+    //      - customer: map or string (required) - Customer contact & delivery address details
+    //      - total: number (required, > 0) - Order grand total in TL
+    //      - id / date / createdAt: string / timestamp (optional)
+    //      - paymentMethod: string (optional) - Payment choice (Kredi Kartı, Kapıda Ödeme, Havale)
+    //      - status: string (optional) - Initial order status (e.g. "Hazırlanıyor", "Beklemede")
+    //      - shipping / discount / coupon / note: string / number (optional)
+    //    Access: Create-only for web clients with strict schema and DoS validation.
+    //            Read, update, delete denied to prevent PII exposure and unauthorized modifications.
+    //
+    // 5. Private Collections:
+    //    - users: Staff and administrative account records
+    //    - sales: In-store and desktop POS sales transactions
+    //    - expenses: Operational farm, feed, and logistics expenses
+    //    - farm_customers: B2B wholesale farm client CRM records
+    //    - farm_egg_sales: Daily egg collection, classification, and wholesale distribution records
+    //    - farm_feed_purchases: Raw feed ingredients and procurement invoices
+    //    - system_settings: Business configuration, sync metadata, and internal settings
+    //    Access: Completely locked down against direct client access (allow read, write: if false;).
+    //            Operated exclusively by Desktop/Mobile Stok Satış Takip & Node.js backend via Admin SDK.
+    //
+    // 6. Default Deny:
+    //    Any unmatched document or subcollection path is denied by default.
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions & Security Invariants
+    // ===============================================================
+
+    // Check if client is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Validate that order has only recognized fields (prevents schema pollution)
+    function hasAllowedOrderFields(data) {
+      return data.keys().hasOnly([
+        'id',
+        'date',
+        'createdAt',
+        'customer',
+        'items',
+        'total',
+        'paymentMethod',
+        'status',
+        'shipping',
+        'shippingCost',
+        'discount',
+        'coupon',
+        'note',
+        'notes',
+        'source',
+        'userAgent',
+        'userId',
+        'uid'
+      ]);
+    }
+
+    // Validate customer information and enforce string bounds against DoS
+    function isValidCustomer(customer) {
+      return (
+        customer is map &&
+        customer.size() >= 1 &&
+        customer.size() <= 20 &&
+        (!('fullname' in customer) || (customer.fullname is string && customer.fullname.size() <= 150)) &&
+        (!('name' in customer) || (customer.name is string && customer.name.size() <= 150)) &&
+        (!('phone' in customer) || (customer.phone is string && customer.phone.size() <= 50)) &&
+        (!('city' in customer) || (customer.city is string && customer.city.size() <= 100)) &&
+        (!('district' in customer) || (customer.district is string && customer.district.size() <= 100)) &&
+        (!('neighborhood' in customer) || (customer.neighborhood is string && customer.neighborhood.size() <= 150)) &&
+        (!('address' in customer) || (customer.address is string && customer.address.size() <= 500)) &&
+        (!('note' in customer) || (customer.note is string && customer.note.size() <= 1000)) &&
+        (!('email' in customer) || (customer.email is string && customer.email.size() <= 150))
+      ) || (
+        customer is string &&
+        customer.size() >= 3 &&
+        customer.size() <= 1000
+      );
+    }
+
+    // Domain validator for e-commerce order submissions
+    function isValidOrder(data) {
+      return
+        // 1. Enforce strict schema (no extraneous fields)
+        hasAllowedOrderFields(data) &&
+
+        // 2. Enforce required fields
+        data.keys().hasAll(['items', 'customer', 'total']) &&
+
+        // 3. Items validation (must be non-empty list, max 100 line items)
+        data.items is list &&
+        data.items.size() >= 1 &&
+        data.items.size() <= 100 &&
+
+        // 4. Customer info validation
+        isValidCustomer(data.customer) &&
+
+        // 5. Total amount validation (must be positive number, reasonable ceiling to prevent overflow)
+        (data.total is number || data.total is int || data.total is float) &&
+        data.total > 0 &&
+        data.total <= 100000000 &&
+
+        // 6. Optional string fields length validation (DoS protection)
+        (!('id' in data) || (data.id is string && data.id.size() <= 100)) &&
+        (!('date' in data) || (data.date is string && data.date.size() <= 100)) &&
+        (!('createdAt' in data) || (data.createdAt is timestamp || (data.createdAt is string && data.createdAt.size() <= 100))) &&
+        (!('paymentMethod' in data) || (data.paymentMethod is string && data.paymentMethod.size() <= 100)) &&
+        (!('status' in data) || (data.status is string && data.status.size() <= 50)) &&
+        (!('coupon' in data) || (data.coupon is string && data.coupon.size() <= 50)) &&
+        (!('note' in data) || (data.note is string && data.note.size() <= 1000)) &&
+        (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+        (!('source' in data) || (data.source is string && data.source.size() <= 50)) &&
+        (!('userAgent' in data) || (data.userAgent is string && data.userAgent.size() <= 300)) &&
+        (!('userId' in data) || (data.userId is string && data.userId.size() <= 128)) &&
+        (!('uid' in data) || (data.uid is string && data.uid.size() <= 128)) &&
+        (!('shipping' in data) || (data.shipping is number || (data.shipping is string && data.shipping.size() <= 50))) &&
+        (!('shippingCost' in data) || (data.shippingCost is number || (data.shippingCost is string && data.shippingCost.size() <= 50))) &&
+        (!('discount' in data) || (data.discount is number || (data.discount is string && data.discount.size() <= 50)));
+    }
+
+    // ===============================================================
+    // Rules Definition
+    // ===============================================================
+
+    // 1. Core Products Collection
+    // Synced with Desktop/Mobile Stok Satış Takip app.
+    // Public read-only for web storefront; NO direct client writes to prevent tampering.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 2. Sanitized Public Products Catalog
+    // Excludes cost/purchase prices and supplier margins.
+    match /public_products/{productId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 3. Product Web Metadata
+    // SEO descriptions, rich media galleries, web category mappings.
+    match /product_web_meta/{productId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 4. Orders Collection
+    // Public/guest customer checkout from website.
+    // Allows creation if required fields are present and valid.
+    // Denies read, update, delete to public clients (protects PII, order tampering, status hijacking).
+    match /orders/{orderId} {
+      allow create: if isValidOrder(request.resource.data);
+      allow read, update, delete: if false;
+    }
+
+    // 5. Private Internal Business Collections
+    // Completely locked down against direct client access.
+    // Accessed strictly via Firebase Admin SDK by desktop/mobile app and backend server.
+    match /users/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /sales/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /expenses/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /farm_customers/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /farm_egg_sales/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /farm_feed_purchases/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /system_settings/{document=**} {
+      allow read, write: if false;
+    }
+
+    // 6. Default Deny Fallback
+    // Catches all other unmatched collections, documents, and subcollections.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

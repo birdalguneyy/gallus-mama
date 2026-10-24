@@ -8,5 +8,10 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 
-# Environment Variables
+# Environment Variables & Service Account Credentials
 .env
+firebase_credentials.json
+
+# Python
+__pycache__/
+*.pyc

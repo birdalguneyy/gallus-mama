@@ -8,6 +8,23 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '19071907';
 const SITE_DOMAIN = process.env.SITE_DOMAIN || 'https://gallusmama.com';
 
+// Optional Firebase Admin Initialization (Graceful fallback if module or credentials not present)
+let firestoreDb = null;
+try {
+  const admin = require('firebase-admin');
+  const credPath = path.join(__dirname, 'firebase_credentials.json');
+  if (fs.existsSync(credPath)) {
+    const serviceAccount = require(credPath);
+    if (!admin.apps.length) {
+      admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    }
+    firestoreDb = admin.firestore();
+    console.log("🔥 [Node Server] Firebase Firestore Admin SDK bağlı (stoktakip-1fe40)");
+  }
+} catch (e) {
+  // Gracefully fallback to local JSON database
+}
+
 // Active session tokens in memory
 const activeTokens = new Set();
 
@@ -494,7 +511,48 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Sipariş detayları ve ürünler zorunludur.' });
       }
 
-      // Check and deduct stock
+      // If firestoreDb is initialized, run atomic Firestore transaction
+      if (firestoreDb) {
+        try {
+          await firestoreDb.runTransaction(async (txn) => {
+            for (const item of body.items) {
+              const pid = item.id || item.productId;
+              const qty = Number(item.qty || 1);
+              let prodRef = firestoreDb.collection('products').doc(String(pid));
+              let snap = await txn.get(prodRef);
+              if (!snap.exists) {
+                prodRef = firestoreDb.collection('products').doc(`u6_p${pid}`);
+                snap = await txn.get(prodRef);
+              }
+              if (snap.exists) {
+                const currStock = Number(snap.data().stock_quantity || 0);
+                const prodName = snap.data().name || item.name;
+                if (currStock < qty) {
+                  throw new Error(`Yetersiz Stok: '${prodName}' için mevcut stok ${currStock} adettir.`);
+                }
+                const newStock = Math.max(0, currStock - qty);
+                txn.update(prodRef, {
+                  stock_quantity: newStock,
+                  updated_at: new Date().toISOString(),
+                  synced_to_cloud: 1
+                });
+                // Also update public_products
+                const publicRef = firestoreDb.collection('public_products').doc(prodRef.id);
+                txn.set(publicRef, {
+                  stock_quantity: newStock,
+                  stock: newStock,
+                  inStock: newStock > 0,
+                  updatedAt: new Date().toISOString()
+                }, { merge: true });
+              }
+            }
+          });
+        } catch (txnErr) {
+          return sendJson(res, 400, { success: false, error: txnErr.message });
+        }
+      }
+
+      // Local fallback / sync
       for (const item of body.items) {
         const p = db.products.find(prod => prod.id === item.id || prod.slug === item.slug);
         if (p) {
@@ -515,6 +573,28 @@ const server = http.createServer(async (req, res) => {
       if (!db.orders) db.orders = [];
       db.orders.unshift(newOrder);
       saveDatabase(db);
+
+      // Record to Firestore 'orders' and 'sales' if firestoreDb is available
+      if (firestoreDb) {
+        try {
+          await firestoreDb.collection('orders').doc(newOrder.id).set({
+            ...newOrder,
+            source: 'web'
+          });
+          const saleId = Number(newOrder.id.replace('GL-', '')) || Date.now();
+          await firestoreDb.collection('sales').doc(`u6_s${saleId}`).set({
+            id: saleId,
+            user_id: 6,
+            total_amount: typeof body.total === 'number' ? body.total : 100,
+            payment_type: body.paymentMethod || 'Kredi Kartı',
+            created_at: new Date().toISOString(),
+            note: `Web Siparişi: ${body.customer.fullname || ''} (${body.customer.phone || ''})`,
+            items: body.items
+          });
+        } catch (fsErr) {
+          console.error("Firestore order write warning:", fsErr.message);
+        }
+      }
 
       return sendJson(res, 201, { success: true, order: newOrder });
     }

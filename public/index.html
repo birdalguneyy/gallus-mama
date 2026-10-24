@@ -65,6 +65,10 @@
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Firebase Web SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
   <style>
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 7px; height: 7px; }
@@ -319,59 +323,66 @@
 
       <!-- Navigation Bar (Mega Menu & Categories) -->
       <nav aria-label="Ana Gezinti" class="hidden lg:flex items-center justify-between border-t border-gray-100 py-2.5 text-xs font-bold text-gray-700">
-        <div class="flex items-center gap-1 xl:gap-2">
+        <div class="flex items-center gap-1 xl:gap-2 flex-wrap">
           
-          <a href="/" onclick="navigate('/', event)" class="nav-link px-3 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">Ana Sayfa</a>
+          <a href="/" onclick="navigate('/', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">Ana Sayfa</a>
           
-          <!-- Köpek Dropdown -->
-          <div class="relative group">
-            <a href="/kopek" onclick="navigate('/kopek', event)" class="nav-link px-3 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 flex items-center gap-1 transition">
-              <span>Köpek</span>
-              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform"></i>
-            </a>
-            <div class="absolute top-full left-0 hidden group-hover:block w-56 pt-2 z-50">
-              <div class="bg-white rounded-2xl border border-gray-200 shadow-mega p-2 space-y-1">
-                <a href="/kopek" onclick="navigate('/kopek', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50 font-bold text-gallus-primary">Tüm Köpek Ürünleri</a>
-                <a href="/kopek/mama" onclick="navigate('/kopek/mama', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Kuru Köpek Maması</a>
-                <a href="/kopek?sub=odul" onclick="navigate('/kopek?sub=odul', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Ödül & Çiğneme Kemikleri</a>
-                <a href="/kopek?sub=bakim" onclick="navigate('/kopek?sub=bakim', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Bakım & Hijyen</a>
-              </div>
-            </div>
-          </div>
-
           <!-- Kedi Dropdown -->
           <div class="relative group">
-            <a href="/kedi" onclick="navigate('/kedi', event)" class="nav-link px-3 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 flex items-center gap-1 transition">
-              <span>Kedi</span>
+            <a href="/kedi" onclick="navigate('/kedi', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 flex items-center gap-1 transition">
+              <span>🐱 Kedi</span>
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform"></i>
             </a>
             <div class="absolute top-full left-0 hidden group-hover:block w-56 pt-2 z-50">
               <div class="bg-white rounded-2xl border border-gray-200 shadow-mega p-2 space-y-1">
                 <a href="/kedi" onclick="navigate('/kedi', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50 font-bold text-gallus-primary">Tüm Kedi Ürünleri</a>
-                <a href="/kedi/mama" onclick="navigate('/kedi/mama', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Kısırlaştırılmış Kedi Maması</a>
-                <a href="/kedi/kum" onclick="navigate('/kedi/kum', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50 font-bold text-gallus-accent">Doğal Bentonit Kedi Kumu</a>
-                <a href="/kedi?sub=odul" onclick="navigate('/kedi?sub=odul', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Ödül & Macunlar</a>
+                <a href="/kedi" onclick="navigate('/kedi', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Kuru & Yaş Kedi Mamaları</a>
+                <a href="/kedi" onclick="navigate('/kedi', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50 font-bold text-gallus-accent">Doğal Bentonit Kedi Kumu</a>
               </div>
             </div>
           </div>
 
-          <!-- Kuş -->
-          <a href="/kus" onclick="navigate('/kus', event)" class="nav-link px-3 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">Kuş</a>
+          <!-- Köpek Dropdown -->
+          <div class="relative group">
+            <a href="/kopek" onclick="navigate('/kopek', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 flex items-center gap-1 transition">
+              <span>🐶 Köpek</span>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform"></i>
+            </a>
+            <div class="absolute top-full left-0 hidden group-hover:block w-56 pt-2 z-50">
+              <div class="bg-white rounded-2xl border border-gray-200 shadow-mega p-2 space-y-1">
+                <a href="/kopek" onclick="navigate('/kopek', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50 font-bold text-gallus-primary">Tüm Köpek Ürünleri</a>
+                <a href="/kopek" onclick="navigate('/kopek', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Kuru & Konserve Köpek Maması</a>
+                <a href="/kopek" onclick="navigate('/kopek', event)" class="block px-3 py-2 rounded-xl text-xs hover:bg-gray-50">Bakım, Şampuan & Hijyen</a>
+              </div>
+            </div>
+          </div>
 
-          <!-- Kümes & Çiftlik -->
-          <a href="/kumes-ciftlik" onclick="navigate('/kumes-ciftlik', event)" class="nav-link px-3 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">Kümes & Çiftlik</a>
+          <!-- Tavuk & Civciv Yemleri -->
+          <a href="/tavuk-civciv" onclick="navigate('/tavuk-civciv', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">🐓 Tavuk & Civciv</a>
 
-          <!-- Doğal Yumurta -->
-          <a href="/yumurta" onclick="navigate('/yumurta', event)" class="nav-link px-3 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition font-black text-gallus-primary flex items-center gap-1">
-            <span>Taze Yumurta</span>
+          <!-- Güvercin Yemleri -->
+          <a href="/guvercin" onclick="navigate('/guvercin', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">🕊️ Güvercin</a>
+
+          <!-- Balık & Akvaryum -->
+          <a href="/balik-akvaryum" onclick="navigate('/balik-akvaryum', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">🐠 Balık & Akvaryum</a>
+
+          <!-- Kümes Ekipmanları -->
+          <a href="/kumes-ekipman" onclick="navigate('/kumes-ekipman', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">🏡 Kümes Ekipmanları</a>
+
+          <!-- Tarım ve Bahçe -->
+          <a href="/tarim-bahce" onclick="navigate('/tarim-bahce', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">🌱 Tarım & Bahçe</a>
+
+          <!-- Taze Yumurta -->
+          <a href="/yumurta" onclick="navigate('/yumurta', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition font-black text-gallus-primary flex items-center gap-1">
+            <span>🥚 Taze Yumurta</span>
             <span class="w-1.5 h-1.5 rounded-full bg-gallus-accent"></span>
           </a>
 
-          <!-- Markalar -->
-          <a href="/markalar" onclick="navigate('/markalar', event)" class="nav-link px-3 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">Markalar</a>
+          <!-- Diğer Ürünler -->
+          <a href="/diger" onclick="navigate('/diger', event)" class="nav-link px-2.5 py-1.5 rounded-lg hover:text-gallus-primary hover:bg-gray-100 transition">✨ Diğer</a>
 
           <!-- Kampanyalar -->
-          <a href="/kampanyalar" onclick="navigate('/kampanyalar', event)" class="nav-link px-3 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 flex items-center gap-1 transition">
+          <a href="/kampanyalar" onclick="navigate('/kampanyalar', event)" class="nav-link px-2.5 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 flex items-center gap-1 transition">
             <i data-lucide="tag" class="w-3.5 h-3.5"></i>
             <span>Kampanyalar</span>
           </a>
@@ -532,42 +543,53 @@
 
     <div class="flex-1 overflow-y-auto p-4 space-y-4 text-xs font-bold text-gray-700">
       <div class="space-y-1">
-        <a href="/" onclick="toggleMobileDrawer(false); navigate('/', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100">Ana Sayfa</a>
+        <a href="/" onclick="toggleMobileDrawer(false); navigate('/', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🏠 Ana Sayfa</span>
+        </a>
         
-        <!-- Köpek Accordion -->
-        <div>
-          <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('mobile-sub-kopek').classList.toggle('hidden')">
-            <span>🐕 Köpek Ürünleri</span>
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400"></i>
-          </div>
-          <div id="mobile-sub-kopek" class="hidden pl-6 pr-2 py-1 space-y-1 text-gray-500 font-medium">
-            <a href="/kopek" onclick="toggleMobileDrawer(false); navigate('/kopek', event);" class="block py-1.5 hover:text-gallus-primary font-bold">Tüm Köpek Ürünleri</a>
-            <a href="/kopek/mama" onclick="toggleMobileDrawer(false); navigate('/kopek/mama', event);" class="block py-1.5 hover:text-gallus-primary">Kuru Köpek Maması</a>
-            <a href="/kopek?sub=odul" onclick="toggleMobileDrawer(false); navigate('/kopek?sub=odul', event);" class="block py-1.5 hover:text-gallus-primary">Ödül & Kemikler</a>
-            <a href="/kopek?sub=bakim" onclick="toggleMobileDrawer(false); navigate('/kopek?sub=bakim', event);" class="block py-1.5 hover:text-gallus-primary">Bakım & Hijyen</a>
-          </div>
-        </div>
+        <a href="/kedi" onclick="toggleMobileDrawer(false); navigate('/kedi', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🐈 Kedi Mamaları ve Ürünleri</span>
+        </a>
 
-        <!-- Kedi Accordion -->
-        <div>
-          <div class="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-gray-100 cursor-pointer" onclick="document.getElementById('mobile-sub-kedi').classList.toggle('hidden')">
-            <span>🐈 Kedi Ürünleri</span>
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400"></i>
-          </div>
-          <div id="mobile-sub-kedi" class="hidden pl-6 pr-2 py-1 space-y-1 text-gray-500 font-medium">
-            <a href="/kedi" onclick="toggleMobileDrawer(false); navigate('/kedi', event);" class="block py-1.5 hover:text-gallus-primary font-bold">Tüm Kedi Ürünleri</a>
-            <a href="/kedi/mama" onclick="toggleMobileDrawer(false); navigate('/kedi/mama', event);" class="block py-1.5 hover:text-gallus-primary">Kısırlaştırılmış Kedi Maması</a>
-            <a href="/kedi/kum" onclick="toggleMobileDrawer(false); navigate('/kedi/kum', event);" class="block py-1.5 text-gallus-accent font-bold">Doğal Bentonit Kum</a>
-            <a href="/kedi?sub=odul" onclick="toggleMobileDrawer(false); navigate('/kedi?sub=odul', event);" class="block py-1.5 hover:text-gallus-primary">Ödül & Macun</a>
-          </div>
-        </div>
+        <a href="/kopek" onclick="toggleMobileDrawer(false); navigate('/kopek', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🐕 Köpek Mamaları ve Ürünleri</span>
+        </a>
 
-        <a href="/kus" onclick="toggleMobileDrawer(false); navigate('/kus', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100">🦜 Kuş Yemleri & Kafes</a>
-        <a href="/kumes-ciftlik" onclick="toggleMobileDrawer(false); navigate('/kumes-ciftlik', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100">🌾 Kümes & Çiftlik Yemleri</a>
-        <a href="/yumurta" onclick="toggleMobileDrawer(false); navigate('/yumurta', event);" class="block px-3 py-2.5 rounded-xl hover:bg-emerald-50 text-gallus-primary font-black">🥚 Taze Çiftlik Yumurtası</a>
-        <a href="/markalar" onclick="toggleMobileDrawer(false); navigate('/markalar', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100">Markalar</a>
-        <a href="/kampanyalar" onclick="toggleMobileDrawer(false); navigate('/kampanyalar', event);" class="block px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50">🔥 Kampanyalar & Fırsatlar</a>
-        <a href="/toptan-satis" onclick="toggleMobileDrawer(false); navigate('/toptan-satis', event);" class="block px-3 py-2.5 rounded-xl bg-gallus-primary-light text-gallus-primary font-black">🏢 Toptan Satış (B2B)</a>
+        <a href="/tavuk-civciv" onclick="toggleMobileDrawer(false); navigate('/tavuk-civciv', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🐓 Tavuk ve Civciv Yemleri</span>
+        </a>
+
+        <a href="/guvercin" onclick="toggleMobileDrawer(false); navigate('/guvercin', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🕊️ Güvercin Yemleri & Tahıllar</span>
+        </a>
+
+        <a href="/balik-akvaryum" onclick="toggleMobileDrawer(false); navigate('/balik-akvaryum', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🐠 Balık Yemleri ve Akvaryum</span>
+        </a>
+
+        <a href="/kumes-ekipman" onclick="toggleMobileDrawer(false); navigate('/kumes-ekipman', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🏡 Kümes ve Pet Ekipmanları</span>
+        </a>
+
+        <a href="/tarim-bahce" onclick="toggleMobileDrawer(false); navigate('/tarim-bahce', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>🌱 Tarım ve Bahçe Ürünleri</span>
+        </a>
+
+        <a href="/yumurta" onclick="toggleMobileDrawer(false); navigate('/yumurta', event);" class="block px-3 py-2.5 rounded-xl hover:bg-emerald-50 text-gallus-primary font-black flex items-center gap-2">
+          <span>🥚 Taze Çiftlik Yumurtası</span>
+        </a>
+
+        <a href="/diger" onclick="toggleMobileDrawer(false); navigate('/diger', event);" class="block px-3 py-2.5 rounded-xl hover:bg-gray-100 flex items-center gap-2">
+          <span>✨ Diğer Ürünler</span>
+        </a>
+
+        <a href="/kampanyalar" onclick="toggleMobileDrawer(false); navigate('/kampanyalar', event);" class="block px-3 py-2.5 rounded-xl text-rose-600 hover:bg-rose-50 flex items-center gap-2">
+          <span>🔥 Kampanyalar & Fırsatlar</span>
+        </a>
+
+        <a href="/toptan-satis" onclick="toggleMobileDrawer(false); navigate('/toptan-satis', event);" class="block px-3 py-2.5 rounded-xl bg-gallus-primary-light text-gallus-primary font-black flex items-center gap-2">
+          <span>🏢 Toptan Satış (B2B)</span>
+        </a>
       </div>
 
       <div class="pt-4 border-t border-gray-200 space-y-1 text-gray-500 font-medium">
@@ -739,6 +761,101 @@
       adminFilter: 'all'
     };
 
+    /* ==========================================================
+       FIREBASE FIRESTORE REAL-TIME SYNCHRONIZATION
+       ========================================================== */
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyC-aRDBrzUO77NQauX6uwAa5GINLbdOuCk",
+      authDomain: "stoktakip-1fe40.firebaseapp.com",
+      projectId: "stoktakip-1fe40",
+      storageBucket: "stoktakip-1fe40.firebasestorage.app",
+      messagingSenderId: "269437573857",
+      appId: "1:269437573857:web:bb86cf1c713b761643f5a0"
+    };
+
+    let firestoreUnsubscribe = null;
+
+    function initFirestoreLiveSync() {
+      try {
+        if (!window.firebase) {
+          console.log("[Firestore] Firebase Web SDK yüklenemedi, yerel API üzerinden senkronize ediliyor.");
+          return;
+        }
+        if (!firebase.apps.length) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        const fDb = firebase.firestore();
+        console.log("🔥 [Firestore Canlı] Gerçek zamanlı onSnapshot dinleyici başlatılıyor...");
+
+        firestoreUnsubscribe = fDb.collection("public_products").onSnapshot((snapshot) => {
+          let hasUpdates = false;
+
+          snapshot.docChanges().forEach((change) => {
+            const data = change.doc.data();
+            const docId = change.doc.id;
+            hasUpdates = true;
+
+            if (change.type === "removed") {
+              console.log(`[Firestore Canlı] Ürün silindi: ${docId}`);
+              appState.products = appState.products.filter(p => p.id !== docId && p.doc_id !== docId);
+            } else {
+              const priceVal = Number(data.sale_price !== undefined ? data.sale_price : data.price) || 0;
+              const stockVal = Number(data.stock_quantity !== undefined ? data.stock_quantity : data.stock) || 0;
+
+              const normalized = {
+                id: docId,
+                doc_id: docId,
+                productId: data.productId || docId,
+                slug: data.slug || docId,
+                name: data.name,
+                price: priceVal,
+                originalPrice: data.originalPrice || null,
+                stock: stockVal,
+                stock_quantity: stockVal,
+                unit: data.unit || 'adet',
+                category: data.category || 'diger',
+                categoryId: data.categoryId || data.category || 'diger',
+                categoryName: data.categoryName || 'Diğer Ürünler',
+                brand: data.brand || 'Gallus Pet',
+                packaging: data.packaging || data.unit || 'Standart',
+                imageUrl: data.imageUrl || '/images/mutlu-patiler-banner.jpg',
+                description: data.description || '',
+                isPopular: Boolean(data.isPopular),
+                isFeatured: Boolean(data.isFeatured || data.isPopular),
+                isBestSeller: Boolean(data.isBestSeller),
+                badge: data.badge || (stockVal <= 0 ? 'Tükendi' : '')
+              };
+
+              const existingIdx = appState.products.findIndex(p => p.id === docId || p.doc_id === docId || (p.productId && p.productId === normalized.productId));
+              if (existingIdx >= 0) {
+                const old = appState.products[existingIdx];
+                if (old.price !== normalized.price) {
+                  showToast(`Fiyat Güncellendi: "${normalized.name}" ${old.price} ₺ ➔ ${normalized.price} ₺`, 'info');
+                }
+                if (old.stock > 0 && normalized.stock <= 0) {
+                  showToast(`Stok Tükendi: "${normalized.name}" tükendi!`, 'warning');
+                }
+                appState.products[existingIdx] = normalized;
+              } else {
+                appState.products.unshift(normalized);
+                console.log(`[Firestore Canlı] Yeni ürün vitrine eklendi: ${normalized.name}`);
+              }
+            }
+          });
+
+          if (hasUpdates) {
+            saveState();
+            // Re-render currently viewed page to reflect live changes without page reload
+            handleRoute(appState.currentRoute || window.location.pathname, false);
+          }
+        }, (err) => {
+          console.warn("[Firestore] onSnapshot bağlantı uyarısı (REST fallback aktif):", err);
+        });
+      } catch (err) {
+        console.warn("[Firestore] Başlatma uyarısı:", err);
+      }
+    }
+
     /* Initialize Application */
     async function initApp() {
       // 1. Fetch live database or fallback to localStorage / embedded
@@ -786,6 +903,9 @@
 
       // Handle Initial Route
       handleRoute(window.location.pathname, false);
+
+      // Start Real-Time Firestore onSnapshot Sync
+      initFirestoreLiveSync();
 
       // Listen for browser back / forward
       window.addEventListener('popstate', (e) => {
@@ -873,22 +993,34 @@
       // Router Switch
       if (cleanPath === '/' || cleanPath === '') {
         renderHomePage(viewport);
-      } else if (cleanPath === '/kopek') {
-        renderCategoryPage(viewport, 'kopek', params.get('sub'));
-      } else if (cleanPath === '/kopek/mama') {
-        renderCategoryPage(viewport, 'kopek', 'kopek-kuru-mama');
       } else if (cleanPath === '/kedi') {
         renderCategoryPage(viewport, 'kedi', params.get('sub'));
       } else if (cleanPath === '/kedi/mama') {
         renderCategoryPage(viewport, 'kedi', 'kedi-kuru-mama');
       } else if (cleanPath === '/kedi/kum') {
         renderCategoryPage(viewport, 'kedi', 'kedi-kum');
-      } else if (cleanPath === '/kus') {
-        renderCategoryPage(viewport, 'kus', params.get('sub'));
-      } else if (cleanPath === '/kumes-ciftlik') {
-        renderCategoryPage(viewport, 'kumes-ciftlik', params.get('sub'));
+      } else if (cleanPath === '/kopek') {
+        renderCategoryPage(viewport, 'kopek', params.get('sub'));
+      } else if (cleanPath === '/kopek/mama') {
+        renderCategoryPage(viewport, 'kopek', 'kopek-kuru-mama');
+      } else if (cleanPath === '/tavuk-civciv') {
+        renderCategoryPage(viewport, 'tavuk-civciv', params.get('sub'));
+      } else if (cleanPath === '/guvercin') {
+        renderCategoryPage(viewport, 'guvercin', params.get('sub'));
+      } else if (cleanPath === '/balik-akvaryum') {
+        renderCategoryPage(viewport, 'balik-akvaryum', params.get('sub'));
+      } else if (cleanPath === '/kumes-ekipman') {
+        renderCategoryPage(viewport, 'kumes-ekipman', params.get('sub'));
+      } else if (cleanPath === '/tarim-bahce') {
+        renderCategoryPage(viewport, 'tarim-bahce', params.get('sub'));
+      } else if (cleanPath === '/diger') {
+        renderCategoryPage(viewport, 'diger', params.get('sub'));
       } else if (cleanPath === '/yumurta') {
         renderCategoryPage(viewport, 'yumurta', params.get('sub'));
+      } else if (cleanPath === '/kus') {
+        renderCategoryPage(viewport, 'guvercin', params.get('sub'));
+      } else if (cleanPath === '/kumes-ciftlik') {
+        renderCategoryPage(viewport, 'tavuk-civciv', params.get('sub'));
       } else if (cleanPath === '/markalar') {
         renderBrandsPage(viewport);
       } else if (cleanPath === '/kampanyalar') {
@@ -1057,12 +1189,15 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-            ${renderCategoryCard('kopek', 'Köpek Ürünleri', 'Kuru mama, ödül, bakım', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=400&q=80', 'dog')}
-            ${renderCategoryCard('kedi', 'Kedi Ürünleri', 'Kısır kedi maması & kum', 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=400&q=80', 'cat')}
-            ${renderCategoryCard('kus', 'Kuş Ürünleri', 'Yem, darı, gaga taşı', 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=400&q=80', 'feather')}
-            ${renderCategoryCard('kumes-ciftlik', 'Kümes & Çiftlik', 'Yumurta yemi & suluk', '/images/tavuklar.jpg', 'wheat')}
-            ${renderCategoryCard('yumurta', 'Taze Yumurta', 'Günlük gezen tavuk viyol', '/images/yumurta-koli-banner.jpg', 'egg')}
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            ${renderCategoryCard('kedi', 'Kedi Mamaları & Ürünleri', 'Kısır, yavru, bentonit kum', 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=400&q=80', 'cat')}
+            ${renderCategoryCard('kopek', 'Köpek Mamaları & Ürünleri', 'Kuru mama, konserve, bakım', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=400&q=80', 'dog')}
+            ${renderCategoryCard('tavuk-civciv', 'Tavuk ve Civciv Yemleri', 'Gezen tavuk ve civciv yemleri', '/images/tavuklar.jpg', 'wheat')}
+            ${renderCategoryCard('guvercin', 'Güvercin Yemleri', '1. kalite buğday ve tahıllar', 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=400&q=80', 'feather')}
+            ${renderCategoryCard('balik-akvaryum', 'Balık Yemleri & Akvaryum', 'Pul yem ve su düzenleyiciler', 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=400&q=80', 'fish')}
+            ${renderCategoryCard('kumes-ekipman', 'Kümes Ekipmanları', 'Taşıma kafesleri, suluk, yemlik', 'https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?auto=format&fit=crop&w=400&q=80', 'home')}
+            ${renderCategoryCard('tarim-bahce', 'Tarım ve Bahçe Ürünleri', 'Doğal gübre ve bahçe bakımı', 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=400&q=80', 'sprout')}
+            ${renderCategoryCard('diger', 'Diğer & Çiftlik Yumurtası', 'Günlük gezen tavuk yumurtaları', '/images/yumurta-koli-banner.jpg', 'egg')}
           </div>
         </section>
 
@@ -1267,9 +1402,9 @@
 
           <div class="p-2.5 sm:p-4 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
             <div>
-              <div class="flex items-center justify-between text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 gap-1">
-                <span class="text-gallus-accent font-extrabold truncate">${p.categoryName || 'Gallus'}</span>
-                <span class="shrink-0 text-gray-500">${p.unit || ''}</span>
+              <div class="flex items-center justify-between text-[9px] sm:text-[10px] font-bold uppercase tracking-wider mb-1 gap-1">
+                <span class="text-gallus-accent font-black truncate">${p.brand || 'Gallus Mama'}</span>
+                <span class="shrink-0 text-gray-600 font-bold bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 rounded text-[9px]">${p.packaging || p.unit || 'Standart'}</span>
               </div>
               <h3 
                 onclick="navigate('/urun/${p.slug || p.id}', event)" 
@@ -1313,18 +1448,29 @@
        ========================================================== */
     function renderCategoryPage(container, categoryKey, subCategoryKey) {
       const categoryTitles = {
-        'kopek': 'Köpek Ürünleri & Maması',
-        'kedi': 'Kedi Maması & Doğal Kedi Kumu',
-        'kus': 'Kuş Yemleri & Kafes Ekipmanları',
-        'kumes-ciftlik': 'Kümes & Çiftlik Yemleri, Otomatik Suluklar',
-        'yumurta': 'Taze Çiftlik Gezen Tavuk Yumurtası'
+        'kedi': 'Kedi Mamaları ve Ürünleri',
+        'kopek': 'Köpek Mamaları ve Ürünleri',
+        'tavuk-civciv': 'Tavuk ve Civciv Yemleri',
+        'guvercin': 'Güvercin Yemleri & Tahıllar',
+        'balik-akvaryum': 'Balık Yemleri ve Akvaryum',
+        'kumes-ekipman': 'Kümes ve Pet Ekipmanları',
+        'tarim-bahce': 'Tarım ve Bahçe Ürünleri',
+        'diger': 'Diğer Ürünler & Taze Çiftlik Yumurtası',
+        'yumurta': 'Taze Çiftlik Gezen Tavuk Yumurtası',
+        'kus': 'Kuş Yemleri & Ekipmanları',
+        'kumes-ciftlik': 'Kümes & Çiftlik Yemleri, Otomatik Suluklar'
       };
 
       const title = categoryTitles[categoryKey] || 'Ürün Kataloğu';
       document.title = `${title} | Gallus Mama`;
 
       // Filter products
-      let list = appState.products.filter(p => p.category === categoryKey);
+      let list = appState.products.filter(p => {
+        if (categoryKey === 'yumurta') return (p.category === 'diger' || p.category === 'yumurta') && p.name.toLowerCase().includes('yumurta');
+        if (categoryKey === 'kus') return (p.category === 'guvercin' || p.category === 'diger') && (p.name.toLowerCase().includes('kuş') || p.name.toLowerCase().includes('kus'));
+        if (categoryKey === 'kumes-ciftlik') return p.category === 'tavuk-civciv' || p.category === 'kumes-ekipman';
+        return p.category === categoryKey || p.categoryId === categoryKey;
+      });
       if (subCategoryKey) {
         list = list.filter(p => p.subCategory === subCategoryKey || (p.subCategory && p.subCategory.includes(subCategoryKey)));
       }
@@ -2050,7 +2196,6 @@
       appState.cart.forEach(item => {
         const p = appState.products.find(prod => prod.id === item.productId);
         if (p) {
-          p.stock = Math.max(0, p.stock - item.qty); // Real-time deduction
           subtotal += p.price * item.qty;
           orderItems.push({
             id: p.id,
@@ -2077,21 +2222,52 @@
         status: "Hazırlanıyor"
       };
 
-      appState.orders.unshift(newOrder);
-      appState.cart = [];
-      saveState();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Siparişiniz Doğrulanıyor...</span>';
+      }
 
-      // Try sending to server
+      // Send to server (server performs atomic Firestore transaction & stock check)
       try {
-        await fetch('/api/orders', {
+        const resp = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newOrder)
         });
-      } catch (err) {}
+        const resData = await resp.json().catch(() => ({}));
 
-      // Render Order Confirmation Screen
-      renderOrderSuccessView(newOrder);
+        if (!resp.ok || !resData.success) {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>Siparişi Onayla & Bitir</span>';
+            if (window.lucide) lucide.createIcons();
+          }
+          showToast(`Sipariş tamamlanamadı: ${resData.error || 'Yetersiz stok veya sunucu hatası'}`, "error");
+          return;
+        }
+
+        // Atomic deduction was successful on server/Firestore
+        orderItems.forEach(item => {
+          const p = appState.products.find(prod => prod.id === item.id);
+          if (p) p.stock = Math.max(0, p.stock - item.qty);
+        });
+
+        appState.orders.unshift(newOrder);
+        appState.cart = [];
+        saveState();
+
+        // Render Order Confirmation Screen
+        renderOrderSuccessView(newOrder);
+      } catch (err) {
+        console.error("Order submit network error:", err);
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>Siparişi Onayla & Bitir</span>';
+          if (window.lucide) lucide.createIcons();
+        }
+        showToast("Sunucu ile iletişim kurulamadı. Lütfen internet bağlantınızı kontrol ediniz.", "error");
+      }
     }
 
     function renderOrderSuccessView(order) {
