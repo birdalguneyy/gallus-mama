@@ -1071,14 +1071,21 @@
     function renderHomePage(container) {
       document.title = "Gallus Mama & Yumurta | Doğal Çiftlik Yumurtası ve Premium Pet Market";
 
-      // Best seller products (up to 4)
-      const bestSellers = appState.products.filter(p => p.isBestSeller || p.isFeatured).slice(0, 4);
-      // Dog food highlights
-      const dogFoods = appState.products.filter(p => p.category === 'kopek').slice(0, 4);
-      // Cat products highlights
-      const catProducts = appState.products.filter(p => p.category === 'kedi').slice(0, 4);
-      // Farm & poultry
-      const farmProducts = appState.products.filter(p => p.category === 'kumes-ciftlik' || p.category === 'yumurta').slice(0, 4);
+      // 1. Best seller products (up to 4)
+      let bestSellers = appState.products.filter(p => p.isBestSeller || p.isFeatured || p.isPopular).slice(0, 4);
+      if (bestSellers.length === 0) bestSellers = appState.products.slice(0, 4);
+
+      // 2. Dog food highlights (up to 4)
+      let dogFoods = appState.products.filter(p => p.category === 'kopek').slice(0, 4);
+      if (dogFoods.length === 0) dogFoods = appState.products.filter(p => (p.name || '').toLowerCase().includes('köpek') || (p.name || '').toLowerCase().includes('kopek')).slice(0, 4);
+
+      // 3. Cat products highlights (up to 4)
+      let catProducts = appState.products.filter(p => p.category === 'kedi').slice(0, 4);
+      if (catProducts.length === 0) catProducts = appState.products.filter(p => (p.name || '').toLowerCase().includes('kedi')).slice(0, 4);
+
+      // 4. Farm, poultry & pigeon feeds (up to 4)
+      let farmProducts = appState.products.filter(p => p.category === 'tavuk-civciv' || p.category === 'guvercin' || p.category === 'kumes-ekipman' || p.category === 'yumurta' || p.category === 'kumes-ciftlik').slice(0, 4);
+      if (farmProducts.length === 0) farmProducts = appState.products.filter(p => (p.name || '').toLowerCase().includes('yem') || (p.name || '').toLowerCase().includes('tavuk') || (p.name || '').toLowerCase().includes('civciv')).slice(0, 4);
 
       container.innerHTML = `
         <!-- 1. Hero Banner (Fully Responsive for All Viewports) -->
@@ -1472,7 +1479,30 @@
         return p.category === categoryKey || p.categoryId === categoryKey;
       });
       if (subCategoryKey) {
-        list = list.filter(p => p.subCategory === subCategoryKey || (p.subCategory && p.subCategory.includes(subCategoryKey)));
+        const subFiltered = list.filter(p => {
+          const name = (p.name || '').toLowerCase();
+          const desc = (p.description || '').toLowerCase();
+          const sub = (p.subCategory || '').toLowerCase();
+          if (subCategoryKey === 'kedi-kuru-mama' || subCategoryKey === 'mama' || subCategoryKey.includes('mama')) {
+            return name.includes('mama') || name.includes('kitten') || name.includes('adult') || name.includes('sterilised') || name.includes('reflex') || name.includes('proline') || sub.includes('mama');
+          }
+          if (subCategoryKey === 'kedi-kum' || subCategoryKey === 'kum' || subCategoryKey.includes('kum')) {
+            return name.includes('kum') || name.includes('bentonit') || name.includes('litter') || sub.includes('kum');
+          }
+          if (subCategoryKey === 'kopek-kuru-mama') {
+            return name.includes('mama') || name.includes('puppy') || name.includes('adult') || name.includes('çoban') || name.includes('king') || name.includes('pancho') || sub.includes('mama');
+          }
+          if (subCategoryKey === 'odul') {
+            return name.includes('ödül') || name.includes('kemik') || name.includes('bisküvi') || name.includes('stick') || name.includes('macun') || desc.includes('ödül');
+          }
+          if (subCategoryKey === 'bakim') {
+            return name.includes('şampuan') || name.includes('ped') || name.includes('tara') || name.includes('bakım') || desc.includes('bakım');
+          }
+          return p.subCategory === subCategoryKey || (p.subCategory && p.subCategory.includes(subCategoryKey));
+        });
+        if (subFiltered.length > 0) {
+          list = subFiltered;
+        }
       }
 
       // In stock only filter
