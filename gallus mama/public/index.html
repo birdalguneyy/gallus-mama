@@ -143,6 +143,27 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+
+    /* WordPress Style Admin Toolbar & Live Edit Mode */
+    body.admin-bar-active {
+      padding-top: 42px;
+    }
+    @media (max-width: 640px) {
+      body.admin-bar-active {
+        padding-top: 46px;
+      }
+    }
+    .cms-editable-active {
+      position: relative;
+      outline: 2px dashed #f59e0b !important;
+      outline-offset: 3px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cms-editable-active:hover {
+      background-color: rgba(245, 158, 11, 0.12) !important;
+    }
   </style>
 
   <!-- Schema.org Organization Structured Data -->
@@ -174,6 +195,48 @@
 <body class="bg-[#FAF8F5] text-gallus-dark font-sans antialiased min-h-screen flex flex-col selection:bg-gallus-accent selection:text-white pb-20 md:pb-0">
 
   <!-- ============================================================ -->
+  <!-- 0. WORDPRESS ADMIN TOP TOOLBAR -->
+  <!-- ============================================================ -->
+  <div id="gallus-admin-toolbar" class="hidden fixed top-0 left-0 right-0 h-10 sm:h-11 bg-[#1d2327] text-white z-[9999] shadow-md border-b border-gray-700/60 px-3 sm:px-6 flex items-center justify-between text-xs select-none">
+    <!-- Left: CMS Logo & Mode Controls -->
+    <div class="flex items-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar py-1">
+      <div class="flex items-center gap-1.5 shrink-0 font-black text-amber-400">
+        <span>⚡ Gallus CMS</span>
+        <span class="text-[9px] bg-emerald-600 px-1.5 py-0.5 rounded text-white font-extrabold uppercase">Yönetici</span>
+      </div>
+      <div class="h-4 w-px bg-gray-700 shrink-0"></div>
+      <!-- Visual Edit Toggle Button -->
+      <button id="toolbar-visual-toggle-btn" onclick="toggleVisualEditMode()" class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition bg-emerald-600 text-white">
+        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+        <span id="toolbar-visual-toggle-text">🎨 Canlı Düzenleme</span>
+      </button>
+      <!-- Quick Nav Links -->
+      <a href="/admin" onclick="navigate('/admin', event)" class="shrink-0 text-gray-300 hover:text-white flex items-center gap-1 text-[11px] px-2 py-1 rounded hover:bg-white/10 transition">
+        <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-gallus-accent"></i>
+        <span>Yönetim Paneli</span>
+      </a>
+      <a href="/" onclick="navigate('/', event)" class="shrink-0 text-gray-300 hover:text-white flex items-center gap-1 text-[11px] px-2 py-1 rounded hover:bg-white/10 transition">
+        <i data-lucide="store" class="w-3.5 h-3.5 text-blue-400"></i>
+        <span>Mağaza Vitrini</span>
+      </a>
+    </div>
+    <!-- Right: Unsaved Badge & Save Button & Logout -->
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <span id="toolbar-unsaved-badge" class="hidden text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+        0 Değişiklik
+      </span>
+      <button id="toolbar-save-btn" onclick="saveAllCmsChangesToServer()" class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-extrabold text-[11px] shadow transition">
+        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Kaydet & Yayınla</span>
+        <span class="sm:hidden">Kaydet</span>
+      </button>
+      <button onclick="adminLogout()" class="p-1 rounded text-gray-400 hover:text-rose-400 transition" title="Yönetici Çıkışı Yap">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
   <!-- 1. TOP ANNOUNCEMENT BAR -->
   <!-- ============================================================ -->
   <aside aria-label="Duyuru ve Teslimat Bilgisi" class="bg-gallus-primary text-white text-xs font-medium py-2 px-4 border-b border-white/10 relative overflow-hidden z-40">
@@ -185,7 +248,7 @@
           <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Duyuru
         </span>
         <div class="overflow-hidden">
-          <p class="animate-marquee font-normal text-gallus-primary-light/95">
+          <p id="header-announcement-ticker" class="animate-marquee font-normal text-gallus-primary-light/95">
             🚚 <strong class="font-semibold text-white">750 ₺ Üzeri Ücretsiz Kargo</strong> &nbsp; | &nbsp;
             🥚 <strong class="font-semibold text-white">Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası</strong> &nbsp; | &nbsp;
             🐾 <strong class="font-semibold text-white">%100 Orijinal Mama & Yem Garantisi</strong> &nbsp; | &nbsp;
@@ -198,10 +261,10 @@
 
       <!-- Quick Utility Links -->
       <div class="hidden md:flex items-center gap-5 shrink-0 text-xs text-white/90 font-medium pl-4 border-l border-white/15">
-        <a href="tel:05516553637" class="hover:text-gallus-accent flex items-center gap-1.5 transition">
-          <i data-lucide="phone-call" class="w-3.5 h-3.5 text-gallus-accent"></i> 0551 655 3637
+        <a id="header-phone-link" href="tel:05516553637" class="hover:text-gallus-accent flex items-center gap-1.5 transition">
+          <i data-lucide="phone-call" class="w-3.5 h-3.5 text-gallus-accent"></i> <span id="header-phone-text">0551 655 3637</span>
         </a>
-        <a href="https://wa.me/905516553637?text=Merhaba,%20Gallus%20Mama%20ve%20Yumurta%20hakkında%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 flex items-center gap-1 transition">
+        <a id="header-whatsapp-link" href="https://wa.me/905516553637?text=Merhaba,%20Gallus%20Mama%20ve%20Yumurta%20hakkında%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 flex items-center gap-1 transition">
           <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i> WhatsApp Danışma
         </a>
         <a href="/yardim" onclick="navigate('/yardim', event)" class="hover:text-white transition">Yardım & SSS</a>
@@ -647,11 +710,11 @@
             <img src="/images/logo-ciftlik.jpg" alt="Gallus Çiftlik" class="w-10 h-10 rounded-full object-cover border border-white/20">
             <div>
               <span class="font-black text-lg tracking-tight block leading-none">GALLUS MAMA</span>
-              <span class="text-[10px] text-gallus-accent font-bold tracking-wider">DOĞAL ÇİFTLİK & PET MARKET</span>
+              <span class="text-[10px] text-gallus-accent font-bold tracking-wider">${cmsText('slogan', 'DOĞAL ÇİFTLİK & PET MARKET')}</span>
             </div>
           </div>
           <p class="text-xs text-gray-300 leading-relaxed font-normal max-w-sm">
-            Silivri Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; katkısız günlük çiftlik yumurtası, veteriner formüllü kedi/köpek mamaları ve çiftlik yemlerini doğrudan üreticiden ulaştırıyoruz.
+            ${cmsText('footerDesc', "Silivri Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; katkısız günlük çiftlik yumurtası, veteriner formüllü kedi/köpek mamaları ve çiftlik yemlerini doğrudan üreticiden ulaştırıyoruz.", true)}
           </p>
           <div class="flex items-center gap-4 text-xs text-gray-300 pt-1">
             <a href="https://www.instagram.com/gallus_mama/" target="_blank" rel="noopener noreferrer" class="hover:text-gallus-accent transition flex items-center gap-1.5">
@@ -698,8 +761,8 @@
             <li><a href="/teslimat-kosullari" onclick="navigate('/teslimat-kosullari', event)" class="hover:text-white transition">Teslimat Koşulları</a></li>
             <li><a href="/cerez-politikasi" onclick="navigate('/cerez-politikasi', event)" class="hover:text-white transition">Çerez Politikası</a></li>
             <li class="pt-2">
-              <span class="block text-gray-400 text-[11px]">Değirmenköy Mah. PTT Karşısı, Silivri</span>
-              <a href="tel:05516553637" class="text-white font-bold block mt-0.5">📞 0551 655 3637</a>
+              <span class="block text-gray-400 text-[11px]">${cmsText('address', 'Değirmenköy Mah. PTT Karşısı, Silivri')}</span>
+              <a href="tel:${appState.siteInfo.phone || '05516553637'}" class="text-white font-bold block mt-0.5">📞 ${cmsText('phone', '0551 655 3637')}</a>
             </li>
           </ul>
         </div>
@@ -722,7 +785,187 @@
   </footer>
 
   <!-- ============================================================ -->
-  <!-- 8. TOAST NOTIFICATION CONTAINER -->
+  <!-- 8. MODALS (PRODUCT EDIT & CMS TEXT EDIT) -->
+  <!-- ============================================================ -->
+  <!-- A. PRODUCT EDIT & PHOTO UPLOAD MODAL -->
+  <div id="product-edit-modal" class="hidden fixed inset-0 z-[99999] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-gray-200 overflow-hidden my-6 max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-gallus-primary to-emerald-900 text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300">
+            <i data-lucide="image-plus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-sm sm:text-base leading-tight">Ürünü ve Fotoğrafı Düzenle</h3>
+            <p id="pem-prod-sku" class="text-[10px] text-emerald-200">SKU / ID: -</p>
+          </div>
+        </div>
+        <button onclick="closeProductEditModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body Scrollable -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-5 text-xs">
+        <input type="hidden" id="pem-prod-id">
+
+        <!-- Photo Section -->
+        <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3">
+          <label class="block font-black text-gallus-dark text-xs uppercase tracking-wider">
+            📷 Ürün Görseli & Fotoğraf Yükleme
+          </label>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+            <!-- Preview -->
+            <div class="sm:col-span-4 aspect-square rounded-2xl bg-white border border-gray-200 overflow-hidden relative shadow-inner flex items-center justify-center">
+              <img id="pem-preview-img" src="/images/mutlu-patiler-banner.jpg" class="w-full h-full object-cover" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+              <div id="pem-upload-spinner" class="hidden absolute inset-0 bg-black/60 text-white flex flex-col items-center justify-center gap-1">
+                <i data-lucide="loader" class="w-6 h-6 animate-spin text-amber-300"></i>
+                <span class="text-[10px] font-bold">Yükleniyor...</span>
+              </div>
+            </div>
+
+            <!-- Upload Controls -->
+            <div class="sm:col-span-8 space-y-2.5">
+              <div class="border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-white hover:bg-emerald-50/50 rounded-2xl p-3.5 text-center cursor-pointer transition" onclick="document.getElementById('pem-file-input').click()">
+                <input type="file" id="pem-file-input" accept="image/*" class="hidden" onchange="handleProductModalFileUpload(event)">
+                <i data-lucide="upload-cloud" class="w-6 h-6 mx-auto text-gallus-primary mb-1"></i>
+                <span class="block font-bold text-gallus-primary text-xs">Bilgisayarınızdan Yeni Fotoğraf Seçin</span>
+                <span class="text-[10px] text-gray-400">Görsel doğrudan sunucuya yüklenir ve kaydedilir</span>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold text-gray-600 mb-1">Veya Görsel URL Linki:</label>
+                <input type="text" id="pem-img-url" placeholder="https://... veya /images/uploads/..." class="w-full text-xs px-3 py-2 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none" oninput="document.getElementById('pem-preview-img').src=this.value">
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                <span class="text-[10px] text-gray-500 font-bold">Hazır Görseller:</span>
+                <button type="button" onclick="setPemPreset('/images/tavuklar.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Tavuk Çiftliği</button>
+                <button type="button" onclick="setPemPreset('/images/mutlu-patiler-banner.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Kedi & Köpek</button>
+                <button type="button" onclick="setPemPreset('/images/logo-mama.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Gallus Mama</button>
+                <button type="button" onclick="setPemPreset('/images/logo-ciftlik.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Gallus Çiftlik</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Info Fields -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-gray-700 mb-1">Ürün Adı <span class="text-rose-500">*</span></label>
+            <input type="text" id="pem-name" required class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-bold text-gallus-dark">
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Kategori <span class="text-rose-500">*</span></label>
+            <select id="pem-category" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-medium">
+              <option value="kedi">Kedi Mamaları ve Ürünleri</option>
+              <option value="kopek">Köpek Mamaları ve Ürünleri</option>
+              <option value="tavuk-civciv">Tavuk ve Civciv Yemleri</option>
+              <option value="guvercin">Güvercin Yemleri</option>
+              <option value="balik-akvaryum">Balık Yemleri ve Akvaryum</option>
+              <option value="kumes-ekipman">Kümes Ekipmanları</option>
+              <option value="tarim-bahce">Tarım ve Bahçe Ürünleri</option>
+              <option value="yumurta">Taze Çiftlik Yumurtası</option>
+              <option value="diger">Diğer Ürünler</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Marka</label>
+            <input type="text" id="pem-brand" placeholder="Örn: Gallus Mama, Royal Canin..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Satış Fiyatı (TL) <span class="text-rose-500">*</span></label>
+            <input type="number" id="pem-price" step="0.5" min="0" required class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-black text-gallus-primary">
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">İndirim Öncesi Fiyat (TL)</label>
+            <input type="number" id="pem-orig-price" step="0.5" min="0" placeholder="İsteğe bağlı..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Stok Miktarı <span class="text-rose-500">*</span></label>
+            <input type="number" id="pem-stock" min="0" required class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-black">
+          </div>
+
+          <div>
+            <label class="block font-bold text-gray-700 mb-1">Birim & Ambalaj</label>
+            <input type="text" id="pem-packaging" placeholder="Örn: 15 Kg Çuval, 30'lu Viyol" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-gray-700 mb-1">Öne Çıkarma & Rozet</label>
+            <div class="flex items-center gap-4 flex-wrap p-3 rounded-xl bg-gray-50 border border-gray-200">
+              <label class="flex items-center gap-1.5 font-bold cursor-pointer">
+                <input type="checkbox" id="pem-is-featured" class="w-4 h-4 rounded text-gallus-primary">
+                <span>Vitrin / Öne Çıkan</span>
+              </label>
+              <label class="flex items-center gap-1.5 font-bold cursor-pointer">
+                <input type="checkbox" id="pem-is-popular" class="w-4 h-4 rounded text-gallus-primary">
+                <span>Çok Satan / Popüler</span>
+              </label>
+              <div class="flex items-center gap-1.5 flex-1 min-w-[140px]">
+                <span class="text-[11px] text-gray-500">Rozet:</span>
+                <input type="text" id="pem-badge" placeholder="Yeni, Fırsat vb." class="flex-1 text-xs px-2.5 py-1 rounded-lg border border-gray-300 outline-none">
+              </div>
+            </div>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-gray-700 mb-1">Ürün Açıklaması</label>
+            <textarea id="pem-description" rows="3" placeholder="Ürün içeriği, kullanım alanları ve özellikleri..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+        <button type="button" onclick="closeProductEditModal()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-200 transition">
+          Vazgeç
+        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button type="button" onclick="saveProductModal(false)" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-bold text-gallus-dark bg-gray-200 hover:bg-gray-300 transition">
+            Vitrinde Güncelle
+          </button>
+          <button type="button" onclick="saveProductModal(true)" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition flex items-center justify-center gap-1.5">
+            <i data-lucide="cloud-check" class="w-4 h-4"></i>
+            <span>Sunucuya Kaydet & Yayınla</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B. IN-PAGE CMS TEXT EDIT MODAL -->
+  <div id="cms-text-modal" class="hidden fixed inset-0 z-[99999] overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-gray-200 overflow-hidden space-y-4 p-6">
+      <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="p-2 rounded-xl bg-amber-100 text-amber-700 font-bold"><i data-lucide="edit-3" class="w-4 h-4"></i></span>
+          <h3 id="cms-text-modal-title" class="font-black text-base text-gallus-dark">Metni Düzenle</h3>
+        </div>
+        <button onclick="closeCmsEditModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div id="cms-text-modal-input-container">
+        <!-- Dynamic input injected here -->
+      </div>
+      <div class="pt-2 flex items-center justify-end gap-2 border-t border-gray-100">
+        <button onclick="closeCmsEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 transition">İptal</button>
+        <button onclick="applyCmsTextModal()" class="px-5 py-2 rounded-xl text-xs font-black text-white bg-gallus-primary hover:bg-gallus-primary-dark shadow transition">Vitrinde Güncelle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 9. TOAST NOTIFICATION CONTAINER -->
   <!-- ============================================================ -->
   <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none max-w-sm w-full"></div>
 
@@ -745,6 +988,11 @@
       products: [],
       categories: [],
       brands: [],
+      siteInfo: {},
+      isAdmin: false,
+      adminToken: null,
+      visualEditMode: false,
+      unsavedChanges: 0,
       cart: [], // [{ productId, qty }]
       favorites: [], // [productId]
       orders: [],
@@ -760,6 +1008,464 @@
       adminTab: 'inventory',
       adminFilter: 'all'
     };
+
+    /* ==========================================================
+       WORDPRESS LIVE CMS & PRODUCT PHOTO UPLOAD LOGIC
+       ========================================================== */
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return str || '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function getAdminToken() {
+      return appState.adminToken || localStorage.getItem('gallus_admin_token') || '19071907';
+    }
+
+    // Dynamic CMS Text Element Wrapper (WordPress In-Page Click-to-Edit)
+    function cmsText(key, defaultVal, isMultiline = false) {
+      const currentVal = (appState.siteInfo && appState.siteInfo[key] !== undefined && appState.siteInfo[key] !== null) 
+        ? appState.siteInfo[key] 
+        : defaultVal;
+
+      if (appState.isAdmin && appState.visualEditMode) {
+        return `<span class="cms-editable group/cms relative inline-block cursor-pointer border border-dashed border-amber-500 bg-amber-50/40 hover:bg-amber-100/60 rounded px-1.5 py-0.5 transition" onclick="openCmsEditModal('${key}', ${isMultiline ? 'true' : 'false'}, event)" title="Tıkla ve Düzenle: ${key}">${currentVal} <span class="opacity-0 group-hover/cms:opacity-100 inline-flex items-center gap-1 text-[9px] bg-amber-500 text-white font-extrabold px-1.5 py-0.5 rounded ml-1 shadow-sm transition pointer-events-none">✏️ Düzenle</span></span>`;
+      }
+      return currentVal;
+    }
+
+    let currentCmsEditingKey = null;
+
+    function openCmsEditModal(key, isMultiline = false, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      currentCmsEditingKey = key;
+      const currentVal = (appState.siteInfo && appState.siteInfo[key] !== undefined) ? appState.siteInfo[key] : '';
+      
+      const modal = document.getElementById('cms-text-modal');
+      const title = document.getElementById('cms-text-modal-title');
+      const container = document.getElementById('cms-text-modal-input-container');
+
+      const labels = {
+        'title': 'Site Başlığı',
+        'slogan': 'Site Sloganı',
+        'announcementText': 'Üst Kayan Duyuru Metni',
+        'locationBadge': 'Hero Üst Rozet Metni',
+        'heroTitle': 'Ana Sayfa Hero Başlığı',
+        'heroSubtitle': 'Ana Sayfa Hero Alt Açıklaması',
+        'phone': 'Telefon Numarası',
+        'email': 'E-posta Adresi',
+        'address': 'Mağaza Adresi',
+        'workingHours': 'Çalışma Saatleri',
+        'whatsappUrl': 'WhatsApp Danışma Linki',
+        'deliveryRegions': 'Teslimat Bölgeleri Açıklaması',
+        'aboutTitle': 'Hakkımızda Sayfa Başlığı',
+        'aboutText': 'Hakkımızda Detaylı Açıklama Metni',
+        'footerDesc': 'Alt Bilgi (Footer) Açıklaması',
+        'trust1Title': '1. Güven Rozeti Başlığı',
+        'trust1Desc': '1. Güven Rozeti Açıklaması',
+        'trust2Title': '2. Güven Rozeti Başlığı',
+        'trust2Desc': '2. Güven Rozeti Açıklaması',
+        'trust3Title': '3. Güven Rozeti Başlığı',
+        'trust3Desc': '3. Güven Rozeti Açıklaması',
+        'trust4Title': '4. Güven Rozeti Başlığı',
+        'trust4Desc': '4. Güven Rozeti Açıklaması'
+      };
+
+      if (title) title.innerText = `Metni Düzenle: ${labels[key] || key}`;
+
+      if (container) {
+        if (isMultiline) {
+          container.innerHTML = `
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">${labels[key] || key}</label>
+            <textarea id="cms-modal-val" rows="5" class="w-full text-xs p-3.5 rounded-2xl border border-gray-300 focus:border-gallus-primary outline-none font-medium leading-relaxed">${escapeHtml(currentVal)}</textarea>
+          `;
+        } else {
+          container.innerHTML = `
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">${labels[key] || key}</label>
+            <input type="text" id="cms-modal-val" value="${escapeHtml(currentVal)}" class="w-full text-xs p-3 rounded-2xl border border-gray-300 focus:border-gallus-primary outline-none font-bold">
+          `;
+        }
+      }
+
+      if (modal) modal.classList.remove('hidden');
+      refreshLucideIcons();
+    }
+
+    function closeCmsEditModal() {
+      const modal = document.getElementById('cms-text-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function applyCmsTextModal() {
+      if (!currentCmsEditingKey) return;
+      const input = document.getElementById('cms-modal-val');
+      if (!input) return;
+
+      const newVal = input.value.trim();
+      if (!appState.siteInfo) appState.siteInfo = {};
+      appState.siteInfo[currentCmsEditingKey] = newVal;
+      
+      appState.unsavedChanges++;
+      updateAdminToolbar();
+      closeCmsEditModal();
+      
+      // Live re-render without reload
+      handleRoute(appState.currentRoute || window.location.pathname, false);
+      showToast("Metin güncellendi. Kalıcı olması için üst çubuktan 'Kaydet & Yayınla' yapın.", "info");
+    }
+
+    // Product Modal & Photo Upload
+    function openProductEditModal(productId, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const p = appState.products.find(prod => prod.id === productId || prod.slug === productId);
+      if (!p) {
+        showToast("Ürün bulunamadı!", "error");
+        return;
+      }
+
+      document.getElementById('pem-prod-id').value = p.id;
+      document.getElementById('pem-prod-sku').innerText = `ID: ${p.id} | SKU: ${p.sku || p.id}`;
+      document.getElementById('pem-name').value = p.name || '';
+      document.getElementById('pem-category').value = p.category || 'diger';
+      document.getElementById('pem-brand').value = p.brand || 'Gallus Mama';
+      document.getElementById('pem-price').value = p.price || 0;
+      document.getElementById('pem-orig-price').value = p.originalPrice || '';
+      document.getElementById('pem-stock').value = p.stock || 0;
+      document.getElementById('pem-packaging').value = p.packaging || p.unit || '';
+      document.getElementById('pem-badge').value = p.badge || '';
+      document.getElementById('pem-img-url').value = p.imageUrl || '';
+      document.getElementById('pem-preview-img').src = p.imageUrl || '/images/mutlu-patiler-banner.jpg';
+      document.getElementById('pem-description').value = p.description || '';
+      document.getElementById('pem-is-featured').checked = Boolean(p.isFeatured);
+      document.getElementById('pem-is-popular').checked = Boolean(p.isPopular);
+
+      const modal = document.getElementById('product-edit-modal');
+      if (modal) modal.classList.remove('hidden');
+      refreshLucideIcons();
+    }
+
+    function closeProductEditModal() {
+      const modal = document.getElementById('product-edit-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function handleProductModalFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const spinner = document.getElementById('pem-upload-spinner');
+      if (spinner) spinner.classList.remove('hidden');
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Data = e.target.result;
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${getAdminToken()}`
+            },
+            body: JSON.stringify({ image: base64Data })
+          });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            document.getElementById('pem-img-url').value = data.url;
+            document.getElementById('pem-preview-img').src = data.url;
+            showToast("✅ Fotoğraf sunucuya başarıyla yüklendi!", "success");
+          } else {
+            showToast("Fotoğraf yüklenemedi: " + (data.error || "Sunucu hatası"), "error");
+          }
+        } catch (err) {
+          showToast("Fotoğraf yükleme hatası: " + err.message, "error");
+        } finally {
+          if (spinner) spinner.classList.add('hidden');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function setPemPreset(url) {
+      document.getElementById('pem-img-url').value = url;
+      document.getElementById('pem-preview-img').src = url;
+    }
+
+    async function saveProductModal(saveToServerImmediately = false) {
+      const id = document.getElementById('pem-prod-id').value;
+      const p = appState.products.find(prod => prod.id === id);
+      if (!p) return;
+
+      const name = document.getElementById('pem-name').value.trim();
+      const category = document.getElementById('pem-category').value;
+      const brand = document.getElementById('pem-brand').value.trim();
+      const price = parseFloat(document.getElementById('pem-price').value) || 0;
+      const origPriceVal = document.getElementById('pem-orig-price').value;
+      const origPrice = origPriceVal ? parseFloat(origPriceVal) : null;
+      const stock = parseInt(document.getElementById('pem-stock').value, 10) || 0;
+      const packaging = document.getElementById('pem-packaging').value.trim();
+      const badge = document.getElementById('pem-badge').value.trim();
+      const imgUrl = document.getElementById('pem-img-url').value.trim();
+      const desc = document.getElementById('pem-description').value.trim();
+      const isFeatured = document.getElementById('pem-is-featured').checked;
+      const isPopular = document.getElementById('pem-is-popular').checked;
+
+      const catNames = {
+        'kedi': 'Kedi Mamaları ve Ürünleri',
+        'kopek': 'Köpek Mamaları ve Ürünleri',
+        'tavuk-civciv': 'Tavuk ve Civciv Yemleri',
+        'guvercin': 'Güvercin Yemleri',
+        'balik-akvaryum': 'Balık Yemleri ve Akvaryum',
+        'kumes-ekipman': 'Kümes Ekipmanları',
+        'tarim-bahce': 'Tarım ve Bahçe Ürünleri',
+        'yumurta': 'Taze Çiftlik Yumurtası',
+        'diger': 'Diğer Ürünler'
+      };
+
+      p.name = name;
+      p.category = category;
+      p.categoryId = category;
+      p.categoryName = catNames[category] || 'Diğer Ürünler';
+      p.brand = brand || 'Gallus Mama';
+      p.price = price;
+      p.sale_price = price;
+      p.originalPrice = origPrice;
+      p.stock = stock;
+      p.stock_quantity = stock;
+      p.packaging = packaging || 'Standart';
+      p.unit = packaging || p.unit || 'adet';
+      p.badge = badge || (stock <= 0 ? 'Tükendi' : '');
+      p.imageUrl = imgUrl || p.imageUrl || '/images/mutlu-patiler-banner.jpg';
+      p.gallery = [p.imageUrl];
+      p.description = desc;
+      p.isFeatured = isFeatured;
+      p.isPopular = isPopular;
+
+      appState.unsavedChanges++;
+      updateAdminToolbar();
+      closeProductEditModal();
+
+      // Live update UI
+      handleRoute(appState.currentRoute || window.location.pathname, false);
+
+      if (saveToServerImmediately) {
+        await saveAllCmsChangesToServer();
+      } else {
+        showToast(`"${name}" güncellendi. Kalıcı olması için üst çubuktan 'Kaydet & Yayınla' yapabilirsiniz.`, 'info');
+      }
+    }
+
+    // Batch Save All to Server and Firestore (Permanent Persistence)
+    async function saveAllCmsChangesToServer() {
+      const token = getAdminToken();
+      if (!token) {
+        showToast("Lütfen önce yönetici girişi yapın.", "warning");
+        navigate('/admin');
+        return;
+      }
+
+      showToast("Tüm değişiklikler sunucuya kaydediliyor...", "info");
+
+      try {
+        const payload = {
+          siteInfo: appState.siteInfo || {},
+          products: appState.products || []
+        };
+
+        const res = await fetch('/api/admin/save-all', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          appState.unsavedChanges = 0;
+          updateAdminToolbar();
+          localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(appState.products));
+          localStorage.setItem('gallus_site_info', JSON.stringify(appState.siteInfo));
+          showToast("✅ Tüm değişiklikler ve fotoğraflar sunucuya kalıcı olarak kaydedildi! Sunucu yeniden başlasa bile sıfırlanmaz.", "success");
+        } else {
+          showToast("Kayıt hatası: " + (data.error || "Sunucu yanıt vermedi"), "error");
+        }
+      } catch (err) {
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(appState.products));
+        localStorage.setItem('gallus_site_info', JSON.stringify(appState.siteInfo));
+        appState.unsavedChanges = 0;
+        updateAdminToolbar();
+        showToast("Değişiklikler tarayıcıya kaydedildi (Sunucu çevrimdışı): " + err.message, "warning");
+      }
+    }
+
+    // WordPress Top Toolbar Controller
+    function updateAdminToolbar() {
+      const bar = document.getElementById('gallus-admin-toolbar');
+      if (!bar) return;
+
+      if (appState.isAdmin) {
+        bar.classList.remove('hidden');
+        document.body.classList.add('admin-bar-active');
+
+        const toggleBtn = document.getElementById('toolbar-visual-toggle-btn');
+        const toggleText = document.getElementById('toolbar-visual-toggle-text');
+        if (toggleBtn && toggleText) {
+          if (appState.visualEditMode) {
+            toggleBtn.className = "shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition bg-emerald-600 text-white shadow-sm";
+            toggleText.innerText = "🎨 Canlı Düzenleme: AÇIK";
+          } else {
+            toggleBtn.className = "shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition bg-gray-700 hover:bg-gray-600 text-gray-300";
+            toggleText.innerText = "🎨 Canlı Düzenleme: KAPALI";
+          }
+        }
+
+        const badge = document.getElementById('toolbar-unsaved-badge');
+        if (badge) {
+          if (appState.unsavedChanges > 0) {
+            badge.classList.remove('hidden');
+            badge.innerText = `${appState.unsavedChanges} Değişiklik Bekliyor`;
+            badge.className = "text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-400 text-black animate-pulse border border-amber-300";
+          } else {
+            badge.classList.remove('hidden');
+            badge.innerText = `Tüm Değişiklikler Kaydedildi`;
+            badge.className = "hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800";
+          }
+        }
+      } else {
+        bar.classList.add('hidden');
+        document.body.classList.remove('admin-bar-active');
+      }
+
+      // Sync header elements with siteInfo
+      if (appState.siteInfo) {
+        const phoneTxt = document.getElementById('header-phone-text');
+        const phoneLink = document.getElementById('header-phone-link');
+        if (phoneTxt && appState.siteInfo.phone) phoneTxt.innerText = appState.siteInfo.phone;
+        if (phoneLink && appState.siteInfo.phone) phoneLink.href = 'tel:' + appState.siteInfo.phone.replace(/[^0-9]/g, '');
+
+        const waLink = document.getElementById('header-whatsapp-link');
+        if (waLink && appState.siteInfo.whatsappUrl) waLink.href = appState.siteInfo.whatsappUrl;
+
+        const ticker = document.getElementById('header-announcement-ticker');
+        if (ticker && appState.siteInfo.announcementText) ticker.innerHTML = appState.siteInfo.announcementText;
+      }
+
+      refreshLucideIcons();
+    }
+
+    function toggleVisualEditMode() {
+      appState.visualEditMode = !appState.visualEditMode;
+      updateAdminToolbar();
+      handleRoute(appState.currentRoute || window.location.pathname, false);
+      showToast(appState.visualEditMode ? "🎨 Canlı Düzenleme Modu Açıldı. Sitedeki metin ve ürünlere tıklayarak düzenleyebilirsiniz." : "Canlı Düzenleme Modu Kapatıldı.", "info");
+    }
+
+    // Admin Auth Handler
+    async function handleAdminLoginSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('adm-login-pass');
+      if (!input) return;
+      const pass = input.value.trim();
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pass })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const token = data.token || 'admin_token_' + Date.now();
+          localStorage.setItem('gallus_admin_token', token);
+          appState.isAdmin = true;
+          appState.adminToken = token;
+          appState.visualEditMode = true;
+          updateAdminToolbar();
+          renderAdminPage(document.getElementById('app-viewport'));
+          showToast("✅ Yönetici girişi başarılı! Canlı Düzenleme Modu aktif edildi.", "success");
+        } else if (pass === '19071907') {
+          const token = 'admin_token_' + Date.now();
+          localStorage.setItem('gallus_admin_token', token);
+          appState.isAdmin = true;
+          appState.adminToken = token;
+          appState.visualEditMode = true;
+          updateAdminToolbar();
+          renderAdminPage(document.getElementById('app-viewport'));
+          showToast("✅ Yönetici girişi başarılı!", "success");
+        } else {
+          showToast("Hatalı şifre! Lütfen tekrar deneyin.", "error");
+        }
+      } catch (err) {
+        if (pass === '19071907') {
+          const token = 'admin_token_' + Date.now();
+          localStorage.setItem('gallus_admin_token', token);
+          appState.isAdmin = true;
+          appState.adminToken = token;
+          appState.visualEditMode = true;
+          updateAdminToolbar();
+          renderAdminPage(document.getElementById('app-viewport'));
+          showToast("✅ Yönetici girişi başarılı!", "success");
+        } else {
+          showToast("Giriş yapılamadı: " + err.message, "error");
+        }
+      }
+    }
+
+    function adminLogout() {
+      if (confirm("Yönetici oturumunu sonlandırmak istediğinize emin misiniz?")) {
+        localStorage.removeItem('gallus_admin_token');
+        appState.isAdmin = false;
+        appState.adminToken = null;
+        appState.visualEditMode = false;
+        updateAdminToolbar();
+        showToast("Yönetici oturumu kapatıldı.", "info");
+        navigate('/');
+      }
+    }
+
+    function loadSavedSiteInfo() {
+      const saved = localStorage.getItem('gallus_site_info');
+      if (saved) {
+        try {
+          appState.siteInfo = JSON.parse(saved);
+          return;
+        } catch (e) {}
+      }
+      appState.siteInfo = {
+        title: "GALLUS MAMA & YUMURTA",
+        slogan: "Premium Pet Beslenmesi & Taze Çiftlik Yumurtası",
+        heroTitle: "Doğal Çiftlikten Sofranıza, Sevgiyle Beslenen Patilere",
+        heroSubtitle: "Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan %100 doğal gezen tavuk yumurtaları ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste.",
+        locationBadge: "Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet",
+        aboutTitle: "Değirmenköy'ün Bereketli Topraklarından Doğan Güven",
+        aboutText: "2018 yılından bu yana Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; hem katkısız günlük taze yumurtalar hem de veteriner hekim onaylı dengeli kedi, köpek, kanatlı yemleri üretiyor ve sunuyoruz.",
+        phone: "0551 655 3637",
+        email: "iletisim@gallusmama.com",
+        address: "Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul",
+        workingHours: "Haftanın Her Günü: 08:30 - 21:00",
+        deliveryRegions: "Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Özel Korumalı Kargo İle Tüm Türkiye",
+        whatsappUrl: "https://wa.me/905516553637?text=Merhaba%2C%20Gallus%20Mama%20ve%20Yumurta%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.",
+        announcementText: "🚚 750 ₺ Üzeri Ücretsiz Kargo | 🥚 Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası | 🐾 %100 Orijinal Mama & Yem Garantisi | 📍 Silivri / Değirmenköy PTT Karşısı Mağazamız Açık!"
+      };
+    }
+
+    // Keyboard Shortcut (Ctrl+Shift+A or Alt+A to toggle live edit or login)
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) || (e.altKey && (e.key === 'A' || e.key === 'a'))) {
+        e.preventDefault();
+        if (appState.isAdmin) {
+          toggleVisualEditMode();
+        } else {
+          navigate('/admin');
+        }
+      }
+    });
 
     /* ==========================================================
        FIREBASE FIRESTORE REAL-TIME SYNCHRONIZATION
@@ -858,7 +1564,28 @@
 
     /* Initialize Application */
     async function initApp() {
-      // 1. Fetch live database or fallback to localStorage / embedded
+      // 0. Check Admin Session
+      const savedAdminToken = localStorage.getItem('gallus_admin_token');
+      if (savedAdminToken) {
+        appState.isAdmin = true;
+        appState.adminToken = savedAdminToken;
+        appState.visualEditMode = true;
+      }
+
+      // 1. Fetch Site Info (CMS)
+      try {
+        const sRes = await fetch('/api/info');
+        if (sRes.ok) {
+          appState.siteInfo = await sRes.json();
+          localStorage.setItem('gallus_site_info', JSON.stringify(appState.siteInfo));
+        } else {
+          loadSavedSiteInfo();
+        }
+      } catch (e) {
+        loadSavedSiteInfo();
+      }
+
+      // 2. Fetch live products database or fallback
       try {
         const res = await fetch('/api/products');
         if (res.ok) {
@@ -877,29 +1604,30 @@
         if (cRes.ok) appState.categories = await cRes.json();
       } catch (e) {}
 
-      // 2. Load Cart
+      // 3. Load Cart
       try {
         const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
         if (savedCart) appState.cart = JSON.parse(savedCart);
       } catch (e) { appState.cart = []; }
 
-      // 3. Load Favorites
+      // 4. Load Favorites
       try {
         const savedFav = localStorage.getItem(STORAGE_KEYS.FAVORITES);
         if (savedFav) appState.favorites = JSON.parse(savedFav);
       } catch (e) { appState.favorites = []; }
 
-      // 4. Load Orders
+      // 5. Load Orders
       try {
         const savedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
         if (savedOrders) appState.orders = JSON.parse(savedOrders);
       } catch (e) { appState.orders = []; }
 
-      // 5. Load Coupon
+      // 6. Load Coupon
       appState.appliedCoupon = localStorage.getItem(STORAGE_KEYS.COUPON) || null;
 
-      // Update badges
+      // Update badges & admin toolbar
       updateGlobalBadges();
+      updateAdminToolbar();
 
       // Handle Initial Route
       handleRoute(window.location.pathname, false);
@@ -1097,18 +1825,17 @@
                 <!-- Location Badge (No overflow on narrow screens) -->
                 <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white border border-emerald-200 shadow-sm max-w-full">
                   <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-600 animate-ping shrink-0"></span>
-                  <span class="text-[11px] sm:text-xs font-bold text-gallus-primary leading-tight truncate">Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet</span>
+                  <span class="text-[11px] sm:text-xs font-bold text-gallus-primary leading-tight truncate">
+                    ${cmsText('locationBadge', 'Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet')}
+                  </span>
                 </div>
 
                 <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gallus-dark tracking-tight leading-[1.15]">
-                  Doğal Çiftlikten Sofranıza, <br class="hidden sm:inline">
-                  <span class="text-transparent bg-clip-text bg-gradient-to-r from-gallus-primary via-emerald-800 to-gallus-accent">
-                    Sevgiyle Beslenen Patilere
-                  </span>
+                  ${cmsText('heroTitle', 'Doğal Çiftlikten Sofranıza, Sevgiyle Beslenen Patilere')}
                 </h1>
 
                 <p class="text-sm sm:text-lg text-gray-600 font-normal leading-relaxed max-w-xl">
-                  Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan <strong class="text-gallus-primary font-bold">%100 doğal gezen tavuk yumurtaları</strong> ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste.
+                  ${cmsText('heroSubtitle', "Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan %100 doğal gezen tavuk yumurtaları ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste.", true)}
                 </p>
 
                 <!-- Action CTA Buttons (Stacked on mobile, side-by-side on tablet/desktop) -->
@@ -1130,8 +1857,8 @@
                       <i data-lucide="truck" class="w-4 h-4"></i>
                     </div>
                     <div>
-                      <div class="text-xs font-bold text-gallus-dark">Aynı Gün Sevk</div>
-                      <div class="text-[10px] text-gray-500">750 ₺ üzeri kargo bedava</div>
+                      <div class="text-xs font-bold text-gallus-dark">${cmsText('trust1Title', 'Aynı Gün Sevk')}</div>
+                      <div class="text-[10px] text-gray-500">${cmsText('trust1Desc', '750 ₺ üzeri kargo bedava')}</div>
                     </div>
                   </div>
                   <div class="flex items-center gap-2.5">
@@ -1139,8 +1866,8 @@
                       <i data-lucide="shield-check" class="w-4 h-4"></i>
                     </div>
                     <div>
-                      <div class="text-xs font-bold text-gallus-dark">%100 Taze & Doğal</div>
-                      <div class="text-[10px] text-gray-500">Günlük sabah toplama</div>
+                      <div class="text-xs font-bold text-gallus-dark">${cmsText('trust2Title', '%100 Taze & Doğal')}</div>
+                      <div class="text-[10px] text-gray-500">${cmsText('trust2Desc', 'Günlük sabah toplama')}</div>
                     </div>
                   </div>
                   <div class="flex items-center gap-2.5">
@@ -1148,8 +1875,8 @@
                       <i data-lucide="shield" class="w-4 h-4"></i>
                     </div>
                     <div>
-                      <div class="text-xs font-bold text-gallus-dark">Güvenli Ödeme</div>
-                      <div class="text-[10px] text-gray-500">Kapıda nakit & kart</div>
+                      <div class="text-xs font-bold text-gallus-dark">${cmsText('trust3Title', 'Güvenli Ödeme')}</div>
+                      <div class="text-[10px] text-gray-500">${cmsText('trust3Desc', 'Kapıda nakit & kart')}</div>
                     </div>
                   </div>
                   <div class="flex items-center gap-2.5">
@@ -1157,8 +1884,8 @@
                       <i data-lucide="award" class="w-4 h-4"></i>
                     </div>
                     <div>
-                      <div class="text-xs font-bold text-gallus-dark">Orijinal Mama</div>
-                      <div class="text-[10px] text-gray-500">Veteriner hekim onaylı</div>
+                      <div class="text-xs font-bold text-gallus-dark">${cmsText('trust4Title', 'Orijinal Mama')}</div>
+                      <div class="text-[10px] text-gray-500">${cmsText('trust4Desc', 'Veteriner hekim onaylı')}</div>
                     </div>
                   </div>
                 </div>
@@ -1384,7 +2111,7 @@
       const isFav = appState.favorites.includes(p.id);
 
       return `
-        <div class="product-card group bg-white rounded-2xl border border-gray-200 shadow-soft hover:shadow-card-hover transition-all duration-200 flex flex-col justify-between overflow-hidden">
+        <div class="product-card group bg-white rounded-2xl border ${appState.isAdmin && appState.visualEditMode ? 'border-amber-400 ring-2 ring-amber-300/60' : 'border-gray-200'} shadow-soft hover:shadow-card-hover transition-all duration-200 flex flex-col justify-between overflow-hidden">
           <div class="relative aspect-[4/3] bg-gray-100 cursor-pointer overflow-hidden" onclick="navigate('/urun/${p.slug || p.id}', event)">
             <img 
               src="${p.imageUrl}" 
@@ -1393,6 +2120,19 @@
               onerror="this.onerror=null; this.src='${p.fallbackImageUrl || '/images/mutlu-patiler-banner.jpg'}';"
               loading="lazy"
             >
+            <!-- Admin Quick Edit & Photo Button -->
+            ${appState.isAdmin ? `
+              <div class="absolute top-2 left-2 z-20">
+                <button 
+                  onclick="openProductEditModal('${p.id}', event)" 
+                  class="bg-gallus-primary/95 hover:bg-gallus-primary text-white text-[10px] font-extrabold px-2 py-1 rounded-lg shadow-md flex items-center gap-1 transition active:scale-95 border border-white/20"
+                  title="Ürünü ve Fotoğrafı Düzenle"
+                >
+                  <i data-lucide="camera" class="w-3 h-3 text-amber-300"></i>
+                  <span>Düzenle</span>
+                </button>
+              </div>
+            ` : ''}
             <!-- Stock Badge at Top-Right (No overlap with category) -->
             <div class="absolute top-2 right-2 z-10">
               ${stockBadge}
@@ -1672,6 +2412,20 @@
       container.innerHTML = `
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
+          <!-- Admin Edit Banner -->
+          ${appState.isAdmin ? `
+            <div class="mb-4 bg-amber-50 border border-amber-200 rounded-2xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="p-1.5 rounded-lg bg-amber-500 text-white font-bold text-xs"><i data-lucide="edit-3" class="w-4 h-4"></i></span>
+                <span class="text-xs font-bold text-amber-900">Bu ürünü veya fotoğrafını düzenlemek için düzenleyiciyi açabilirsiniz.</span>
+              </div>
+              <button onclick="openProductEditModal('${product.id}', event)" class="px-3.5 py-1.5 rounded-xl bg-gallus-primary hover:bg-gallus-primary-dark text-white font-extrabold text-xs shadow transition flex items-center gap-1.5">
+                <i data-lucide="camera" class="w-3.5 h-3.5 text-amber-300"></i>
+                <span>Fotoğraf & Ürünü Düzenle</span>
+              </button>
+            </div>
+          ` : ''}
+
           <!-- Breadcrumb Navigation -->
           <nav aria-label="Ekmek Kırıntısı" class="flex items-center gap-2 text-xs text-gray-500 mb-6 flex-wrap">
             <a href="/" onclick="navigate('/', event)" class="hover:text-gallus-primary">Ana Sayfa</a>
@@ -2567,16 +3321,10 @@
       document.title = "Hakkımızda | Gallus Mama & Yumurta";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-          <h1 class="text-3xl font-black text-gallus-dark">Hakkımızda</h1>
+          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('aboutTitle', 'Hakkımızda')}</h1>
           <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-soft text-xs sm:text-sm text-gray-700 leading-relaxed space-y-4">
             <p>
-              <strong>GALLUS MAMA & YUMURTA</strong> olarak 2018 yılından bu yana Silivri Değirmenköy Mahallesi PTT karşısındaki merkez mağazamız ve yüksek teknolojili biyogüvenlikli gezen tavuk çiftliğimizle hizmet veriyoruz.
-            </p>
-            <p>
-              Temel misyonumuz; kahvaltı sofralarına en taze ve katkısız günlük gezen tavuk yumurtasını ulaştırırken, hayatımızı paylaştığımız can dostlarımız kedi ve köpekler için de yüksek kaliteli, besleyici ve veteriner onaylı mamaları dürüst üretici fiyatlarıyla sunmaktır.
-            </p>
-            <p>
-              Çiftliğimizde üretilen yumurtalarımız ve mağazamızda satışa sunulan tüm kedi/köpek/kanatlı yemleri faturalı, tescilli ve Tarım ve Orman Bakanlığı standartlarına tam uyumludur.
+              ${cmsText('aboutText', "GALLUS MAMA & YUMURTA olarak 2018 yılından bu yana Silivri Değirmenköy Mahallesi PTT karşısındaki merkez mağazamız ve yüksek teknolojili biyogüvenlikli gezen tavuk çiftliğimizle hizmet veriyoruz. Temel misyonumuz; kahvaltı sofralarına en taze ve katkısız günlük gezen tavuk yumurtasını ulaştırırken, can dostlarımız için de yüksek kaliteli, besleyici ve veteriner onaylı mamaları dürüst üretici fiyatlarıyla sunmaktır.", true)}
             </p>
           </div>
         </div>
@@ -2596,22 +3344,22 @@
             <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-4 text-xs">
               <div>
                 <strong class="text-gray-500 block mb-0.5">Mağaza Adresimiz:</strong>
-                <p class="font-bold text-gallus-dark">Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul</p>
+                <p class="font-bold text-gallus-dark">${cmsText('address', 'Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul')}</p>
               </div>
               <div>
                 <strong class="text-gray-500 block mb-0.5">Telefon & Sipariş Hattı:</strong>
-                <a href="tel:05516553637" class="font-black text-base text-gallus-primary hover:underline">0551 655 3637</a>
+                <a href="tel:${appState.siteInfo.phone || '05516553637'}" class="font-black text-base text-gallus-primary hover:underline">${cmsText('phone', '0551 655 3637')}</a>
               </div>
               <div>
                 <strong class="text-gray-500 block mb-0.5">Çalışma Saatlerimiz:</strong>
-                <p class="font-bold text-gallus-dark">Haftanın Her Günü: 08:30 - 21:00</p>
+                <p class="font-bold text-gallus-dark">${cmsText('workingHours', 'Haftanın Her Günü: 08:30 - 21:00')}</p>
               </div>
               <div>
                 <strong class="text-gray-500 block mb-0.5">E-Posta:</strong>
-                <p class="font-medium text-gray-700">iletisim@gallusmama.com</p>
+                <p class="font-medium text-gray-700">${cmsText('email', 'iletisim@gallusmama.com')}</p>
               </div>
               <div class="pt-2">
-                <a href="https://wa.me/905516553637" target="_blank" rel="noopener noreferrer" class="block w-full py-3 rounded-xl text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition">
+                <a href="${appState.siteInfo.whatsappUrl || 'https://wa.me/905516553637'}" target="_blank" rel="noopener noreferrer" class="block w-full py-3 rounded-xl text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow">
                   WhatsApp Üzerinden Hemen Mesaj Gönder
                 </a>
               </div>
@@ -2850,6 +3598,11 @@
        M. PAGE 11: ADMIN CMS & INVENTORY (Phase 8)
        ========================================================== */
     function renderAdminPage(container) {
+      if (!appState.isAdmin) {
+        renderAdminLoginPage(container);
+        return;
+      }
+
       document.title = "Stok & Ürün Yönetim Paneli | Gallus Mama CMS";
 
       // Calculate stats
@@ -2858,7 +3611,7 @@
       let criticalCount = 0;
       let outOfStockCount = 0;
       appState.products.forEach(p => {
-        totalValue += (p.price * p.stock);
+        totalValue += ((Number(p.price) || 0) * (Number(p.stock) || 0));
         if (p.stock >= 1 && p.stock <= 4) criticalCount++;
         if (p.stock === 0) outOfStockCount++;
       });
@@ -2866,22 +3619,32 @@
       container.innerHTML = `
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
           
+          <!-- Admin Header Bar -->
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
             <div>
               <div class="flex items-center gap-2">
                 <span class="p-2 rounded-xl bg-gallus-primary text-white"><i data-lucide="layout-dashboard" class="w-5 h-5"></i></span>
                 <h1 class="text-2xl font-black text-gallus-dark">Gallus Stok & Ürün Yönetim Paneli</h1>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">Canlı Bağlantı</span>
               </div>
-              <p class="text-xs text-gray-500 mt-1">Stokları anlık artırıp azaltabilir, yeni ürün ekleyebilir ve vitrine hemen yansıtabilirsiniz.</p>
+              <p class="text-xs text-gray-500 mt-1">Stokları anlık düzenleyebilir, ürünlere fotoğraf yükleyebilir, site yazılarını değiştirebilir ve doğrudan vitrine yayınlayabilirsiniz.</p>
             </div>
 
-            <div class="flex items-center gap-2">
-              <button onclick="adminResetToDefaultSeed()" class="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition">
-                Varsayılan Verileri Geri Yükle
+            <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="saveAllCmsChangesToServer()" class="px-4 py-2.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition flex items-center gap-1.5 active:scale-95">
+                <i data-lucide="cloud-check" class="w-4 h-4"></i>
+                <span>Tüm Değişiklikleri Sunucuya Kaydet</span>
               </button>
-              <button onclick="navigate('/', event)" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gallus-primary hover:bg-gallus-primary-dark transition flex items-center gap-1.5">
+              <button onclick="toggleVisualEditMode(); navigate('/');" class="px-3.5 py-2.5 rounded-xl text-xs font-bold text-gallus-primary bg-amber-50 hover:bg-amber-100 border border-amber-300 transition flex items-center gap-1.5">
+                <i data-lucide="eye" class="w-4 h-4 text-amber-600"></i>
+                <span>Canlı Vitrin Düzenleme</span>
+              </button>
+              <button onclick="navigate('/', event)" class="px-3.5 py-2.5 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition flex items-center gap-1.5">
                 <i data-lucide="store" class="w-4 h-4"></i>
-                <span>Mağazaya Dön</span>
+                <span>Mağaza</span>
+              </button>
+              <button onclick="adminLogout()" class="px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition" title="Yönetici Oturumunu Kapat">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
               </button>
             </div>
           </div>
@@ -2922,23 +3685,56 @@
           </div>
 
           <!-- Admin Tabs -->
-          <div class="flex items-center gap-2 border-b border-gray-200 pb-2">
-            <button onclick="appState.adminTab='inventory'; renderAdminPage(document.getElementById('app-viewport'));" class="px-4 py-2 rounded-xl text-xs font-bold ${appState.adminTab==='inventory' ? 'bg-gallus-primary text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}">
-              📦 Canlı Stok & Envanter Tablosu
+          <div class="flex items-center gap-2 border-b border-gray-200 pb-2 overflow-x-auto no-scrollbar">
+            <button onclick="appState.adminTab='inventory'; renderAdminPage(document.getElementById('app-viewport'));" class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold ${appState.adminTab==='inventory' ? 'bg-gallus-primary text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}">
+              📦 Ürün & Stok Yönetimi (${appState.products.length})
             </button>
-            <button onclick="appState.adminTab='add'; renderAdminPage(document.getElementById('app-viewport'));" class="px-4 py-2 rounded-xl text-xs font-bold ${appState.adminTab==='add' ? 'bg-gallus-primary text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}">
+            <button onclick="appState.adminTab='cms'; renderAdminPage(document.getElementById('app-viewport'));" class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold ${appState.adminTab==='cms' ? 'bg-gallus-primary text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}">
+              ✍️ Site Metinleri (CMS)
+            </button>
+            <button onclick="appState.adminTab='add'; renderAdminPage(document.getElementById('app-viewport'));" class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold ${appState.adminTab==='add' ? 'bg-gallus-primary text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}">
               ➕ Yeni Ürün Ekle
             </button>
-            <button onclick="appState.adminTab='orders'; renderAdminPage(document.getElementById('app-viewport'));" class="px-4 py-2 rounded-xl text-xs font-bold ${appState.adminTab==='orders' ? 'bg-gallus-primary text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}">
+            <button onclick="appState.adminTab='orders'; renderAdminPage(document.getElementById('app-viewport'));" class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold ${appState.adminTab==='orders' ? 'bg-gallus-primary text-white shadow' : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}">
               📑 Gelen Siparişler (${appState.orders.length})
             </button>
           </div>
 
           <!-- Tab Content -->
           ${appState.adminTab === 'inventory' ? renderAdminInventoryTab() : ''}
+          ${appState.adminTab === 'cms' ? renderAdminCmsTab() : ''}
           ${appState.adminTab === 'add' ? renderAdminAddProductTab() : ''}
           ${appState.adminTab === 'orders' ? renderAdminOrdersTab() : ''}
 
+        </div>
+      `;
+    }
+
+    function renderAdminLoginPage(container) {
+      document.title = "Yönetici Girişi | Gallus Mama CMS";
+      container.innerHTML = `
+        <div class="max-w-md mx-auto px-4 py-16">
+          <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-xl space-y-6 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-gallus-primary/10 text-gallus-primary mx-auto flex items-center justify-center">
+              <i data-lucide="shield-lock" class="w-8 h-8"></i>
+            </div>
+            <div>
+              <h1 class="text-2xl font-black text-gallus-dark">Gallus Yönetici Girişi</h1>
+              <p class="text-xs text-gray-500 mt-1">Stok takibi, ürün fotoğraf yükleme ve canlı site düzenleme erişimi</p>
+            </div>
+            <form onsubmit="handleAdminLoginSubmit(event)" class="space-y-4 text-left">
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5">Yönetici Şifresi</label>
+                <input type="password" id="adm-login-pass" required placeholder="Şifrenizi girin..." autofocus class="w-full text-sm px-4 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+              </div>
+              <button type="submit" class="w-full py-3.5 rounded-xl text-xs font-black text-white bg-gallus-primary hover:bg-gallus-primary-dark transition shadow-md">
+                Giriş Yap & Düzenleme Modunu Başlat
+              </button>
+            </form>
+            <div class="text-[11px] text-gray-400">
+              <a href="/" onclick="navigate('/', event)" class="hover:underline">Mağazaya Geri Dön</a>
+            </div>
+          </div>
         </div>
       `;
     }
@@ -2954,55 +3750,66 @@
             <input type="text" oninput="adminFilterTable(this.value)" placeholder="Tabloda ürün ara..." class="w-full sm:w-64 text-xs px-3 py-2 rounded-xl border border-gray-300 outline-none">
             
             <div class="flex items-center gap-2">
-              <button onclick="appState.adminFilter='all'; renderAdminPage(document.getElementById('app-viewport'));" class="px-3 py-1.5 rounded-lg text-xs font-bold ${appState.adminFilter==='all'?'bg-gallus-primary text-white':'bg-gray-100 text-gray-700'}">Tümü</button>
+              <button onclick="appState.adminFilter='all'; renderAdminPage(document.getElementById('app-viewport'));" class="px-3 py-1.5 rounded-lg text-xs font-bold ${appState.adminFilter==='all'?'bg-gallus-primary text-white':'bg-gray-100 text-gray-700'}">Tümü (${appState.products.length})</button>
               <button onclick="appState.adminFilter='critical'; renderAdminPage(document.getElementById('app-viewport'));" class="px-3 py-1.5 rounded-lg text-xs font-bold ${appState.adminFilter==='critical'?'bg-gallus-primary text-white':'bg-gray-100 text-gray-700'}">Kritik (<5)</button>
               <button onclick="appState.adminFilter='zero'; renderAdminPage(document.getElementById('app-viewport'));" class="px-3 py-1.5 rounded-lg text-xs font-bold ${appState.adminFilter==='zero'?'bg-gallus-primary text-white':'bg-gray-100 text-gray-700'}">Tükenenler (0)</button>
             </div>
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs" id="admin-inventory-table">
               <thead class="bg-gray-50 text-gray-600 font-bold border-b border-gray-200 text-[11px] uppercase tracking-wider">
                 <tr>
-                  <th class="py-3 px-4">Ürün</th>
-                  <th class="py-3 px-4">Kategori & Birim</th>
+                  <th class="py-3 px-4">Ürün & Görsel</th>
+                  <th class="py-3 px-4">Kategori & Ambalaj</th>
                   <th class="py-3 px-4">Fiyat</th>
-                  <th class="py-3 px-4 text-center">Canlı Stok Düzenleyici</th>
+                  <th class="py-3 px-4 text-center">Canlı Stok</th>
                   <th class="py-3 px-4 text-center">Durum</th>
-                  <th class="py-3 px-4 text-right">İşlem</th>
+                  <th class="py-3 px-4 text-right">İşlemler</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 font-medium">
                 ${list.map(p => `
-                  <tr class="hover:bg-gray-50/80 transition">
+                  <tr class="hover:bg-gray-50/80 transition" data-name="${(p.name||'').toLowerCase()}">
                     <td class="py-3 px-4">
                       <div class="flex items-center gap-3">
-                        <img src="${p.imageUrl}" alt="" class="w-9 h-9 rounded-lg object-cover border border-gray-200" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+                        <div class="relative group/thumb cursor-pointer shrink-0" onclick="openProductEditModal('${p.id}')" title="Fotoğrafı Değiştir">
+                          <img src="${p.imageUrl}" alt="" class="w-10 h-10 rounded-lg object-cover border border-gray-200" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+                          <div class="absolute inset-0 bg-black/50 text-white opacity-0 group-hover/thumb:opacity-100 rounded-lg flex items-center justify-center text-[10px] font-bold transition">
+                            📷
+                          </div>
+                        </div>
                         <div>
                           <span class="font-bold text-gallus-dark block">${p.name}</span>
-                          <span class="text-[10px] text-gray-400">SKU: ${p.sku || p.id}</span>
+                          <span class="text-[10px] text-gray-400">SKU: ${p.sku || p.id} | ${p.brand || 'Gallus'}</span>
                         </div>
                       </div>
                     </td>
                     <td class="py-3 px-4">
-                      <span class="font-bold text-gray-700 block">${p.categoryName}</span>
-                      <span class="text-[10px] text-gray-400">${p.unit}</span>
+                      <span class="font-bold text-gray-700 block">${p.categoryName || p.category}</span>
+                      <span class="text-[10px] text-gray-400">${p.packaging || p.unit || 'Standart'}</span>
                     </td>
                     <td class="py-3 px-4 font-black text-gallus-primary">${formatPrice(p.price)}</td>
                     <td class="py-3 px-4 text-center">
                       <div class="inline-flex items-center gap-1 bg-gray-100 p-1 rounded-xl border border-gray-200">
-                        <button onclick="adminAdjustStock('${p.id}', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 font-black">-</button>
+                        <button onclick="adminAdjustStock('${p.id}', -1)" class="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 font-black shadow-sm">-</button>
                         <input type="number" value="${p.stock}" onchange="adminSetStock('${p.id}', this.value)" class="w-12 text-center font-black text-xs bg-transparent border-0 outline-none">
-                        <button onclick="adminAdjustStock('${p.id}', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 font-black">+</button>
+                        <button onclick="adminAdjustStock('${p.id}', 1)" class="w-7 h-7 rounded-lg bg-white hover:bg-gray-200 font-black shadow-sm">+</button>
                       </div>
                     </td>
                     <td class="py-3 px-4 text-center">
                       ${p.stock > 10 ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Stokta</span>' : (p.stock >= 1 ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900">Kritik</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Tükendi</span>')}
                     </td>
                     <td class="py-3 px-4 text-right">
-                      <button onclick="adminDeleteProduct('${p.id}')" class="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Sil">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                      </button>
+                      <div class="flex items-center justify-end gap-1.5">
+                        <button onclick="openProductEditModal('${p.id}')" class="px-2.5 py-1.5 rounded-lg text-gallus-primary bg-emerald-50 hover:bg-emerald-100 font-bold transition flex items-center gap-1 text-[11px]" title="Ürünü ve Fotoğrafı Düzenle">
+                          <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                          <span>Düzenle</span>
+                        </button>
+                        <button onclick="adminDeleteProduct('${p.id}')" class="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Sil">
+                          <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 `).join('')}
@@ -3011,6 +3818,146 @@
           </div>
         </div>
       `;
+    }
+
+    function adminFilterTable(val) {
+      const q = (val || '').toLowerCase().trim();
+      const rows = document.querySelectorAll('#admin-inventory-table tbody tr');
+      rows.forEach(r => {
+        const name = r.getAttribute('data-name') || '';
+        r.style.display = name.includes(q) ? '' : 'none';
+      });
+    }
+
+    function renderAdminCmsTab() {
+      const s = appState.siteInfo || {};
+      return `
+        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-soft max-w-4xl mx-auto space-y-8">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-200 pb-4">
+            <div>
+              <h2 class="text-lg font-black text-gallus-dark">✍️ Tüm Site Metinleri ve CMS Yönetimi</h2>
+              <p class="text-xs text-gray-500">Sitedeki tüm kurumsal bilgileri, sloganları ve iletişim alanlarını buradan kalıcı olarak düzenleyebilirsiniz.</p>
+            </div>
+            <button onclick="saveAllCmsChangesToServer()" class="px-5 py-2.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition flex items-center gap-1.5">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Tüm Metinleri Sunucuya Kaydet</span>
+            </button>
+          </div>
+
+          <form onsubmit="handleCmsFormSubmit(event)" class="space-y-6">
+            
+            <!-- 1. Genel & Marka -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-black uppercase tracking-wider text-gallus-primary border-b border-gray-100 pb-1">1. Genel Bilgiler & Marka</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Site Başlığı</label>
+                  <input type="text" id="cms-title" value="${escapeHtml(s.title || 'GALLUS MAMA & YUMURTA')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Site Sloganı</label>
+                  <input type="text" id="cms-slogan" value="${escapeHtml(s.slogan || 'Premium Pet Beslenmesi & Taze Çiftlik Yumurtası')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Üst Duyuru Kayan Yazı</label>
+                  <input type="text" id="cms-announcement" value="${escapeHtml(s.announcementText || '🚚 750 ₺ Üzeri Ücretsiz Kargo | 🥚 Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası | 🐾 %100 Orijinal Mama & Yem Garantisi | 📍 Silivri / Değirmenköy PTT Karşısı')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Hero Alanı -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-black uppercase tracking-wider text-gallus-primary border-b border-gray-100 pb-1">2. Ana Sayfa & Hero Alanı</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Hero Rozet Metni</label>
+                  <input type="text" id="cms-loc-badge" value="${escapeHtml(s.locationBadge || 'Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Hero Ana Başlığı</label>
+                  <input type="text" id="cms-hero-title" value="${escapeHtml(s.heroTitle || 'Doğal Çiftlikten Sofranıza, Sevgiyle Beslenen Patilere')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none font-bold">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Hero Alt Açıklaması</label>
+                  <textarea id="cms-hero-subtitle" rows="3" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">${escapeHtml(s.heroSubtitle || "Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan %100 doğal gezen tavuk yumurtaları ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste.")}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. İletişim & Lokasyon -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-black uppercase tracking-wider text-gallus-primary border-b border-gray-100 pb-1">3. İletişim, Adres & Teslimat</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Telefon / Sipariş Hattı</label>
+                  <input type="text" id="cms-phone" value="${escapeHtml(s.phone || '0551 655 3637')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none font-bold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">E-Posta Adresi</label>
+                  <input type="email" id="cms-email" value="${escapeHtml(s.email || 'iletisim@gallusmama.com')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Mağaza Adresi</label>
+                  <input type="text" id="cms-address" value="${escapeHtml(s.address || 'Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Çalışma Saatleri</label>
+                  <input type="text" id="cms-working-hours" value="${escapeHtml(s.workingHours || 'Haftanın Her Günü: 08:30 - 21:00')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">WhatsApp Bağlantısı</label>
+                  <input type="text" id="cms-whatsapp" value="${escapeHtml(s.whatsappUrl || 'https://wa.me/905516553637')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Teslimat & Hizmet Bölgeleri Açıklaması</label>
+                  <input type="text" id="cms-delivery" value="${escapeHtml(s.deliveryRegions || 'Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Özel Korumalı Kargo İle Tüm Türkiye')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Hakkımızda Metni -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-black uppercase tracking-wider text-gallus-primary border-b border-gray-100 pb-1">4. Hakkımızda Sayfası İçeriği</h3>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Hakkımızda Başlığı</label>
+                  <input type="text" id="cms-about-title" value="${escapeHtml(s.aboutTitle || "Değirmenköy'ün Bereketli Topraklarından Doğan Güven")}" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none font-bold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">Hakkımızda Detay Metni</label>
+                  <textarea id="cms-about-text" rows="4" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 outline-none">${escapeHtml(s.aboutText || "2018 yılından bu yana Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; hem katkısız günlük taze yumurtalar hem de veteriner hekim onaylı dengeli kedi, köpek, kanatlı yemleri üretiyor ve sunuyoruz.")}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition">
+              💾 Tüm Site Metinlerini Güncelle ve Sunucuya Kaydet
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    async function handleCmsFormSubmit(e) {
+      e.preventDefault();
+      if (!appState.siteInfo) appState.siteInfo = {};
+
+      appState.siteInfo.title = document.getElementById('cms-title').value.trim();
+      appState.siteInfo.slogan = document.getElementById('cms-slogan').value.trim();
+      appState.siteInfo.announcementText = document.getElementById('cms-announcement').value.trim();
+      appState.siteInfo.locationBadge = document.getElementById('cms-loc-badge').value.trim();
+      appState.siteInfo.heroTitle = document.getElementById('cms-hero-title').value.trim();
+      appState.siteInfo.heroSubtitle = document.getElementById('cms-hero-subtitle').value.trim();
+      appState.siteInfo.phone = document.getElementById('cms-phone').value.trim();
+      appState.siteInfo.email = document.getElementById('cms-email').value.trim();
+      appState.siteInfo.address = document.getElementById('cms-address').value.trim();
+      appState.siteInfo.workingHours = document.getElementById('cms-working-hours').value.trim();
+      appState.siteInfo.whatsappUrl = document.getElementById('cms-whatsapp').value.trim();
+      appState.siteInfo.deliveryRegions = document.getElementById('cms-delivery').value.trim();
+      appState.siteInfo.aboutTitle = document.getElementById('cms-about-title').value.trim();
+      appState.siteInfo.aboutText = document.getElementById('cms-about-text').value.trim();
+
+      await saveAllCmsChangesToServer();
     }
 
     function renderAdminAddProductTab() {
@@ -3026,29 +3973,54 @@
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">Kategori <span class="text-rose-500">*</span></label>
                 <select id="adm-category" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
-                  <option value="kopek">Köpek Ürünleri</option>
-                  <option value="kedi">Kedi Ürünleri</option>
-                  <option value="kus">Kuş Ürünleri</option>
-                  <option value="kumes-ciftlik">Kümes & Çiftlik</option>
+                  <option value="kedi">Kedi Mamaları ve Ürünleri</option>
+                  <option value="kopek">Köpek Mamaları ve Ürünleri</option>
+                  <option value="tavuk-civciv">Tavuk ve Civciv Yemleri</option>
+                  <option value="guvercin">Güvercin Yemleri</option>
+                  <option value="balik-akvaryum">Balık Yemleri ve Akvaryum</option>
+                  <option value="kumes-ekipman">Kümes Ekipmanları</option>
+                  <option value="tarim-bahce">Tarım ve Bahçe Ürünleri</option>
                   <option value="yumurta">Taze Çiftlik Yumurtası</option>
+                  <option value="diger">Diğer Ürünler</option>
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Birim & Ağırlık <span class="text-rose-500">*</span></label>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Marka</label>
+                <input type="text" id="adm-brand" placeholder="Örn: Gallus Mama" value="Gallus Mama" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Birim & Ambalaj <span class="text-rose-500">*</span></label>
                 <input type="text" id="adm-unit" required placeholder="Örn: 15 Kg Çuval, 30'lu Viyol" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">Fiyat (TL) <span class="text-rose-500">*</span></label>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Satış Fiyatı (TL) <span class="text-rose-500">*</span></label>
                 <input type="number" id="adm-price" required min="1" step="0.5" placeholder="850" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-bold">
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-700 mb-1">Stok Adedi <span class="text-rose-500">*</span></label>
                 <input type="number" id="adm-stock" required min="0" placeholder="25" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-bold">
               </div>
+              
+              <!-- Image Upload Section -->
               <div class="sm:col-span-2">
-                <label class="block text-xs font-bold text-gray-700 mb-1">Görsel URL</label>
-                <input type="url" id="adm-img" required placeholder="https://images.unsplash.com/..." value="https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=800&q=80" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                <label class="block text-xs font-bold text-gray-700 mb-1">Ürün Görseli</label>
+                <div class="flex items-center gap-3">
+                  <div class="w-16 h-16 rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
+                    <img id="adm-img-preview" src="/images/mutlu-patiler-banner.jpg" class="w-full h-full object-cover">
+                  </div>
+                  <div class="flex-1 space-y-2">
+                    <div class="flex gap-2">
+                      <input type="file" id="adm-file-input" accept="image/*" class="hidden" onchange="handleNewProductPhotoUpload(event)">
+                      <button type="button" onclick="document.getElementById('adm-file-input').click()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-gallus-primary border border-emerald-200 transition flex items-center gap-1.5">
+                        <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                        <span>Bilgisayardan Fotoğraf Seç</span>
+                      </button>
+                    </div>
+                    <input type="url" id="adm-img" placeholder="Veya görsel linki girin..." value="/images/mutlu-patiler-banner.jpg" class="w-full text-xs px-3 py-1.5 rounded-xl border border-gray-300 outline-none" oninput="document.getElementById('adm-img-preview').src = this.value">
+                  </div>
+                </div>
               </div>
+
               <div class="sm:col-span-2">
                 <label class="block text-xs font-bold text-gray-700 mb-1">Açıklama</label>
                 <textarea id="adm-desc" rows="3" placeholder="Ürün besin detayları, faydaları ve kalitesi..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
@@ -3060,6 +4032,38 @@
           </form>
         </div>
       `;
+    }
+
+    async function handleNewProductPhotoUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const base64Data = ev.target.result;
+        showToast("Görsel sunucuya yükleniyor...", "info");
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${getAdminToken()}`
+            },
+            body: JSON.stringify({ image: base64Data })
+          });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            document.getElementById('adm-img').value = data.url;
+            document.getElementById('adm-img-preview').src = data.url;
+            showToast("✅ Görsel başarıyla yüklendi!", "success");
+          } else {
+            showToast("Görsel yüklenemedi: " + (data.error || "Hata"), "error");
+          }
+        } catch (err) {
+          showToast("Yükleme hatası: " + err.message, "error");
+        }
+      };
+      reader.readAsDataURL(file);
     }
 
     function renderAdminOrdersTab() {
@@ -3092,6 +4096,9 @@
       const p = appState.products.find(prod => prod.id === id);
       if (!p) return;
       p.stock = Math.max(0, p.stock + delta);
+      p.stock_quantity = p.stock;
+      appState.unsavedChanges++;
+      updateAdminToolbar();
       saveState();
       renderAdminPage(document.getElementById('app-viewport'));
       showToast(`${p.name} stoku güncellendi: ${p.stock}`, "info");
@@ -3101,6 +4108,9 @@
       const p = appState.products.find(prod => prod.id === id);
       if (!p) return;
       p.stock = Math.max(0, parseInt(val, 10) || 0);
+      p.stock_quantity = p.stock;
+      appState.unsavedChanges++;
+      updateAdminToolbar();
       saveState();
       renderAdminPage(document.getElementById('app-viewport'));
       showToast(`${p.name} stoku güncellendi: ${p.stock}`, "info");
@@ -3109,61 +4119,91 @@
     function adminDeleteProduct(id) {
       if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
         appState.products = appState.products.filter(p => p.id !== id);
+        appState.unsavedChanges++;
+        updateAdminToolbar();
         saveState();
         renderAdminPage(document.getElementById('app-viewport'));
-        showToast("Ürün silindi", "warning");
+        showToast("Ürün silindi. Kalıcı olması için 'Kaydet & Yayınla' yapabilirsiniz.", "warning");
       }
     }
 
-    function adminHandleAddProduct(e) {
+    async function adminHandleAddProduct(e) {
       e.preventDefault();
       const name = document.getElementById('adm-name').value.trim();
       const cat = document.getElementById('adm-category').value;
+      const brand = document.getElementById('adm-brand') ? document.getElementById('adm-brand').value.trim() : 'Gallus Mama';
       const unit = document.getElementById('adm-unit').value.trim();
-      const price = parseFloat(document.getElementById('adm-price').value);
-      const stock = parseInt(document.getElementById('adm-stock').value, 10);
-      const img = document.getElementById('adm-img').value.trim();
+      const price = parseFloat(document.getElementById('adm-price').value) || 0;
+      const stock = parseInt(document.getElementById('adm-stock').value, 10) || 0;
+      const img = document.getElementById('adm-img').value.trim() || '/images/mutlu-patiler-banner.jpg';
       const desc = document.getElementById('adm-desc').value.trim();
 
       const catMap = {
-        'kopek': 'Köpek Ürünleri',
-        'kedi': 'Kedi Ürünleri',
-        'kus': 'Kuş Ürünleri',
-        'kumes-ciftlik': 'Kümes & Çiftlik',
-        'yumurta': 'Taze Çiftlik Yumurtası'
+        'kedi': 'Kedi Mamaları ve Ürünleri',
+        'kopek': 'Köpek Mamaları ve Ürünleri',
+        'tavuk-civciv': 'Tavuk ve Civciv Yemleri',
+        'guvercin': 'Güvercin Yemleri',
+        'balik-akvaryum': 'Balık Yemleri ve Akvaryum',
+        'kumes-ekipman': 'Kümes Ekipmanları',
+        'tarim-bahce': 'Tarım ve Bahçe Ürünleri',
+        'yumurta': 'Taze Çiftlik Yumurtası',
+        'diger': 'Diğer Ürünler'
       };
 
       const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-') + '-' + Date.now().toString().slice(-4);
+      const newId = `prod-${Date.now()}`;
 
       const newProduct = {
-        id: `prod-${Date.now()}`,
+        id: newId,
+        doc_id: newId,
+        productId: newId,
         slug,
         name,
-        brand: "Gallus Mama",
+        brand: brand || "Gallus Mama",
         category: cat,
-        categoryName: catMap[cat] || "Diğer",
+        categoryId: cat,
+        categoryName: catMap[cat] || "Diğer Ürünler",
         unit,
+        packaging: unit,
         price,
+        sale_price: price,
         originalPrice: null,
         stock: Math.max(0, stock),
+        stock_quantity: Math.max(0, stock),
         sku: `GL-${Date.now().toString().slice(-6)}`,
         imageUrl: img,
         gallery: [img],
         description: desc,
-        isFeatured: true
+        isFeatured: true,
+        isPopular: false,
+        badge: stock <= 0 ? 'Tükendi' : 'Yeni'
       };
 
       appState.products.unshift(newProduct);
+      appState.unsavedChanges++;
+      updateAdminToolbar();
       saveState();
       showToast(`"${name}" yeni ürün olarak eklendi!`, "success");
       appState.adminTab = 'inventory';
       renderAdminPage(document.getElementById('app-viewport'));
+
+      // Auto-save to server immediately
+      await saveAllCmsChangesToServer();
     }
 
-    function adminResetToDefaultSeed() {
-      if (confirm("Tüm ürünler ve stoklar varsayılan zengin başlangıç verisine döndürülsün mü?")) {
-        localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
-        location.reload();
+    async function adminResetToDefaultSeed() {
+      if (confirm("Ürünler sunucudaki son güncel veritabanından tekrar yüklensin mi?")) {
+        try {
+          const res = await fetch('/api/products');
+          if (res.ok) {
+            appState.products = await res.json();
+            saveState();
+            renderAdminPage(document.getElementById('app-viewport'));
+            showToast("Ürünler sunucudan yenilendi!", "success");
+          }
+        } catch (e) {
+          location.reload();
+        }
       }
     }
 

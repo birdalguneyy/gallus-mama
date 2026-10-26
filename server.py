@@ -3,10 +3,16 @@ import sys
 import json
 import time
 import mimetypes
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
 from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.parse
 import threading
+import base64
 
 # Firebase Admin
 import firebase_admin
@@ -374,6 +380,110 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                 token = "admin_token_" + str(int(time.time()))
                 return self.send_json(200, {"success": True, "token": token})
             return self.send_json(401, {"error": "Hatalı şifre."})
+
+        # Image Upload POST
+        if pathname == "/api/upload":
+            raw_img = body.get("image", "")
+            if not raw_img or "base64," not in raw_img:
+                return self.send_json(400, {"error": "Geçersiz base64 görsel verisi."})
+            
+            try:
+                header, data = raw_img.split("base64,", 1)
+                ext = "jpg"
+                if "png" in header: ext = "png"
+                elif "webp" in header: ext = "webp"
+                elif "svg" in header: ext = "svg"
+                
+                img_bytes = base64.b64decode(data)
+                filename = f"up_{int(time.time())}_{os.urandom(3).hex()}.{ext}"
+                
+                for upload_dir in [
+                    BASE_DIR / "public" / "images" / "uploads",
+                    BASE_DIR / "gallus mama" / "public" / "images" / "uploads"
+                ]:
+                    upload_dir.mkdir(parents=True, exist_ok=True)
+                    (upload_dir / filename).write_bytes(img_bytes)
+                
+                return self.send_json(200, {"success": True, "url": f"/images/uploads/{filename}", "filename": filename})
+            except Exception as e:
+                return self.send_json(500, {"error": f"Yükleme hatası: {str(e)}"})
+
+        # Batch Save All (WordPress Live Edit Mode) POST
+        if pathname == "/api/admin/save-all":
+            try:
+                local_db = {}
+                if DB_PATH.exists():
+                    local_db = json.loads(DB_PATH.read_text(encoding="utf-8"))
+                
+                site_info = body.get("siteInfo")
+                if site_info and isinstance(site_info, dict):
+                    if "siteInfo" not in local_db: local_db["siteInfo"] = {}
+                    local_db["siteInfo"].update(site_info)
+                
+                products = body.get("products")
+                if products and isinstance(products, list):
+                    local_db["products"] = products
+                    global in_memory_products
+                    in_memory_products = list(products)
+                
+                # Write to both root and nested database.json
+                for db_file in [
+                    BASE_DIR / "data" / "database.json",
+                    BASE_DIR / "gallus mama" / "data" / "database.json"
+                ]:
+                    db_file.parent.mkdir(parents=True, exist_ok=True)
+                    db_file.write_text(json.dumps(local_db, ensure_ascii=False, indent=2), encoding="utf-8")
+                
+                # If Firestore is connected, sync metadata to public_products & product_web_meta
+                if db and products and isinstance(products, list):
+                    try:
+                        batch = db.batch()
+                        for p in products:
+                            doc_id = p.get("doc_id") or p.get("id")
+                            if doc_id:
+                                pub_ref = db.collection("public_products").document(doc_id)
+                                batch.set(pub_ref, {
+                                    "id": doc_id,
+                                    "name": p.get("name"),
+                                    "price": float(p.get("price") or 0.0),
+                                    "sale_price": float(p.get("price") or 0.0),
+                                    "stock": float(p.get("stock") or 0.0),
+                                    "stock_quantity": float(p.get("stock") or 0.0),
+                                    "unit": p.get("unit", "adet"),
+                                    "category": p.get("category", "diger"),
+                                    "categoryName": p.get("categoryName", "Diğer"),
+                                    "brand": p.get("brand", "Gallus Mama"),
+                                    "packaging": p.get("packaging") or p.get("unit") or "Standart",
+                                    "imageUrl": p.get("imageUrl", ""),
+                                    "description": p.get("description", ""),
+                                    "isPopular": bool(p.get("isPopular")),
+                                    "isFeatured": bool(p.get("isFeatured")),
+                                    "badge": p.get("badge", ""),
+                                    "updatedAt": firestore.SERVER_TIMESTAMP
+                                }, merge=True)
+                                
+                                meta_ref = db.collection("product_web_meta").document(doc_id)
+                                batch.set(meta_ref, {
+                                    "category": p.get("category", "diger"),
+                                    "categoryName": p.get("categoryName", "Diğer"),
+                                    "brand": p.get("brand", "Gallus Mama"),
+                                    "packaging": p.get("packaging") or p.get("unit") or "Standart",
+                                    "description": p.get("description", ""),
+                                    "imageUrl": p.get("imageUrl", ""),
+                                    "badge": p.get("badge", ""),
+                                    "updatedAt": firestore.SERVER_TIMESTAMP
+                                }, merge=True)
+                        batch.commit()
+                    except Exception as fs_err:
+                        print(f"[WARN] Firestore sync warning: {fs_err}")
+                
+                return self.send_json(200, {
+                    "success": True, 
+                    "message": "Tüm site içerikleri ve ürünler kalıcı olarak kaydedildi! Sunucu yeniden başlasa bile korunur.",
+                    "productCount": len(products) if products else len(local_db.get("products", []))
+                })
+            except Exception as e:
+                return self.send_json(500, {"error": f"Kayıt hatası: {str(e)}"})
 
         return self.send_json(404, {"error": "Not Found"})
 
