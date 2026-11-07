@@ -3,13 +3,14 @@ import sys
 import json
 import time
 import mimetypes
+from typing import Any, Dict
 
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 if hasattr(sys.stderr, 'reconfigure'):
     sys.stderr.reconfigure(encoding='utf-8')
 from pathlib import Path
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 import urllib.parse
 import threading
 import base64
@@ -114,6 +115,143 @@ def start_firestore_listener():
 
 threading.Thread(target=start_firestore_listener, daemon=True).start()
 
+
+def parse_numeric_total(val: Any) -> float:
+    if isinstance(val, (int, float)):
+        return float(val)
+    if not val:
+        return 0.0
+    import re
+    s = re.sub(r"[^\d.,-]", "", str(val)).strip()
+    if not s:
+        return 0.0
+    if "." in s and "," in s:
+        s = s.replace(".", "").replace(",", ".")
+    elif "," in s:
+        parts = s.split(",")
+        if len(parts[-1]) == 2:
+            s = s.replace(",", ".")
+        else:
+            s = s.replace(",", "")
+    elif "." in s:
+        parts = s.split(".")
+        if len(parts[-1]) == 3:
+            s = s.replace(".", "")
+    try:
+        return float(s)
+    except Exception:
+        return 0.0
+
+
+def calc_order_points(total_numeric: Any) -> int:
+    num = parse_numeric_total(total_numeric)
+    return max(0, int(round((num * 0.01) * 100)))
+
+
+def load_local_db() -> Dict[str, Any]:
+    if DB_PATH.exists():
+        try:
+            return json.loads(DB_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {}
+
+
+def save_local_db(data: Dict[str, Any]) -> None:
+    for db_file in [
+        BASE_DIR / "data" / "database.json",
+        BASE_DIR / "gallus mama" / "data" / "database.json"
+    ]:
+        try:
+            db_file.parent.mkdir(parents=True, exist_ok=True)
+            db_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+
+
+def collect_all_emails(local_db: Dict[str, Any]) -> Dict[str, Any]:
+    email_set = []
+    details_map: Dict[str, Dict[str, Any]] = {}
+
+    def add_email(em: str, name: str = "", phone: str = "", source: str = "Bülten", date_str: str = ""):
+        clean = str(em or "").strip().lower()
+        if not clean or "@" not in clean:
+            return
+        if clean not in email_set:
+            email_set.append(clean)
+        prev = details_map.get(clean, {})
+        details_map[clean] = {
+            "email": clean,
+            "name": name or prev.get("name", ""),
+            "phone": phone or prev.get("phone", ""),
+            "source": source if not prev.get("source") else prev.get("source"),
+            "date": date_str or prev.get("date", "")
+        }
+
+    for e in local_db.get("subscribers", []):
+        add_email(e, source="Web Bülten")
+    for d in local_db.get("subscriberDetails", []):
+        if isinstance(d, dict):
+            add_email(d.get("email", ""), d.get("name", ""), d.get("phone", ""), d.get("source", "Web Bülten"), d.get("date", ""))
+    for m in local_db.get("members", []):
+        if isinstance(m, dict):
+            add_email(m.get("email", ""), m.get("fullname", ""), m.get("phone", ""), "Site Üyesi", m.get("createdAt", ""))
+    for o in local_db.get("orders", []):
+        if isinstance(o, dict):
+            c = o.get("customer", {}) or {}
+            add_email(c.get("email") or o.get("email", ""), c.get("fullname", ""), c.get("phone", ""), "Sipariş Müşterisi", o.get("date", ""))
+
+    return {
+        "allEmails": email_set,
+        "subscriberDetails": list(details_map.values())
+    }
+
+
+def build_member_payload(local_db: Dict[str, Any], member_obj: Dict[str, Any]) -> Dict[str, Any]:
+    if not member_obj:
+        return {}
+    import re
+    email = str(member_obj.get("email") or "").strip().lower()
+    phone_clean = re.sub(r"\D", "", str(member_obj.get("phone") or ""))[-10:]
+    all_orders = local_db.get("orders", [])
+    member_orders = []
+    for o in all_orders:
+        c = o.get("customer") or {}
+        o_email = str(c.get("email") or o.get("email") or "").strip().lower()
+        o_phone = re.sub(r"\D", "", str(c.get("phone") or ""))[-10:]
+        if (email and o_email and email == o_email) or (len(phone_clean) >= 10 and o_phone == phone_clean):
+            member_orders.append(o)
+
+    approved_earned = 0
+    pending_earned = 0
+    total_used = 0
+    for o in member_orders:
+        t_num = o.get("totalNumeric") if o.get("totalNumeric") is not None else parse_numeric_total(o.get("total"))
+        pts = int(o.get("earnedPoints")) if o.get("earnedPoints") is not None else calc_order_points(t_num)
+        used = int(o.get("usedPoints") or 0)
+        total_used += used
+        if o.get("pointsApproved") is True or o.get("status") in ["Onaylandı", "Tamamlandı"]:
+            approved_earned += pts
+        elif o.get("status") not in ["İptal", "İptal Edildi"]:
+            pending_earned += pts
+
+    bonus = int(member_obj.get("bonusPoints") or 0)
+    approved_points = max(0, approved_earned + bonus - total_used)
+    pending_points = max(0, pending_earned)
+
+    safe_member = dict(member_obj)
+    safe_member.pop("password", None)
+    safe_member.update({
+        "approvedPoints": approved_points,
+        "pendingPoints": pending_points,
+        "totalEarnedPoints": approved_earned + bonus,
+        "usedPoints": total_used,
+        "pointsTlValue": round(approved_points / 100.0, 2),
+        "orders": member_orders
+    })
+    return safe_member
+
+
 class GallusMamaHandler(BaseHTTPRequestHandler):
     def send_json(self, status_code: int, data: Any):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -179,13 +317,57 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
 
         # 3.1 API: Orders GET
         if pathname == "/api/orders":
-            orders = []
-            if DB_PATH.exists():
-                try:
-                    orders = json.loads(DB_PATH.read_text(encoding="utf-8")).get("orders", [])
-                except Exception:
-                    pass
+            local_db = load_local_db()
+            orders = local_db.get("orders", [])
+            q_email = str(query.get("email", [""])[0] or "").strip().lower()
+            if q_email:
+                orders = [o for o in orders if str((o.get("customer") or {}).get("email") or o.get("email") or "").strip().lower() == q_email]
             return self.send_json(200, orders)
+
+        # 3.2 API: Newsletter GET
+        if pathname == "/api/newsletter":
+            local_db = load_local_db()
+            em_data = collect_all_emails(local_db)
+            return self.send_json(200, {
+                "success": True,
+                "subscribers": em_data["allEmails"],
+                "subscriberDetails": em_data["subscriberDetails"],
+                "count": len(em_data["allEmails"])
+            })
+
+        # 3.3 API: Members ME GET
+        if pathname == "/api/members/me":
+            email = str(query.get("email", [""])[0] or "").strip().lower()
+            if not email:
+                return self.send_json(400, {"success": False, "error": "E-posta parametresi gerekli."})
+            local_db = load_local_db()
+            members = local_db.get("members", [])
+            member = next((m for m in members if str(m.get("email") or "").lower() == email), None)
+            if not member:
+                member = {
+                    "id": "MEM-GUEST",
+                    "fullname": email.split("@")[0],
+                    "email": email,
+                    "phone": "",
+                    "city": "İstanbul",
+                    "district": "Silivri",
+                    "address": "",
+                    "bonusPoints": 0
+                }
+            return self.send_json(200, {"success": True, "member": build_member_payload(local_db, member)})
+
+        # 3.4 API: Sync Web Data GET (For Stok Satis Takip App)
+        if pathname == "/api/sync/web-data":
+            local_db = load_local_db()
+            em_data = collect_all_emails(local_db)
+            enriched_members = [build_member_payload(local_db, m) for m in local_db.get("members", [])]
+            return self.send_json(200, {
+                "success": True,
+                "orders": local_db.get("orders", []),
+                "subscribers": em_data["allEmails"],
+                "subscriberDetails": em_data["subscriberDetails"],
+                "members": enriched_members
+            })
 
         # 4. Robots.txt, Sitemap.xml & Google Shopping XML Feed
         if pathname == "/robots.txt":
@@ -303,12 +485,34 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
         # Order Placement with Atomic Firestore Transaction
         if pathname == "/api/orders":
             items = body.get("items", [])
-            customer = body.get("customer", {})
+            customer = body.get("customer", {}) or {}
             if not items or not customer:
                 return self.send_json(400, {"success": False, "error": "Sipariş detayları ve ürünler zorunludur."})
 
-            order_id = "GL-" + str(int(time.time()))[-6:]
+            order_id = "GL-" + str(int(time.time() * 1000))[-6:]
             now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+            total_numeric = float(body.get("totalNumeric")) if body.get("totalNumeric") is not None else parse_numeric_total(body.get("total"))
+            earned_points = int(body.get("earnedPoints")) if body.get("earnedPoints") is not None else calc_order_points(total_numeric)
+            used_points = max(0, int(body.get("usedPoints") or 0))
+            cust_email = str(customer.get("email") or body.get("email") or "").strip().lower()
+            customer["email"] = cust_email
+            payment_method = body.get("paymentMethod") or "Havale / EFT"
+
+            new_order = {
+                "id": order_id,
+                "date": now_str,
+                "customer": customer,
+                "email": cust_email,
+                "paymentMethod": payment_method,
+                "items": items,
+                "total": body.get("total") or f"{total_numeric:.2f} ₺",
+                "totalNumeric": total_numeric,
+                "earnedPoints": earned_points,
+                "usedPoints": used_points,
+                "pointsApproved": False,
+                "status": "Onay Bekliyor",
+                "source": "web"
+            }
 
             # Check and atomically deduct stock in Firestore
             if db:
@@ -322,12 +526,10 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                             pid = item.get("id") or item.get("productId")
                             qty = float(item.get("qty") or item.get("quantity") or 1.0)
                             
-                            # Find matching product ref
                             prod_ref = db.collection("products").document(str(pid))
                             snap = prod_ref.get(transaction=txn)
                             
                             if not snap.exists:
-                                # Try with u6_ prefix
                                 prod_ref = db.collection("products").document(f"u6_p{pid}")
                                 snap = prod_ref.get(transaction=txn)
 
@@ -350,7 +552,6 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                     updated_stocks = process_order_transaction(transaction)
                     print(f"✅ [TRANSACTION BAŞARILI] Stoklar Firestore'da güvenle düşüldü: {updated_stocks}")
 
-                    # Update public_products with new stocks
                     for doc_id, st in updated_stocks.items():
                         try:
                             db.collection("public_products").document(doc_id).update({
@@ -362,28 +563,29 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                         except Exception:
                             pass
 
-                    # Write order document to 'orders'
-                    order_doc = {
-                        "id": order_id,
-                        "date": now_str,
-                        "createdAt": firestore.SERVER_TIMESTAMP,
-                        "customer": customer,
-                        "paymentMethod": body.get("paymentMethod", "Kredi Kartı"),
-                        "items": items,
-                        "total": float(body.get("total", 0)) if isinstance(body.get("total"), (int, float)) else 100.0,
-                        "status": "Hazırlanıyor",
-                        "source": "web"
-                    }
+                    order_doc = dict(new_order)
+                    order_doc["createdAt"] = firestore.SERVER_TIMESTAMP
                     db.collection("orders").document(order_id).set(order_doc)
 
-                    # Also create sale record in 'sales' for Stok Satış Takip app reports
+                    if cust_email and "@" in cust_email:
+                        try:
+                            db.collection("newsletter_subscribers").document(cust_email).set({
+                                "email": cust_email,
+                                "name": customer.get("fullname", ""),
+                                "phone": customer.get("phone", ""),
+                                "source": "Sipariş",
+                                "date": now_str
+                            }, merge=True)
+                        except Exception:
+                            pass
+
                     sale_doc = {
                         "id": int(order_id.replace("GL-", "")),
                         "user_id": 6,
-                        "total_amount": float(body.get("total", 0)) if isinstance(body.get("total"), (int, float)) else 100.0,
-                        "payment_type": body.get("paymentMethod", "Kredi Kartı"),
+                        "total_amount": total_numeric or 100.0,
+                        "payment_type": payment_method,
                         "created_at": now_str,
-                        "note": f"Web Siparişi: {customer.get('fullname', '')} ({customer.get('phone', '')})",
+                        "note": f"Web Siparişi ({order_id}): {customer.get('fullname', '')} ({customer.get('phone', '')}) - {cust_email}",
                         "items": items
                     }
                     db.collection("sales").document(f"u6_s{order_id.replace('GL-', '')}").set(sale_doc)
@@ -393,18 +595,200 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                 except Exception as ex:
                     print(f"[WARN] Firestore order transaction warning: {ex}")
 
-            # Also record in local database.json
-            if DB_PATH.exists():
+            # Record in local database.json
+            local_db = load_local_db()
+            if "orders" not in local_db:
+                local_db["orders"] = []
+            local_db["orders"].insert(0, new_order)
+
+            if cust_email and "@" in cust_email:
+                if "subscribers" not in local_db:
+                    local_db["subscribers"] = []
+                if cust_email not in local_db["subscribers"]:
+                    local_db["subscribers"].append(cust_email)
+                if "subscriberDetails" not in local_db:
+                    local_db["subscriberDetails"] = []
+                if not any(str(s.get("email") or "").lower() == cust_email for s in local_db["subscriberDetails"]):
+                    local_db["subscriberDetails"].insert(0, {
+                        "email": cust_email,
+                        "name": customer.get("fullname", ""),
+                        "phone": customer.get("phone", ""),
+                        "source": "Sipariş",
+                        "date": now_str
+                    })
+
+            save_local_db(local_db)
+            return self.send_json(201, {"success": True, "order": new_order})
+
+        # Order Approve & Loyalty Points Activation POST
+        if pathname == "/api/orders/approve":
+            order_id = str(body.get("orderId") or body.get("id") or "").strip()
+            if not order_id:
+                return self.send_json(400, {"success": False, "error": "orderId zorunludur."})
+            now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+            local_db = load_local_db()
+            orders = local_db.get("orders", [])
+            ord_obj = next((o for o in orders if o.get("id") == order_id), None)
+            if ord_obj:
+                ord_obj["pointsApproved"] = True
+                ord_obj["status"] = body.get("status") or "Onaylandı"
+                ord_obj["approvedAt"] = now_str
+                if ord_obj.get("earnedPoints") is None:
+                    ord_obj["earnedPoints"] = calc_order_points(ord_obj.get("totalNumeric") or ord_obj.get("total"))
+                save_local_db(local_db)
+
+            if db:
                 try:
-                    local_db = json.loads(DB_PATH.read_text(encoding="utf-8"))
-                    if "orders" not in local_db:
-                        local_db["orders"] = []
-                    local_db["orders"].insert(0, new_order)
-                    DB_PATH.write_text(json.dumps(local_db, ensure_ascii=False, indent=2), encoding="utf-8")
+                    db.collection("orders").document(order_id).set({
+                        "pointsApproved": True,
+                        "status": body.get("status") or "Onaylandı",
+                        "approvedAt": now_str
+                    }, merge=True)
                 except Exception:
                     pass
 
-            return self.send_json(201, {"success": True, "order": new_order})
+            updated_member = None
+            cust_email = ""
+            if ord_obj:
+                cust_email = str((ord_obj.get("customer") or {}).get("email") or ord_obj.get("email") or "").strip().lower()
+            if not cust_email:
+                cust_email = str(body.get("email") or "").strip().lower()
+
+            if cust_email:
+                m_obj = next((m for m in local_db.get("members", []) if str(m.get("email") or "").lower() == cust_email), None)
+                if m_obj:
+                    updated_member = build_member_payload(local_db, m_obj)
+                    if db:
+                        try:
+                            db.collection("web_members").document(cust_email).set({
+                                "approvedPoints": updated_member["approvedPoints"],
+                                "pendingPoints": updated_member["pendingPoints"],
+                                "updatedAt": now_str
+                            }, merge=True)
+                        except Exception:
+                            pass
+
+            return self.send_json(200, {
+                "success": True,
+                "message": f"Sipariş ({order_id}) ve kazanılan puanlar onaylandı!",
+                "order": ord_obj or {"id": order_id, "pointsApproved": True, "status": "Onaylandı"},
+                "member": updated_member
+            })
+
+        # Members Register (Fast & Standard) POST
+        if pathname == "/api/members/register":
+            email = str(body.get("email") or "").strip().lower()
+            fullname = str(body.get("fullname") or body.get("name") or "").strip()
+            phone = str(body.get("phone") or "").strip()
+            password = str(body.get("password") or "123456").strip()
+            city = str(body.get("city") or "İstanbul").strip()
+            district = str(body.get("district") or "Silivri").strip()
+            street = str(body.get("street") or "").strip()
+            address = str(body.get("address") or "").strip()
+
+            if not email or "@" not in email:
+                return self.send_json(400, {"success": False, "error": "Lütfen geçerli bir e-posta adresi giriniz."})
+
+            now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+            local_db = load_local_db()
+            if "members" not in local_db:
+                local_db["members"] = []
+
+            member = next((m for m in local_db["members"] if str(m.get("email") or "").lower() == email), None)
+            if member:
+                if fullname: member["fullname"] = fullname
+                if phone: member["phone"] = phone
+                if body.get("password"): member["password"] = password
+                if city: member["city"] = city
+                if district: member["district"] = district
+                if street: member["street"] = street
+                if address: member["address"] = address
+                member["updatedAt"] = now_str
+            else:
+                member = {
+                    "id": "MEM-" + str(int(time.time() * 1000))[-6:],
+                    "fullname": fullname or email.split("@")[0],
+                    "email": email,
+                    "phone": phone,
+                    "password": password,
+                    "city": city,
+                    "district": district,
+                    "street": street,
+                    "address": address,
+                    "bonusPoints": 0,
+                    "createdAt": now_str,
+                    "updatedAt": now_str
+                }
+                local_db["members"].insert(0, member)
+
+            if "subscribers" not in local_db:
+                local_db["subscribers"] = []
+            if email not in local_db["subscribers"]:
+                local_db["subscribers"].append(email)
+            if "subscriberDetails" not in local_db:
+                local_db["subscriberDetails"] = []
+            if not any(str(s.get("email") or "").lower() == email for s in local_db["subscriberDetails"]):
+                local_db["subscriberDetails"].insert(0, {
+                    "email": email,
+                    "name": member["fullname"],
+                    "phone": member["phone"],
+                    "source": body.get("source") or "Hızlı Üyelik",
+                    "date": now_str
+                })
+
+            save_local_db(local_db)
+            enriched = build_member_payload(local_db, member)
+
+            if db:
+                try:
+                    fs_member = dict(enriched)
+                    fs_member.pop("orders", None)
+                    db.collection("web_members").document(email).set(fs_member, merge=True)
+                    db.collection("newsletter_subscribers").document(email).set({
+                        "email": email,
+                        "name": member["fullname"],
+                        "phone": member["phone"],
+                        "source": body.get("source") or "Hızlı Üyelik",
+                        "date": now_str
+                    }, merge=True)
+                except Exception:
+                    pass
+
+            return self.send_json(200, {
+                "success": True,
+                "message": "Üyeliğiniz başarıyla oluşturuldu!",
+                "member": enriched
+            })
+
+        # Members Login POST
+        if pathname == "/api/members/login":
+            import re
+            identifier = str(body.get("email") or body.get("identifier") or "").strip().lower()
+            password = str(body.get("password") or "").strip()
+            if not identifier:
+                return self.send_json(400, {"success": False, "error": "E-posta veya telefon numarası giriniz."})
+
+            local_db = load_local_db()
+            clean_phone = re.sub(r"\D", "", identifier)[-10:]
+            member = None
+            for m in local_db.get("members", []):
+                m_email = str(m.get("email") or "").lower()
+                m_phone = re.sub(r"\D", "", str(m.get("phone") or ""))[-10:]
+                if m_email == identifier or (len(clean_phone) >= 10 and m_phone == clean_phone):
+                    member = m
+                    break
+
+            if not member:
+                return self.send_json(404, {"success": False, "error": "Bu e-posta ile kayıtlı üye bulunamadı. Hızlı Üyelik sekmesinden hemen kayıt olabilirsiniz."})
+
+            if member.get("password") and password and member.get("password") != password:
+                return self.send_json(401, {"success": False, "error": "Şifreniz hatalı. Lütfen kontrol edip tekrar deneyin."})
+
+            return self.send_json(200, {
+                "success": True,
+                "message": "Giriş başarılı!",
+                "member": build_member_payload(local_db, member)
+            })
 
         # Wholesale Inquiry POST
         if pathname == "/api/wholesale":
@@ -419,15 +803,11 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                 "estimatedVolume": body.get("estimatedVolume", ""),
                 "note": body.get("note", "")
             }
-            if DB_PATH.exists():
-                try:
-                    local_db = json.loads(DB_PATH.read_text(encoding="utf-8"))
-                    if "wholesaleInquiries" not in local_db:
-                        local_db["wholesaleInquiries"] = []
-                    local_db["wholesaleInquiries"].insert(0, new_inquiry)
-                    DB_PATH.write_text(json.dumps(local_db, ensure_ascii=False, indent=2), encoding="utf-8")
-                except Exception:
-                    pass
+            local_db = load_local_db()
+            if "wholesaleInquiries" not in local_db:
+                local_db["wholesaleInquiries"] = []
+            local_db["wholesaleInquiries"].insert(0, new_inquiry)
+            save_local_db(local_db)
             return self.send_json(200, {"success": True, "message": "Toptan satış talebiniz alındı."})
 
         # Newsletter POST
@@ -435,14 +815,32 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
             email = (body.get("email") or "").strip().lower()
             if not email or "@" not in email:
                 return self.send_json(400, {"error": "Geçerli bir e-posta adresi giriniz."})
-            if DB_PATH.exists():
+            now_str = time.strftime("%Y-%m-%d %H:%M:%S")
+            local_db = load_local_db()
+            if "subscribers" not in local_db:
+                local_db["subscribers"] = []
+            if email not in local_db["subscribers"]:
+                local_db["subscribers"].append(email)
+            if "subscriberDetails" not in local_db:
+                local_db["subscriberDetails"] = []
+            if not any(str(s.get("email") or "").lower() == email for s in local_db["subscriberDetails"]):
+                local_db["subscriberDetails"].insert(0, {
+                    "email": email,
+                    "name": body.get("name") or body.get("fullname") or "",
+                    "phone": body.get("phone") or "",
+                    "source": body.get("source") or "Web Bülten",
+                    "date": now_str
+                })
+            save_local_db(local_db)
+            if db:
                 try:
-                    local_db = json.loads(DB_PATH.read_text(encoding="utf-8"))
-                    if "subscribers" not in local_db:
-                        local_db["subscribers"] = []
-                    if email not in local_db["subscribers"]:
-                        local_db["subscribers"].append(email)
-                        DB_PATH.write_text(json.dumps(local_db, ensure_ascii=False, indent=2), encoding="utf-8")
+                    db.collection("newsletter_subscribers").document(email).set({
+                        "email": email,
+                        "name": body.get("name") or body.get("fullname") or "",
+                        "phone": body.get("phone") or "",
+                        "source": body.get("source") or "Web Bülten",
+                        "date": now_str
+                    }, merge=True)
                 except Exception:
                     pass
             return self.send_json(200, {"success": True, "message": "E-bülten kaydınız tamamlandı."})
@@ -591,9 +989,44 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
 
         return self.send_json(404, {"error": "Not Found"})
 
+    def do_PUT(self):
+        parsed = urllib.parse.urlparse(self.path)
+        pathname = parsed.path
+        content_len = int(self.headers.get("Content-Length", 0))
+        raw_body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else "{}"
+        try:
+            body = json.loads(raw_body)
+        except Exception:
+            body = {}
+
+        if pathname == "/api/members/profile":
+            email = str(body.get("email") or "").strip().lower()
+            if not email:
+                return self.send_json(400, {"success": False, "error": "E-posta gerekli."})
+            local_db = load_local_db()
+            member = next((m for m in local_db.get("members", []) if str(m.get("email") or "").lower() == email), None)
+            if not member:
+                return self.send_json(404, {"success": False, "error": "Üye bulunamadı."})
+            for k in ["fullname", "phone", "city", "district", "street", "address"]:
+                if body.get(k) is not None:
+                    member[k] = str(body.get(k)).strip()
+            member["updatedAt"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            save_local_db(local_db)
+            return self.send_json(200, {"success": True, "member": build_member_payload(local_db, member)})
+
+        if pathname == "/api/info":
+            local_db = load_local_db()
+            if "siteInfo" not in local_db:
+                local_db["siteInfo"] = {}
+            local_db["siteInfo"].update(body)
+            save_local_db(local_db)
+            return self.send_json(200, {"success": True, "siteInfo": local_db["siteInfo"]})
+
+        return self.send_json(404, {"error": "Not Found"})
+
 def run_server():
     server_address = ("", PORT)
-    httpd = HTTPServer(server_address, GallusMamaHandler)
+    httpd = ThreadingHTTPServer(server_address, GallusMamaHandler)
     print("====================================================")
     print(f"🚀 Gallus Mama Canlı Firestore Sunucusu Başlatıldı! (Port: {PORT})")
     print(f"🌐 Web Sitesi: http://localhost:{PORT}")

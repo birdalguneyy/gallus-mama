@@ -119,6 +119,148 @@ function checkAdminAuth(req) {
   return activeTokens.has(token) || token === ADMIN_PASSWORD || token.startsWith('admin_token_');
 }
 
+// Helper: Parse numeric price/total
+function parseNumericTotal(val) {
+  if (typeof val === 'number' && !isNaN(val)) return val;
+  if (!val) return 0;
+  let s = String(val).replace(/[^\d.,-]/g, '').trim();
+  if (!s) return 0;
+  if (s.includes('.') && s.includes(',')) {
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if (s.includes(',')) {
+    const parts = s.split(',');
+    if (parts[parts.length - 1].length === 2) s = s.replace(',', '.');
+    else s = s.replace(/,/g, '');
+  } else if (s.includes('.')) {
+    const parts = s.split('.');
+    if (parts[parts.length - 1].length === 3) s = s.replace(/\./g, '');
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+// Helper: Compute Loyalty Points (%1 * 100 = 100% of totalNumeric in points)
+function calcOrderPoints(totalNumeric) {
+  const num = parseNumericTotal(totalNumeric);
+  return Math.max(0, Math.round((num * 0.01) * 100));
+}
+
+// Helper: Collect all unique emails from subscribers, subscriberDetails, members, and orders
+function collectAllEmails(db) {
+  const emailSet = new Set();
+  const detailsMap = new Map();
+
+  for (const e of (db.subscribers || [])) {
+    const clean = String(e || '').trim().toLowerCase();
+    if (clean && clean.includes('@')) {
+      emailSet.add(clean);
+      if (!detailsMap.has(clean)) {
+        detailsMap.set(clean, { email: clean, name: '', source: 'Bülten', date: '' });
+      }
+    }
+  }
+
+  for (const d of (db.subscriberDetails || [])) {
+    const clean = String((d && d.email) || '').trim().toLowerCase();
+    if (clean && clean.includes('@')) {
+      emailSet.add(clean);
+      detailsMap.set(clean, {
+        email: clean,
+        name: d.name || d.fullname || '',
+        phone: d.phone || '',
+        source: d.source || 'Bülten',
+        date: d.date || d.createdAt || ''
+      });
+    }
+  }
+
+  for (const m of (db.members || [])) {
+    const clean = String((m && m.email) || '').trim().toLowerCase();
+    if (clean && clean.includes('@')) {
+      emailSet.add(clean);
+      const existing = detailsMap.get(clean) || {};
+      detailsMap.set(clean, {
+        email: clean,
+        name: m.fullname || existing.name || '',
+        phone: m.phone || existing.phone || '',
+        source: existing.source ? `${existing.source} + Üye` : 'Site Üyesi',
+        date: m.createdAt || existing.date || ''
+      });
+    }
+  }
+
+  for (const o of (db.orders || [])) {
+    const c = (o && o.customer) || {};
+    const clean = String(c.email || o.email || '').trim().toLowerCase();
+    if (clean && clean.includes('@')) {
+      emailSet.add(clean);
+      if (!detailsMap.has(clean)) {
+        detailsMap.set(clean, {
+          email: clean,
+          name: c.fullname || '',
+          phone: c.phone || '',
+          source: 'Sipariş Müşterisi',
+          date: o.date || ''
+        });
+      }
+    }
+  }
+
+  return {
+    allEmails: Array.from(emailSet),
+    subscriberDetails: Array.from(detailsMap.values())
+  };
+}
+
+// Helper: Enrich Member with live calculated points & orders
+function buildMemberPayload(db, memberObj) {
+  if (!memberObj) return null;
+  const email = (memberObj.email || '').trim().toLowerCase();
+  const phoneClean = (memberObj.phone || '').replace(/\D/g, '').slice(-10);
+  const allOrders = Array.isArray(db.orders) ? db.orders : [];
+  const memberOrders = allOrders.filter(o => {
+    const c = o.customer || {};
+    const oEmail = (c.email || o.email || '').trim().toLowerCase();
+    const oPhone = (c.phone || '').replace(/\D/g, '').slice(-10);
+    if (email && oEmail && email === oEmail) return true;
+    if (phoneClean && phoneClean.length >= 10 && oPhone === phoneClean) return true;
+    return false;
+  });
+
+  let approvedEarned = 0;
+  let pendingEarned = 0;
+  let totalUsed = 0;
+
+  for (const o of memberOrders) {
+    const tNum = o.totalNumeric !== undefined ? Number(o.totalNumeric) : parseNumericTotal(o.total);
+    const pts = o.earnedPoints !== undefined ? Number(o.earnedPoints) : calcOrderPoints(tNum);
+    const used = Number(o.usedPoints || 0);
+    totalUsed += used;
+    if (o.pointsApproved === true || o.status === 'Onaylandı' || o.status === 'Tamamlandı') {
+      approvedEarned += pts;
+    } else if (o.status !== 'İptal' && o.status !== 'İptal Edildi') {
+      pendingEarned += pts;
+    }
+  }
+
+  const bonus = Number(memberObj.bonusPoints || 0);
+  const approvedPoints = Math.max(0, approvedEarned + bonus - totalUsed);
+  const pendingPoints = Math.max(0, pendingEarned);
+
+  const safeMember = { ...memberObj };
+  delete safeMember.password;
+
+  return {
+    ...safeMember,
+    approvedPoints,
+    pendingPoints,
+    totalEarnedPoints: approvedEarned + bonus,
+    usedPoints: totalUsed,
+    pointsTlValue: Number((approvedPoints / 100).toFixed(2)),
+    orders: memberOrders
+  };
+}
+
 // Helper: Dynamic SEO Meta Resolver
 function getRouteMetadata(pathname, db) {
   const defaultMeta = {
@@ -736,7 +878,11 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/orders') {
     const db = getDatabase();
     if (method === 'GET') {
-      if (!checkAdminAuth(req)) return sendJson(res, 401, { error: 'Yetkisiz erişim.' });
+      if (parsedUrl.query && parsedUrl.query.email) {
+        const qEmail = String(parsedUrl.query.email).trim().toLowerCase();
+        const filtered = (db.orders || []).filter(o => ((o.customer && o.customer.email) || o.email || '').toLowerCase() === qEmail);
+        return sendJson(res, 200, filtered);
+      }
       return sendJson(res, 200, db.orders || []);
     }
 
@@ -795,18 +941,47 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
+      const totalNumeric = body.totalNumeric !== undefined ? Number(body.totalNumeric) : parseNumericTotal(body.total);
+      const earnedPoints = body.earnedPoints !== undefined ? Number(body.earnedPoints) : calcOrderPoints(totalNumeric);
+      const usedPoints = Math.max(0, Number(body.usedPoints || 0));
+      const custEmail = String((body.customer && body.customer.email) || body.email || '').trim().toLowerCase();
+
       const newOrder = {
         id: 'GL-' + Date.now().toString().slice(-6),
         date: new Date().toISOString(),
-        customer: body.customer,
-        paymentMethod: body.paymentMethod || 'Kredi Kartı',
+        customer: {
+          ...body.customer,
+          email: custEmail
+        },
+        email: custEmail,
+        paymentMethod: body.paymentMethod || 'Havale / EFT',
         items: body.items,
         total: body.total,
-        status: 'Hazırlanıyor'
+        totalNumeric,
+        earnedPoints,
+        usedPoints,
+        pointsApproved: false,
+        status: 'Onay Bekliyor',
+        source: 'web'
       };
 
       if (!db.orders) db.orders = [];
       db.orders.unshift(newOrder);
+
+      if (custEmail && custEmail.includes('@')) {
+        if (!db.subscribers) db.subscribers = [];
+        if (!db.subscribers.includes(custEmail)) db.subscribers.push(custEmail);
+        if (!db.subscriberDetails) db.subscriberDetails = [];
+        if (!db.subscriberDetails.some(s => (s.email || '').toLowerCase() === custEmail)) {
+          db.subscriberDetails.unshift({
+            email: custEmail,
+            name: (body.customer && body.customer.fullname) || '',
+            phone: (body.customer && body.customer.phone) || '',
+            source: 'Sipariş',
+            date: newOrder.date
+          });
+        }
+      }
       saveDatabase(db);
 
       // Record to Firestore 'orders' and 'sales' if firestoreDb is available
@@ -816,14 +991,23 @@ const server = http.createServer(async (req, res) => {
             ...newOrder,
             source: 'web'
           });
+          if (custEmail && custEmail.includes('@')) {
+            await firestoreDb.collection('newsletter_subscribers').doc(custEmail).set({
+              email: custEmail,
+              name: (body.customer && body.customer.fullname) || '',
+              phone: (body.customer && body.customer.phone) || '',
+              source: 'Sipariş',
+              date: newOrder.date
+            }, { merge: true });
+          }
           const saleId = Number(newOrder.id.replace('GL-', '')) || Date.now();
           await firestoreDb.collection('sales').doc(`u6_s${saleId}`).set({
             id: saleId,
             user_id: 6,
-            total_amount: typeof body.total === 'number' ? body.total : 100,
-            payment_type: body.paymentMethod || 'Kredi Kartı',
+            total_amount: totalNumeric || 100,
+            payment_type: body.paymentMethod || 'Havale / EFT',
             created_at: new Date().toISOString(),
-            note: `Web Siparişi: ${body.customer.fullname || ''} (${body.customer.phone || ''})`,
+            note: `Web Siparişi: ${body.customer.fullname || ''} (${body.customer.phone || ''}) - ${custEmail}`,
             items: body.items
           });
         } catch (fsErr) {
@@ -833,6 +1017,237 @@ const server = http.createServer(async (req, res) => {
 
       return sendJson(res, 201, { success: true, order: newOrder });
     }
+  }
+
+  // Order Approve & Loyalty Points Activation: POST
+  if (pathname === '/api/orders/approve' && method === 'POST') {
+    const body = await parseJsonBody(req);
+    const orderId = String(body.orderId || body.id || '').trim();
+    if (!orderId) return sendJson(res, 400, { success: false, error: 'orderId zorunludur.' });
+
+    const db = getDatabase();
+    if (!db.orders) db.orders = [];
+    const ord = db.orders.find(o => o.id === orderId);
+    const nowIso = new Date().toISOString();
+
+    if (ord) {
+      ord.pointsApproved = true;
+      ord.status = body.status || 'Onaylandı';
+      ord.approvedAt = nowIso;
+      if (ord.earnedPoints === undefined) {
+        ord.earnedPoints = calcOrderPoints(ord.totalNumeric !== undefined ? ord.totalNumeric : ord.total);
+      }
+      saveDatabase(db);
+    }
+
+    if (firestoreDb) {
+      try {
+        await firestoreDb.collection('orders').doc(orderId).set({
+          pointsApproved: true,
+          status: body.status || 'Onaylandı',
+          approvedAt: nowIso
+        }, { merge: true });
+      } catch (e) {}
+    }
+
+    let updatedMember = null;
+    const custEmail = ord ? String((ord.customer && ord.customer.email) || ord.email || '').trim().toLowerCase() : String(body.email || '').trim().toLowerCase();
+    if (custEmail && Array.isArray(db.members)) {
+      const m = db.members.find(x => (x.email || '').toLowerCase() === custEmail);
+      if (m) {
+        updatedMember = buildMemberPayload(db, m);
+        if (firestoreDb) {
+          try {
+            await firestoreDb.collection('web_members').doc(custEmail).set({
+              approvedPoints: updatedMember.approvedPoints,
+              pendingPoints: updatedMember.pendingPoints,
+              updatedAt: nowIso
+            }, { merge: true });
+          } catch (e) {}
+        }
+      }
+    }
+
+    return sendJson(res, 200, {
+      success: true,
+      message: `Sipariş (${orderId}) ve kazanılan puanlar onaylandı!`,
+      order: ord || { id: orderId, pointsApproved: true, status: 'Onaylandı' },
+      member: updatedMember
+    });
+  }
+
+  // Members: Fast Register / Full Register
+  if (pathname === '/api/members/register' && method === 'POST') {
+    const body = await parseJsonBody(req);
+    const email = String(body.email || '').trim().toLowerCase();
+    const fullname = String(body.fullname || body.name || '').trim();
+    const phone = String(body.phone || '').trim();
+    const password = String(body.password || '123456').trim();
+    const city = String(body.city || 'İstanbul').trim();
+    const district = String(body.district || 'Silivri').trim();
+    const street = String(body.street || '').trim();
+    const address = String(body.address || '').trim();
+
+    if (!email || !email.includes('@')) {
+      return sendJson(res, 400, { success: false, error: 'Lütfen geçerli bir e-posta adresi giriniz.' });
+    }
+
+    const db = getDatabase();
+    if (!db.members) db.members = [];
+    const nowIso = new Date().toISOString();
+
+    let member = db.members.find(m => (m.email || '').toLowerCase() === email);
+    if (member) {
+      if (fullname) member.fullname = fullname;
+      if (phone) member.phone = phone;
+      if (body.password) member.password = password;
+      if (city) member.city = city;
+      if (district) member.district = district;
+      if (street) member.street = street;
+      if (address) member.address = address;
+      member.updatedAt = nowIso;
+    } else {
+      member = {
+        id: 'MEM-' + Date.now().toString().slice(-6),
+        fullname: fullname || email.split('@')[0],
+        email,
+        phone,
+        password,
+        city,
+        district,
+        street,
+        address,
+        bonusPoints: 0,
+        createdAt: nowIso,
+        updatedAt: nowIso
+      };
+      db.members.unshift(member);
+    }
+
+    if (!db.subscribers) db.subscribers = [];
+    if (!db.subscribers.includes(email)) db.subscribers.push(email);
+    if (!db.subscriberDetails) db.subscriberDetails = [];
+    if (!db.subscriberDetails.some(s => (s.email || '').toLowerCase() === email)) {
+      db.subscriberDetails.unshift({
+        email,
+        name: member.fullname,
+        phone: member.phone,
+        source: body.source || 'Hızlı Üyelik',
+        date: nowIso
+      });
+    }
+
+    saveDatabase(db);
+    const enriched = buildMemberPayload(db, member);
+
+    if (firestoreDb) {
+      try {
+        const fsMember = { ...enriched };
+        delete fsMember.orders;
+        await firestoreDb.collection('web_members').doc(email).set({
+          ...fsMember,
+          updatedAt: nowIso
+        }, { merge: true });
+        await firestoreDb.collection('newsletter_subscribers').doc(email).set({
+          email,
+          name: member.fullname,
+          phone: member.phone,
+          source: body.source || 'Hızlı Üyelik',
+          date: nowIso
+        }, { merge: true });
+      } catch (e) {}
+    }
+
+    return sendJson(res, 200, {
+      success: true,
+      message: 'Üyeliğiniz başarıyla oluşturuldu!',
+      member: enriched
+    });
+  }
+
+  // Members: Login
+  if (pathname === '/api/members/login' && method === 'POST') {
+    const body = await parseJsonBody(req);
+    const identifier = String(body.email || body.identifier || '').trim().toLowerCase();
+    const password = String(body.password || '').trim();
+
+    if (!identifier) {
+      return sendJson(res, 400, { success: false, error: 'E-posta veya telefon numarası giriniz.' });
+    }
+
+    const db = getDatabase();
+    if (!db.members) db.members = [];
+    const cleanPhone = identifier.replace(/\D/g, '').slice(-10);
+
+    const member = db.members.find(m => {
+      const mEmail = (m.email || '').toLowerCase();
+      const mPhone = (m.phone || '').replace(/\D/g, '').slice(-10);
+      return mEmail === identifier || (cleanPhone.length >= 10 && mPhone === cleanPhone);
+    });
+
+    if (!member) {
+      return sendJson(res, 404, { success: false, error: 'Bu e-posta ile kayıtlı üye bulunamadı. Hızlı Üyelik sekmesinden hemen kayıt olabilirsiniz.' });
+    }
+
+    if (member.password && password && member.password !== password) {
+      return sendJson(res, 401, { success: false, error: 'Şifreniz hatalı. Lütfen kontrol edip tekrar deneyin.' });
+    }
+
+    const enriched = buildMemberPayload(db, member);
+    return sendJson(res, 200, {
+      success: true,
+      message: 'Giriş başarılı!',
+      member: enriched
+    });
+  }
+
+  // Members: Get Profile & Live Points
+  if (pathname === '/api/members/me' && method === 'GET') {
+    const email = String((parsedUrl.query && parsedUrl.query.email) || '').trim().toLowerCase();
+    if (!email) return sendJson(res, 400, { success: false, error: 'E-posta parametresi gerekli.' });
+
+    const db = getDatabase();
+    if (!db.members) db.members = [];
+    let member = db.members.find(m => (m.email || '').toLowerCase() === email);
+    if (!member) {
+      member = {
+        id: 'MEM-GUEST',
+        fullname: email.split('@')[0],
+        email,
+        phone: '',
+        city: 'İstanbul',
+        district: 'Silivri',
+        address: '',
+        bonusPoints: 0
+      };
+    }
+    const enriched = buildMemberPayload(db, member);
+    return sendJson(res, 200, { success: true, member: enriched });
+  }
+
+  // Members: Update Profile / Address
+  if (pathname === '/api/members/profile' && method === 'PUT') {
+    const body = await parseJsonBody(req);
+    const email = String(body.email || '').trim().toLowerCase();
+    if (!email) return sendJson(res, 400, { success: false, error: 'E-posta gerekli.' });
+
+    const db = getDatabase();
+    if (!db.members) db.members = [];
+    let member = db.members.find(m => (m.email || '').toLowerCase() === email);
+    if (!member) {
+      return sendJson(res, 404, { success: false, error: 'Üye bulunamadı.' });
+    }
+
+    if (body.fullname !== undefined) member.fullname = String(body.fullname).trim();
+    if (body.phone !== undefined) member.phone = String(body.phone).trim();
+    if (body.city !== undefined) member.city = String(body.city).trim();
+    if (body.district !== undefined) member.district = String(body.district).trim();
+    if (body.street !== undefined) member.street = String(body.street).trim();
+    if (body.address !== undefined) member.address = String(body.address).trim();
+    member.updatedAt = new Date().toISOString();
+
+    saveDatabase(db);
+    return sendJson(res, 200, { success: true, member: buildMemberPayload(db, member) });
   }
 
   // Wholesale B2B Inquiry: POST
@@ -856,7 +1271,18 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, { success: true, message: 'Toptan satış talebiniz alındı. En kısa sürede aranacaksınız.' });
   }
 
-  // Newsletter: POST
+  // Newsletter: GET & POST
+  if (pathname === '/api/newsletter' && method === 'GET') {
+    const db = getDatabase();
+    const { allEmails, subscriberDetails } = collectAllEmails(db);
+    return sendJson(res, 200, {
+      success: true,
+      subscribers: allEmails,
+      subscriberDetails,
+      count: allEmails.length
+    });
+  }
+
   if (pathname === '/api/newsletter' && method === 'POST') {
     const body = await parseJsonBody(req);
     const email = (body.email || '').trim().toLowerCase();
@@ -864,10 +1290,46 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 400, { error: 'Geçerli bir e-posta adresi giriniz.' });
     }
     const db = getDatabase();
+    const nowIso = new Date().toISOString();
     if (!db.subscribers) db.subscribers = [];
     if (!db.subscribers.includes(email)) db.subscribers.push(email);
+    if (!db.subscriberDetails) db.subscriberDetails = [];
+    if (!db.subscriberDetails.some(s => (s.email || '').toLowerCase() === email)) {
+      db.subscriberDetails.unshift({
+        email,
+        name: body.name || body.fullname || '',
+        phone: body.phone || '',
+        source: body.source || 'Web Bülten',
+        date: nowIso
+      });
+    }
     saveDatabase(db);
+    if (firestoreDb) {
+      try {
+        await firestoreDb.collection('newsletter_subscribers').doc(email).set({
+          email,
+          name: body.name || body.fullname || '',
+          phone: body.phone || '',
+          source: body.source || 'Web Bülten',
+          date: nowIso
+        }, { merge: true });
+      } catch (e) {}
+    }
     return sendJson(res, 200, { success: true, message: 'Bültenimize başarıyla kaydoldunuz!' });
+  }
+
+  // Sync Endpoint for Stok-Satis-Takip App (Orders + Newsletter Emails + Members)
+  if (pathname === '/api/sync/web-data' && method === 'GET') {
+    const db = getDatabase();
+    const { allEmails, subscriberDetails } = collectAllEmails(db);
+    const enrichedMembers = (db.members || []).map(m => buildMemberPayload(db, m));
+    return sendJson(res, 200, {
+      success: true,
+      orders: db.orders || [],
+      subscribers: allEmails,
+      subscriberDetails,
+      members: enrichedMembers
+    });
   }
 
   // --- STATIC FILES & MULTI-PAGE ROUTING ---

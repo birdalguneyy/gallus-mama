@@ -354,13 +354,15 @@
 
           <!-- Account Button (Desktop only - Mobile has bottom bar) -->
           <a 
+            id="header-account-btn"
             href="/hesabim" 
             onclick="navigate('/hesabim', event)" 
-            class="hidden md:inline-flex p-2.5 rounded-xl hover:bg-gray-100 text-gray-700 transition items-center gap-1.5 text-xs font-semibold"
-            title="Hesabım & Sipariş Takibi"
+            class="hidden md:inline-flex px-3 py-2 rounded-xl hover:bg-gray-100 border border-transparent hover:border-gray-200 text-gray-700 transition items-center gap-1.5 text-xs font-bold"
+            title="Üyelik, Puanlarım & Sipariş Takibi"
           >
-            <i data-lucide="user" class="w-4 h-4 text-gray-600"></i>
-            <span>Hesabım</span>
+            <i data-lucide="user-check" class="w-4 h-4 text-gallus-primary"></i>
+            <span id="header-account-label">Üye Ol / Giriş</span>
+            <span id="header-points-badge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">⭐ 0 Puan</span>
           </a>
 
           <!-- Favorites Button (Desktop only - Mobile has bottom bar) -->
@@ -707,9 +709,10 @@
       <span>Sepetim</span>
       <span id="bottom-cart-badge" class="absolute top-0.5 right-1 w-4 h-4 bg-gallus-accent text-white rounded-full text-[9px] font-black flex items-center justify-center">0</span>
     </button>
-    <a href="/hesabim" onclick="navigate('/hesabim', event)" class="flex flex-col items-center py-1 px-2 hover:text-gallus-primary">
+    <a href="/hesabim" onclick="navigate('/hesabim', event)" class="relative flex flex-col items-center py-1 px-2 hover:text-gallus-primary">
       <i data-lucide="user" class="w-5 h-5 mb-0.5"></i>
-      <span>Hesabım</span>
+      <span id="bottom-account-label">Üyelik</span>
+      <span id="bottom-points-badge" class="hidden absolute -top-0.5 right-0 px-1 bg-amber-400 text-gallus-dark rounded-full text-[8px] font-black">⭐</span>
     </a>
   </nav>
 
@@ -1195,6 +1198,8 @@
       cart: [], // [{ productId, qty }]
       favorites: [], // [productId]
       orders: [],
+      member: null,
+      useLoyaltyPoints: false,
       appliedCoupon: null,
       currentRoute: '/',
       filterCategory: null,
@@ -2933,11 +2938,27 @@
         if (savedFav) appState.favorites = JSON.parse(savedFav);
       } catch (e) { appState.favorites = []; }
 
-      // 5. Load Orders
+      // 5. Load Orders & Member Session
       try {
         const savedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
         if (savedOrders) appState.orders = JSON.parse(savedOrders);
       } catch (e) { appState.orders = []; }
+
+      try {
+        const savedMember = localStorage.getItem('gallus_member_v1');
+        if (savedMember) {
+          appState.member = JSON.parse(savedMember);
+          refreshMemberProfile(false);
+        }
+      } catch (e) { appState.member = null; }
+
+      // Also sync orders list from server
+      fetch('/api/orders').then(r => r.ok ? r.json() : null).then(srvOrders => {
+        if (Array.isArray(srvOrders) && srvOrders.length > 0) {
+          appState.orders = srvOrders;
+          localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(appState.orders));
+        }
+      }).catch(() => {});
 
       // 6. Load Coupon
       appState.appliedCoupon = localStorage.getItem(STORAGE_KEYS.COUPON) || null;
@@ -3078,7 +3099,7 @@
         renderCartPage(viewport);
       } else if (cleanPath === '/odeme') {
         renderCheckoutPage(viewport);
-      } else if (cleanPath === '/hesabim') {
+      } else if (cleanPath === '/hesabim' || cleanPath === '/uyelik' || cleanPath === '/giris' || cleanPath === '/kayit') {
         renderAccountPage(viewport);
       } else if (cleanPath === '/favorilerim') {
         renderFavoritesPage(viewport);
@@ -4283,6 +4304,50 @@
     /* ==========================================================
        G. PAGE 5: CHECKOUT PAGE (Phase 7)
        ========================================================== */
+    function selectQuickRegion(regionText) {
+      const cityInput = document.getElementById('chk-city');
+      const streetInput = document.getElementById('chk-street');
+      if (cityInput) {
+        cityInput.value = regionText;
+        saveCheckoutDraft();
+      }
+      if (streetInput && !streetInput.value) {
+        streetInput.focus();
+      }
+    }
+
+    function appendDeliveryNoteChip(chipText) {
+      const noteInput = document.getElementById('chk-note');
+      if (!noteInput) return;
+      if (noteInput.value && !noteInput.value.includes(chipText)) {
+        noteInput.value = noteInput.value.trim() + ' — ' + chipText;
+      } else if (!noteInput.value) {
+        noteInput.value = chipText;
+      }
+      saveCheckoutDraft();
+    }
+
+    function saveCheckoutDraft() {
+      try {
+        const draft = {
+          fullname: document.getElementById('chk-fullname')?.value || '',
+          phone: document.getElementById('chk-phone')?.value || '',
+          email: document.getElementById('chk-email')?.value || '',
+          city: document.getElementById('chk-city')?.value || '',
+          street: document.getElementById('chk-street')?.value || '',
+          address: document.getElementById('chk-address')?.value || '',
+          note: document.getElementById('chk-note')?.value || ''
+        };
+        localStorage.setItem('gallus_checkout_draft_v1', JSON.stringify(draft));
+      } catch (e) {}
+    }
+
+    function toggleLoyaltyPointsInCheckout(checked) {
+      appState.useLoyaltyPoints = Boolean(checked);
+      saveCheckoutDraft();
+      renderCheckoutPage(document.getElementById('app-viewport'));
+    }
+
     function renderCheckoutPage(container) {
       document.title = "Siparişi Tamamla | Gallus Mama";
 
@@ -4304,81 +4369,161 @@
       });
       const isFreeShipping = (subtotal >= 750);
       const shippingCost = isFreeShipping ? 0 : 49;
-      const discount = (appState.appliedCoupon === 'GALLUS10') ? (subtotal * 0.10) : 0;
-      const grandTotal = Math.max(0, subtotal + shippingCost - discount);
+      const couponDiscount = (appState.appliedCoupon === 'GALLUS10') ? (subtotal * 0.10) : 0;
+
+      const availableApprovedPoints = (appState.member && Number(appState.member.approvedPoints) > 0) ? Number(appState.member.approvedPoints) : 0;
+      const maxPointsTl = Number((availableApprovedPoints / 100).toFixed(2));
+      const basePayable = Math.max(0, subtotal + shippingCost - couponDiscount);
+      const pointsDiscountTl = (appState.useLoyaltyPoints && availableApprovedPoints > 0) ? Math.min(basePayable, maxPointsTl) : 0;
+      const usedPointsCount = Math.round(pointsDiscountTl * 100);
+      const grandTotal = Math.max(0, Number((basePayable - pointsDiscountTl).toFixed(2)));
+      const earnedPoints = Math.max(0, Math.round((grandTotal * 0.01) * 100));
+
+      let draft = {};
+      try {
+        draft = JSON.parse(localStorage.getItem('gallus_checkout_draft_v1') || '{}');
+      } catch (e) {}
+      const mem = appState.member || {};
+      const preName = escapeHtml(draft.fullname || mem.fullname || '');
+      const prePhone = escapeHtml(draft.phone || mem.phone || '');
+      const preEmail = escapeHtml(draft.email || mem.email || '');
+      const preCity = escapeHtml(draft.city || (mem.city && mem.district ? `${mem.city} / ${mem.district}` : (mem.district || 'İstanbul / Silivri')));
+      const preStreet = escapeHtml(draft.street || mem.street || '');
+      const preAddress = escapeHtml(draft.address || mem.address || '');
+      const preNote = escapeHtml(draft.note || '');
+
+      const quickRegions = [
+        'İstanbul / Silivri Merkez',
+        'Silivri / Değirmenköy',
+        'Silivri / Çantaköy',
+        'Silivri / Gümüşyaka',
+        'Silivri / Selimpaşa',
+        'Silivri / Kavaklı - Ortaköy',
+        'Tekirdağ / Çorlu',
+        'Tekirdağ / Çerkezköy',
+        'İstanbul (Avrupa Yakası)',
+        'İstanbul (Anadolu Yakası)',
+        'Diğer İl (Anlaşmalı Kargo)'
+      ];
 
       container.innerHTML = `
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           
-          <h1 class="text-2xl sm:text-3xl font-black text-gallus-dark mb-2">Güvenli Sipariş ve Ödeme</h1>
-          <p class="text-xs text-gray-500 mb-8">Lütfen teslimat ve ödeme bilgilerinizi eksiksiz doldurun.</p>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-black text-gallus-dark">Hızlı Sipariş ve Kolay Teslimat</h1>
+              <p class="text-xs text-gray-500 mt-1">Bölgenizi tek tıkla seçin, adresinizi rahatça girin ve siparişinizden <strong>+${earnedPoints} Puan</strong> kazanın.</p>
+            </div>
+            ${!appState.member ? `
+              <a href="/hesabim" onclick="navigate('/hesabim', event)" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold hover:bg-amber-100 transition self-start">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-600"></i>
+                <span>Üye Girişi Yap (Kayıtlı Adres & Puan Kullan)</span>
+              </a>
+            ` : `
+              <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold self-start">
+                <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+                <span>Hoş geldiniz, ${escapeHtml(appState.member.fullname)} (⭐ ${availableApprovedPoints} Onaylı Puan)</span>
+              </div>
+            `}
+          </div>
 
-          <form id="checkout-page-form" onsubmit="handleFullCheckoutSubmit(event)">
+          <form id="checkout-page-form" onsubmit="handleFullCheckoutSubmit(event)" oninput="saveCheckoutDraft()">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
               <!-- Left Form Fields -->
               <div class="lg:col-span-8 space-y-6">
                 
-                <!-- Step 1: Teslimat Bilgileri -->
-                <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-4">
-                  <div class="flex items-center gap-2 pb-3 border-b border-gray-100">
-                    <span class="w-6 h-6 rounded-full bg-gallus-primary text-white text-xs font-black flex items-center justify-center">1</span>
-                    <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider">Teslimat & İletişim Bilgileri</h2>
+                <!-- Step 1: İletişim & Rahat Adres Girişi -->
+                <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-5">
+                  <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                    <div class="flex items-center gap-2">
+                      <span class="w-6 h-6 rounded-full bg-gallus-primary text-white text-xs font-black flex items-center justify-center">1</span>
+                      <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider">İletişim & Kolay Adres Bilgileri</h2>
+                    </div>
+                    <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">⚡ Otomatik Kaydedilir</span>
                   </div>
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-xs font-bold text-gray-700 mb-1">Ad Soyad <span class="text-rose-500">*</span></label>
-                      <input type="text" id="chk-fullname" required placeholder="Örn: Ahmet Yılmaz" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                      <label class="block text-xs font-bold text-gray-700 mb-1">Adınız Soyadınız <span class="text-rose-500">*</span></label>
+                      <input type="text" id="chk-fullname" required value="${preName}" placeholder="Örn: Ahmet Yılmaz" class="w-full text-xs px-3.5 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary focus:ring-2 focus:ring-emerald-100 outline-none">
                     </div>
                     <div>
-                      <label class="block text-xs font-bold text-gray-700 mb-1">Telefon Numarası <span class="text-rose-500">*</span></label>
-                      <input type="tel" id="chk-phone" required placeholder="05XX XXX XX XX" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                      <label class="block text-xs font-bold text-gray-700 mb-1">Telefon Numaranız (WhatsApp) <span class="text-rose-500">*</span></label>
+                      <input type="tel" id="chk-phone" required value="${prePhone}" placeholder="05XX XXX XX XX" class="w-full text-xs px-3.5 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary focus:ring-2 focus:ring-emerald-100 outline-none">
                     </div>
                     <div class="sm:col-span-2">
-                      <label class="block text-xs font-bold text-gray-700 mb-1">İl ve İlçe <span class="text-rose-500">*</span></label>
-                      <input type="text" id="chk-city" required placeholder="Örn: İstanbul / Silivri veya Tekirdağ / Çorlu" class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                      <label class="block text-xs font-bold text-gray-700 mb-1">E-Posta Adresiniz <span class="text-rose-500">*</span> <span class="text-[11px] font-semibold text-amber-700 ml-1">(🎁 Sipariş sonrası tek tıkla hızlı üyelik ve +${earnedPoints} Puan kazanımı için)</span></label>
+                      <input type="email" id="chk-email" required value="${preEmail}" placeholder="ornek@eposta.com" class="w-full text-xs px-3.5 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary focus:ring-2 focus:ring-emerald-100 outline-none">
+                    </div>
+                  </div>
+
+                  <!-- Quick Region / District Selector Pills -->
+                  <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                      <label class="text-xs font-black text-gallus-dark flex items-center gap-1.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gallus-primary"></i>
+                        <span>Hızlı Bölge / İlçe Seçimi (Tek Tıkla Doldur):</span>
+                      </label>
+                      <span class="text-[10px] text-gray-500">Seçtiğiniz bölge aşağıya otomatik yazılır</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                      ${quickRegions.map(reg => `
+                        <button type="button" onclick="selectQuickRegion('${reg}')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-white border border-gray-200 hover:border-gallus-primary hover:bg-emerald-50 text-gray-700 hover:text-gallus-primary transition shadow-sm">
+                          📍 ${reg}
+                        </button>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  <!-- Structured Comfortable Address Inputs -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 mb-1">İl / İlçe / Bölge <span class="text-rose-500">*</span></label>
+                      <input type="text" id="chk-city" required value="${preCity}" placeholder="Örn: Silivri / Değirmenköy" class="w-full text-xs px-3.5 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary focus:ring-2 focus:ring-emerald-100 outline-none">
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 mb-1">Mahalle / Cadde / Sokak / Köy <span class="text-rose-500">*</span></label>
+                      <input type="text" id="chk-street" required value="${preStreet}" placeholder="Örn: Fevzipaşa Mah. Çiftlik Cad." class="w-full text-xs px-3.5 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary focus:ring-2 focus:ring-emerald-100 outline-none">
                     </div>
                     <div class="sm:col-span-2">
-                      <label class="block text-xs font-bold text-gray-700 mb-1">Açık Teslimat Adresi <span class="text-rose-500">*</span></label>
-                      <textarea id="chk-address" required rows="2" placeholder="Mahalle, cadde, sokak, bina ve daire no..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
+                      <label class="block text-xs font-bold text-gray-700 mb-1">Bina No, Daire / Çiftlik Kapı Tarifi ve Açık Adres <span class="text-rose-500">*</span></label>
+                      <textarea id="chk-address" required rows="2" placeholder="Bina/Kapı No, Daire No veya bilinen bir nokta tarifi (Örn: PTT yanı, mavi kapılı müstakil ev)..." class="w-full text-xs px-3.5 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary focus:ring-2 focus:ring-emerald-100 outline-none">${preAddress}</textarea>
                     </div>
-                    <div class="sm:col-span-2">
-                      <label class="block text-xs font-bold text-gray-700 mb-1">Sipariş Notu (Opsiyonel)</label>
-                      <input type="text" id="chk-note" placeholder="Kurye için kapı zili, bırakılacak yer vb." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                    <div class="sm:col-span-2 space-y-2">
+                      <label class="block text-xs font-bold text-gray-700">Teslimat Notu (İsteğe Bağlı — Hızlı Seçebilirsiniz)</label>
+                      <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onclick="appendDeliveryNoteChip('Gelmeden 10 dk önce arayın')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition">📞 Gelmeden 10 dk önce arayın</button>
+                        <button type="button" onclick="appendDeliveryNoteChip('Kapıya / Bahçe girişine bırakabilirsiniz')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition">🔔 Kapıya / Bahçeye bırakabilirsiniz</button>
+                        <button type="button" onclick="appendDeliveryNoteChip('Güvenliğe / Komşuya teslim edilebilir')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition">🏪 Güvenliğe / Komşuya bırakın</button>
+                        <button type="button" onclick="appendDeliveryNoteChip('Konum WhatsApp ile gönderilecek')" class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition">📍 Konum WhatsApp'tan atılacak</button>
+                      </div>
+                      <input type="text" id="chk-note" value="${preNote}" placeholder="Kurye için ek teslimat notunuz..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
                     </div>
                   </div>
                 </div>
 
-                <!-- Step 2: Ödeme Yöntemi -->
+                <!-- Step 2: Ödeme Yöntemi (Havale/EFT veya WhatsApp ile İlet) -->
                 <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-4">
                   <div class="flex items-center gap-2 pb-3 border-b border-gray-100">
                     <span class="w-6 h-6 rounded-full bg-gallus-primary text-white text-xs font-black flex items-center justify-center">2</span>
-                    <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider">Ödeme Yöntemi Seçin</h2>
+                    <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider">Ödeme ve Sipariş İletim Seçeneği</h2>
                   </div>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <label class="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-200 hover:border-gallus-primary cursor-pointer transition">
-                      <input type="radio" name="checkoutPayment" value="Kredi Kartı / Banka Kartı" checked class="text-gallus-primary">
-                      <div class="text-xs">
-                        <div class="font-bold text-gallus-dark">💳 Kredi / Banka Kartı</div>
-                        <div class="text-[10px] text-gray-500">Güvenli 3D Secure</div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label class="flex items-start gap-3 p-4 rounded-2xl border-2 border-emerald-600/30 bg-emerald-50/40 hover:border-gallus-primary cursor-pointer transition">
+                      <input type="radio" name="checkoutPayment" value="Havale / EFT" checked class="mt-1 text-gallus-primary">
+                      <div class="text-xs space-y-1">
+                        <div class="font-black text-sm text-gallus-dark">🏦 Havale / EFT ile Ödeme</div>
+                        <div class="text-[11px] text-gray-600 leading-relaxed">Siparişinizi onayladıktan sonra banka / IBAN bilgilerimiz ekranda gösterilir. Ödemenizi kolayca Havale veya FAST ile yapabilirsiniz.</div>
                       </div>
                     </label>
 
-                    <label class="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-200 hover:border-gallus-primary cursor-pointer transition">
-                      <input type="radio" name="checkoutPayment" value="Kapıda Ödeme (Nakit/POS)" class="text-gallus-primary">
-                      <div class="text-xs">
-                        <div class="font-bold text-gallus-dark">💵 Kapıda Ödeme</div>
-                        <div class="text-[10px] text-gray-500">Nakit veya POS Cihazı</div>
-                      </div>
-                    </label>
-
-                    <label class="flex items-center gap-2.5 p-3.5 rounded-xl border border-gray-200 hover:border-gallus-primary cursor-pointer transition">
-                      <input type="radio" name="checkoutPayment" value="WhatsApp ile Hızlı Sipariş" class="text-gallus-primary">
-                      <div class="text-xs">
-                        <div class="font-bold text-emerald-700">📱 WhatsApp Sipariş</div>
-                        <div class="text-[10px] text-gray-500">Doğrudan mesajla onay</div>
+                    <label class="flex items-start gap-3 p-4 rounded-2xl border-2 border-emerald-600/30 bg-emerald-50/40 hover:border-gallus-primary cursor-pointer transition">
+                      <input type="radio" name="checkoutPayment" value="WhatsApp ile İlet" class="mt-1 text-gallus-primary">
+                      <div class="text-xs space-y-1">
+                        <div class="font-black text-sm text-emerald-800">💬 WhatsApp ile Siparişi İlet</div>
+                        <div class="text-[11px] text-gray-600 leading-relaxed">Siparişiniz sistemimize kaydedilir ve tüm ürün/adres detaylarınız otomatik olarak WhatsApp hattımıza yönlendirilir.</div>
                       </div>
                     </label>
                   </div>
@@ -4386,7 +4531,7 @@
                   <!-- Legal Terms Checkbox -->
                   <div class="pt-2">
                     <label class="flex items-start gap-2.5 cursor-pointer text-xs text-gray-600">
-                      <input type="checkbox" required class="mt-0.5 rounded border-gray-300 text-gallus-primary">
+                      <input type="checkbox" required checked class="mt-0.5 rounded border-gray-300 text-gallus-primary">
                       <span>
                         <a href="/mesafeli-satis-sozlesmesi" target="_blank" class="text-gallus-primary font-bold underline">Mesafeli Satış Sözleşmesi</a>'ni ve 
                         <a href="/teslimat-kosullari" target="_blank" class="text-gallus-primary font-bold underline">Ön Bilgilendirme Koşulları</a>'nı okudum, kabul ediyorum.
@@ -4397,9 +4542,32 @@
 
               </div>
 
-              <!-- Right Summary & Confirmation -->
+              <!-- Right Summary & Loyalty Points -->
               <div class="lg:col-span-4 bg-white rounded-3xl border border-gray-200 p-6 shadow-soft space-y-4">
-                <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider pb-2 border-b border-gray-100">Sipariş Özeti</h2>
+                <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider pb-2 border-b border-gray-100">Sipariş & Puan Özeti</h2>
+
+                <!-- Loyalty Points Earned Box (%1 * 100) -->
+                <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-black text-amber-900">🎁 Kazanacağınız Puan:</span>
+                    <span class="text-sm font-black text-amber-700">+${earnedPoints} Puan</span>
+                  </div>
+                  <p class="text-[10px] text-amber-800 leading-relaxed">
+                    Sipariş tutarınızın <strong>%1'inin 100 katı (${earnedPoints} Puan)</strong> hesabınıza tanımlanır ve <strong>Stok-Satış Takip</strong> onayımızdan sonra aktifleşir.
+                  </p>
+                </div>
+
+                ${availableApprovedPoints > 0 ? `
+                  <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                    <label class="flex items-start gap-2.5 cursor-pointer text-xs">
+                      <input type="checkbox" ${appState.useLoyaltyPoints ? 'checked' : ''} onchange="toggleLoyaltyPointsInCheckout(this.checked)" class="mt-0.5 rounded text-gallus-primary">
+                      <div>
+                        <div class="font-black text-emerald-950">⭐ Onaylı Puanlarımı Kullan (${availableApprovedPoints} Puan)</div>
+                        <div class="text-[10px] text-emerald-800">Siparişinizden <strong>-${formatPrice(maxPointsTl)}</strong> puan indirimi düşülür.</div>
+                      </div>
+                    </label>
+                  </div>
+                ` : ''}
 
                 <div class="space-y-2 text-xs">
                   <div class="flex justify-between text-gray-500">
@@ -4410,10 +4578,16 @@
                     <span>Kargo:</span>
                     <span class="font-bold text-emerald-700">${isFreeShipping ? 'Ücretsiz' : formatPrice(shippingCost)}</span>
                   </div>
-                  ${discount > 0 ? `
+                  ${couponDiscount > 0 ? `
                     <div class="flex justify-between text-emerald-700 font-bold">
-                      <span>İndirim:</span>
-                      <span>-${formatPrice(discount)}</span>
+                      <span>Kupon İndirimi:</span>
+                      <span>-${formatPrice(couponDiscount)}</span>
+                    </div>
+                  ` : ''}
+                  ${pointsDiscountTl > 0 ? `
+                    <div class="flex justify-between text-amber-700 font-bold">
+                      <span>Puan İndirimi (${usedPointsCount} Puan):</span>
+                      <span>-${formatPrice(pointsDiscountTl)}</span>
                     </div>
                   ` : ''}
                   <div class="flex justify-between text-base font-black text-gallus-dark pt-3 border-t border-gray-200">
@@ -4422,13 +4596,17 @@
                   </div>
                 </div>
 
+                <input type="hidden" id="chk-used-points" value="${usedPointsCount}">
+                <input type="hidden" id="chk-earned-points" value="${earnedPoints}">
+                <input type="hidden" id="chk-grand-total-num" value="${grandTotal}">
+
                 <button type="submit" class="w-full py-4 rounded-xl font-black text-sm text-white bg-gallus-accent hover:bg-gallus-accent-hover shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
                   <i data-lucide="check-circle" class="w-4 h-4"></i>
-                  <span>Siparişi Onayla & Bitir</span>
+                  <span>Siparişi Oluştur (+${earnedPoints} Puan Kazan)</span>
                 </button>
 
                 <p class="text-[10px] text-gray-400 text-center leading-relaxed">
-                  Onayla butonuna bastığınızda satın alınan ürün adetleri gerçek zamanlı olarak stoktan düşürülür.
+                  Siparişiniz anında Stok & Satış Takip ekranımıza düşer. Sipariş sonrasında e-postanızla tek tıkla hızlı kayıt olabilirsiniz.
                 </p>
               </div>
 
@@ -4437,6 +4615,7 @@
 
         </div>
       `;
+      refreshLucideIcons();
     }
 
     async function handleFullCheckoutSubmit(e) {
@@ -4453,10 +4632,20 @@
 
       const fullname = document.getElementById('chk-fullname').value.trim();
       const phone = document.getElementById('chk-phone').value.trim();
+      const email = (document.getElementById('chk-email')?.value || '').trim().toLowerCase();
       const city = document.getElementById('chk-city').value.trim();
-      const address = document.getElementById('chk-address').value.trim();
+      const street = (document.getElementById('chk-street')?.value || '').trim();
+      const rawAddress = document.getElementById('chk-address').value.trim();
+      const fullAddress = street ? `${street}, ${rawAddress}` : rawAddress;
       const note = document.getElementById('chk-note').value.trim();
-      const paymentMethod = document.querySelector('input[name="checkoutPayment"]:checked')?.value || 'Kredi Kartı';
+      const paymentMethod = document.querySelector('input[name="checkoutPayment"]:checked')?.value || 'Havale / EFT';
+
+      if (!email || !email.includes('@')) {
+        showToast("Lütfen geçerli bir e-posta adresi giriniz.", "error");
+        return;
+      }
+
+      saveCheckoutDraft();
 
       const orderId = `GL-${Date.now().toString().slice(-6)}`;
       const orderDate = new Date().toLocaleString('tr-TR');
@@ -4480,23 +4669,41 @@
       });
 
       const shipping = (subtotal >= 750) ? 0 : 49;
-      const discount = (appState.appliedCoupon === 'GALLUS10') ? (subtotal * 0.10) : 0;
-      const grandTotalStr = formatPrice(Math.max(0, subtotal + shipping - discount));
+      const couponDiscount = (appState.appliedCoupon === 'GALLUS10') ? (subtotal * 0.10) : 0;
+      const usedPoints = Number(document.getElementById('chk-used-points')?.value || 0);
+      const pointsDiscount = Number((usedPoints / 100).toFixed(2));
+      const grandTotalNum = Math.max(0, Number((subtotal + shipping - couponDiscount - pointsDiscount).toFixed(2)));
+      const grandTotalStr = formatPrice(grandTotalNum);
+      const earnedPoints = Math.max(0, Math.round((grandTotalNum * 0.01) * 100));
 
       const newOrder = {
         id: orderId,
         date: orderDate,
-        customer: { fullname, phone, city, address, note },
+        customer: {
+          fullname,
+          phone,
+          email,
+          city,
+          district: city,
+          street,
+          address: fullAddress,
+          note
+        },
+        email,
         paymentMethod,
         items: orderItems,
         total: grandTotalStr,
-        status: "Hazırlanıyor"
+        totalNumeric: grandTotalNum,
+        earnedPoints,
+        usedPoints,
+        pointsApproved: false,
+        status: "Onay Bekliyor"
       };
 
       const submitBtn = e.target.querySelector('button[type="submit"]');
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Siparişiniz Doğrulanıyor...</span>';
+        submitBtn.innerHTML = '<span>Siparişiniz Kaydediliyor...</span>';
       }
 
       // Send to server (server performs atomic Firestore transaction & stock check)
@@ -4511,12 +4718,14 @@
         if (!resp.ok || !resData.success) {
           if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>Siparişi Onayla & Bitir</span>';
+            submitBtn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i><span>Siparişi Oluştur (+${earnedPoints} Puan Kazan)</span>`;
             if (window.lucide) lucide.createIcons();
           }
           showToast(`Sipariş tamamlanamadı: ${resData.error || 'Yetersiz stok veya sunucu hatası'}`, "error");
           return;
         }
+
+        const savedOrder = resData.order || newOrder;
 
         // Atomic deduction was successful on server/Firestore
         orderItems.forEach(item => {
@@ -4524,20 +4733,102 @@
           if (p) p.stock = Math.max(0, p.stock - item.qty);
         });
 
-        appState.orders.unshift(newOrder);
+        appState.orders.unshift(savedOrder);
         appState.cart = [];
+        appState.useLoyaltyPoints = false;
         saveState();
 
-        // Render Order Confirmation Screen
-        renderOrderSuccessView(newOrder);
+        if (appState.member && appState.member.email) {
+          refreshMemberProfile(false);
+        }
+
+        // If paymentMethod is WhatsApp ile İlet, open WhatsApp automatically
+        if (paymentMethod === 'WhatsApp ile İlet') {
+          let waText = `*GALLUS MAMA & YUMURTA - YENİ WEB SİPARİŞİ (${savedOrder.id})*\n\n` +
+            `*Müşteri:* ${fullname}\n*Telefon:* ${phone}\n*E-Posta:* ${email}\n*Bölge:* ${city}\n*Adres:* ${fullAddress}\n${note ? `*Not:* ${note}\n` : ''}*Ödeme Seçeneği:* ${paymentMethod}\n*Kazanılan Puan:* +${earnedPoints} Puan (Onay Bekliyor)\n\n` +
+            `*Ürünler:*\n` + orderItems.map(i => `- ${i.qty} adet ${i.name} (${formatPrice(i.totalPrice)})`).join('\n') +
+            `\n\n*Toplam Tutar:* ${grandTotalStr}`;
+          const waUrl = `https://wa.me/905516553637?text=${encodeURIComponent(waText)}`;
+          try { window.open(waUrl, '_blank'); } catch (e) {}
+        }
+
+        // Render Order Confirmation Screen with 1-Click Fast Registration
+        renderOrderSuccessView(savedOrder);
       } catch (err) {
         console.error("Order submit network error:", err);
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i><span>Siparişi Onayla & Bitir</span>';
+          submitBtn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i><span>Siparişi Oluştur (+${earnedPoints} Puan Kazan)</span>`;
           if (window.lucide) lucide.createIcons();
         }
         showToast("Sunucu ile iletişim kurulamadı. Lütfen internet bağlantınızı kontrol ediniz.", "error");
+      }
+    }
+
+    async function handlePostOrderFastRegister(e) {
+      e.preventDefault();
+      const email = document.getElementById('post-reg-email')?.value.trim().toLowerCase();
+      const fullname = document.getElementById('post-reg-fullname')?.value.trim();
+      const phone = document.getElementById('post-reg-phone')?.value.trim();
+      const city = document.getElementById('post-reg-city')?.value.trim();
+      const address = document.getElementById('post-reg-address')?.value.trim();
+      const password = document.getElementById('post-reg-password')?.value.trim() || '123456';
+      const btn = document.getElementById('post-reg-submit-btn');
+
+      if (!email) return;
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Hesabınız ve Puanınız Tanımlanıyor...';
+      }
+
+      try {
+        const res = await fetch('/api/members/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullname,
+            email,
+            phone,
+            password,
+            city,
+            district: city,
+            address,
+            source: 'Sipariş Sonrası Hızlı Kayıt'
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.member) {
+          appState.member = data.member;
+          localStorage.setItem('gallus_member_v1', JSON.stringify(data.member));
+          updateGlobalBadges();
+          showToast("🎉 Hızlı üyeliğiniz tamamlandı! Puanınız hesabınıza tanımlandı.", "success");
+          const card = document.getElementById('post-order-fast-reg-card');
+          if (card) {
+            card.innerHTML = `
+              <div class="p-4 rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-950 text-left space-y-2">
+                <div class="flex items-center gap-2 font-black text-sm">
+                  <span>✅ Hızlı Üyeliğiniz Tamamlandı! (${escapeHtml(email)})</span>
+                </div>
+                <p class="text-xs leading-relaxed">
+                  Bu siparişinizden kazandığınız <strong>+${data.member.pendingPoints || 0} Puan</strong> hesabınıza <strong>"Onay Bekliyor"</strong> olarak tanımlandı. Stok & Satış Takip uygulamamızdan onaylandığı anda puanınız aktifleşecektir.
+                </p>
+                <a href="/hesabim" onclick="navigate('/hesabim', event)" class="inline-block mt-1 px-4 py-2 rounded-xl bg-gallus-primary text-white text-xs font-black">Hesabım & Puanlarımı Gör →</a>
+              </div>
+            `;
+          }
+        } else {
+          showToast(data.error || "Kayıt sırasında hata oluştu.", "error");
+          if (btn) {
+            btn.disabled = false;
+            btn.innerText = '⚡ Hızlı Kayıt Ol & Puanımı Hesabıma Tanımla';
+          }
+        }
+      } catch (err) {
+        showToast("Bağlantı hatası oluştu.", "error");
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = '⚡ Hızlı Kayıt Ol & Puanımı Hesabıma Tanımla';
+        }
       }
     }
 
@@ -4545,35 +4836,106 @@
       const container = document.getElementById('app-viewport');
       if (!container) return;
 
+      const cust = order.customer || {};
+      const earnedPts = order.earnedPoints !== undefined ? order.earnedPoints : Math.round(((order.totalNumeric || 100) * 0.01) * 100);
+      const isAlreadyMemberWithSameEmail = appState.member && (appState.member.email || '').toLowerCase() === (cust.email || '').toLowerCase();
+
       let waText = `*GALLUS MAMA & YUMURTA - SİPARİŞ ONAYI (${order.id})*\n\n` +
-        `*Müşteri:* ${order.customer.fullname}\n*Telefon:* ${order.customer.phone}\n*Adres:* ${order.customer.address}, ${order.customer.city}\n*Ödeme:* ${order.paymentMethod}\n\n` +
+        `*Müşteri:* ${cust.fullname}\n*Telefon:* ${cust.phone}\n*E-Posta:* ${cust.email || '-'}\n*Adres:* ${cust.address}, ${cust.city}\n*Ödeme:* ${order.paymentMethod}\n*Kazanılan Puan:* +${earnedPts} Puan (Onay Bekliyor)\n\n` +
         `*Ürünler:*\n` + order.items.map(i => `- ${i.qty} adet ${i.name} (${formatPrice(i.totalPrice)})`).join('\n') +
         `\n\n*Toplam:* ${order.total}`;
       const waUrl = `https://wa.me/905516553637?text=${encodeURIComponent(waText)}`;
 
       container.innerHTML = `
-        <div class="max-w-xl mx-auto px-4 py-16 text-center">
-          <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="check" class="w-10 h-10 stroke-[3]"></i>
+        <div class="max-w-xl mx-auto px-4 py-12 text-center space-y-6">
+          <div>
+            <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="check" class="w-10 h-10 stroke-[3]"></i>
+            </div>
+            <span class="text-xs font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full">Siparişiniz Stok-Satış Takip Sistemine İletildi</span>
+            <h1 class="text-2xl sm:text-3xl font-black text-gallus-dark mt-3">Teşekkür Ederiz, ${escapeHtml(cust.fullname)}!</h1>
+            <p class="text-xs text-gray-500 mt-2 max-w-md mx-auto">
+              Sipariş numaranız: <strong class="text-gallus-primary">#${order.id}</strong>. Siparişiniz yönetim ekranımıza düştü.
+            </p>
           </div>
-          <span class="text-xs font-black uppercase tracking-wider text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full">Siparişiniz Başarıyla Alındı</span>
-          <h1 class="text-2xl sm:text-3xl font-black text-gallus-dark mt-3">Teşekkür Ederiz, ${order.customer.fullname}!</h1>
-          <p class="text-xs text-gray-500 mt-2 max-w-md mx-auto">
-            Sipariş numaranız: <strong class="text-gallus-primary">#${order.id}</strong>. Ürünler stoklarımızdan anında ayrıldı ve Değirmenköy depomuzda kargo için hazırlanıyor.
-          </p>
 
-          <div class="my-6 p-5 rounded-2xl bg-white border border-gray-200 text-left text-xs space-y-2 shadow-soft">
+          <!-- Loyalty Points Earned Banner -->
+          <div class="p-5 rounded-3xl bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 border-2 border-amber-300 text-left space-y-2 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black uppercase tracking-wider text-amber-900">🎁 Sipariş Puanı (%1 x 100)</span>
+              <span class="px-3 py-1 rounded-full text-xs font-black bg-amber-400 text-gallus-dark">+${earnedPts} Puan</span>
+            </div>
+            <p class="text-xs text-amber-950 leading-relaxed">
+              Bu siparişinizden <strong>+${earnedPts} Puan (${formatPrice(earnedPts / 100)} değerinde)</strong> kazandınız! Puanınız şu an <strong>"Onay Bekliyor"</strong> durumundadır; <strong>Stok & Satış Takip</strong> panelimizden onaylandığında hesabınızda aktif olarak gözükecektir.
+            </p>
+          </div>
+
+          <!-- Post-Order 1-Click Fast Registration Card -->
+          <div id="post-order-fast-reg-card">
+            ${!isAlreadyMemberWithSameEmail ? `
+              <form onsubmit="handlePostOrderFastRegister(event)" class="p-6 rounded-3xl bg-emerald-950 text-white text-left space-y-4 shadow-xl border border-emerald-700">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-400 text-gallus-dark mb-1">⚡ Tek Tıkla Hızlı Üyelik</span>
+                    <h3 class="text-base font-black">Sipariş Mailinizle Hemen Kayıt Olun, +${earnedPts} Puanınız Kaybolmasın!</h3>
+                    <p class="text-[11px] text-emerald-200 mt-1">Siparişte girdiğiniz <strong>${escapeHtml(cust.email)}</strong> mail adresiniz ve adres bilgileriniz hazır. Sadece bir şifre belirleyip tek tıkla hesabınızı açın:</p>
+                  </div>
+                </div>
+
+                <input type="hidden" id="post-reg-email" value="${escapeHtml(cust.email || '')}">
+                <input type="hidden" id="post-reg-fullname" value="${escapeHtml(cust.fullname || '')}">
+                <input type="hidden" id="post-reg-phone" value="${escapeHtml(cust.phone || '')}">
+                <input type="hidden" id="post-reg-city" value="${escapeHtml(cust.city || '')}">
+                <input type="hidden" id="post-reg-address" value="${escapeHtml(cust.address || '')}">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-[11px] font-bold text-emerald-200 mb-1">E-Posta Adresiniz (Siparişten Alındı)</label>
+                    <input type="email" disabled value="${escapeHtml(cust.email || '')}" class="w-full text-xs px-3.5 py-2.5 rounded-xl bg-emerald-900/70 border border-emerald-700 text-emerald-100 font-bold">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] font-bold text-emerald-200 mb-1">Üyelik Şifreniz Belirleyin <span class="text-amber-300">*</span></label>
+                    <input type="password" id="post-reg-password" required placeholder="En az 4 karakter şifre..." value="" class="w-full text-xs px-3.5 py-2.5 rounded-xl bg-white text-gray-900 font-bold border border-emerald-400 outline-none">
+                  </div>
+                </div>
+
+                <button type="submit" id="post-reg-submit-btn" class="w-full py-3.5 rounded-xl text-xs font-black bg-amber-400 hover:bg-amber-300 text-gallus-dark transition shadow-lg">
+                  ⚡ Hızlı Kayıt Ol & +${earnedPts} Puanımı Hesabıma Tanımla
+                </button>
+              </form>
+            ` : `
+              <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 text-left flex items-center justify-between">
+                <span>✅ <strong>${escapeHtml(cust.email)}</strong> hesabınıza <strong>+${earnedPts} Puan (Onay Bekliyor)</strong> kaydedildi.</span>
+                <a href="/hesabim" onclick="navigate('/hesabim', event)" class="font-black underline ml-2 shrink-0">Hesabıma Git →</a>
+              </div>
+            `}
+          </div>
+
+          ${order.paymentMethod === 'Havale / EFT' ? `
+            <div class="p-5 rounded-2xl bg-blue-50 border border-blue-200 text-left text-xs space-y-2">
+              <div class="font-black text-blue-950 text-sm">🏦 Havale / EFT Ödeme Bilgileri</div>
+              <p class="text-blue-900 leading-relaxed">
+                Ödemenizi açıklama kısmına <strong>#${order.id}</strong> yazarak gerçekleştirebilir ve dekontunuzu aşağıdaki WhatsApp butonundan bize iletebilirsiniz.
+              </p>
+            </div>
+          ` : ''}
+
+          <div class="p-5 rounded-2xl bg-white border border-gray-200 text-left text-xs space-y-2 shadow-soft">
             <div class="flex justify-between border-b border-gray-100 pb-2">
               <span class="text-gray-500">Sipariş No:</span>
               <span class="font-black text-gallus-dark">#${order.id}</span>
             </div>
             <div class="flex justify-between border-b border-gray-100 pb-2">
-              <span class="text-gray-500">Ödeme Yöntemi:</span>
-              <span class="font-bold text-gallus-dark">${order.paymentMethod}</span>
+              <span class="text-gray-500">E-Posta:</span>
+              <span class="font-bold text-gallus-dark">${escapeHtml(cust.email || '-')}</span>
+            </div>
+            <div class="flex justify-between border-b border-gray-100 pb-2">
+              <span class="text-gray-500">Ödeme Seçeneği:</span>
+              <span class="font-bold text-gallus-dark">${escapeHtml(order.paymentMethod)}</span>
             </div>
             <div class="flex justify-between border-b border-gray-100 pb-2">
               <span class="text-gray-500">Teslimat Adresi:</span>
-              <span class="font-medium text-gray-700 max-w-xs text-right">${order.customer.address}, ${order.customer.city}</span>
+              <span class="font-medium text-gray-700 max-w-xs text-right">${escapeHtml(cust.address)}, ${escapeHtml(cust.city)}</span>
             </div>
             <div class="flex justify-between pt-1">
               <span class="text-gray-500">Toplam Tutar:</span>
@@ -4582,9 +4944,12 @@
           </div>
 
           <div class="space-y-2.5">
-            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center justify-center gap-2 shadow">
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center justify-center gap-2 shadow">
               <i data-lucide="message-circle" class="w-4 h-4"></i>
-              <span>WhatsApp ile Sipariş Durumunu Takip Et</span>
+              <span>💬 Siparişi / Dekontu WhatsApp ile İlet</span>
+            </a>
+            <a href="/hesabim" onclick="navigate('/hesabim', event)" class="block w-full py-3 rounded-xl text-xs font-bold text-gallus-primary bg-emerald-50 hover:bg-emerald-100 transition">
+              Hesabım & Puan Durumumu Görüntüle
             </a>
             <a href="/" onclick="navigate('/', event)" class="block w-full py-3 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition">
               Alışverişe Devam Et
@@ -5004,46 +5369,385 @@
     /* ==========================================================
        L. PAGE 10: CUSTOMER ACCOUNT & FAVORITES
        ========================================================== */
-    function renderAccountPage(container) {
-      document.title = "Hesabım & Sipariş Takibi | Gallus Mama";
-      container.innerHTML = `
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-          <div>
-            <h1 class="text-2xl sm:text-3xl font-black text-gallus-dark">Müşteri Hesabı & Sipariş Takibi</h1>
-            <p class="text-xs text-gray-500 mt-1">Geçmiş siparişlerinizi ve kargo durumunuzu buradan görüntüleyebilirsiniz.</p>
-          </div>
+    async function refreshMemberProfile(shouldRerender = true) {
+      if (!appState.member || !appState.member.email) return;
+      try {
+        const res = await fetch(`/api/members/me?email=${encodeURIComponent(appState.member.email)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.member) {
+            appState.member = data.member;
+            localStorage.setItem('gallus_member_v1', JSON.stringify(data.member));
+            updateGlobalBadges();
+            if (shouldRerender && ['/hesabim', '/uyelik', '/giris', '/kayit'].includes(appState.currentRoute)) {
+              renderAccountPage(document.getElementById('app-viewport'), false);
+            }
+          }
+        }
+      } catch (e) {}
+    }
 
-          <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft">
-            <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider mb-4">Sipariş Geçmişim (${appState.orders.length})</h2>
-            ${appState.orders.length === 0 ? `
-              <div class="py-8 text-center text-xs text-gray-400">
-                Kayıtlı bir siparişiniz bulunmamaktadır.
-              </div>
-            ` : `
-              <div class="space-y-3">
-                ${appState.orders.map(o => `
-                  <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-xs space-y-2">
-                    <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                      <div class="flex items-center gap-2">
-                        <strong class="text-gallus-primary">#${o.id}</strong>
-                        <span class="text-gray-400">•</span>
-                        <span class="text-gray-500">${o.date}</span>
-                      </div>
-                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">${o.status || 'Hazırlanıyor'}</span>
+    async function handleFastRegisterSubmit(e) {
+      e.preventDefault();
+      const fullname = document.getElementById('reg-fullname')?.value.trim() || '';
+      const email = (document.getElementById('reg-email')?.value || '').trim().toLowerCase();
+      const phone = document.getElementById('reg-phone')?.value.trim() || '';
+      const password = document.getElementById('reg-password')?.value.trim() || '';
+      const district = document.getElementById('reg-district')?.value.trim() || 'İstanbul / Silivri';
+      const address = document.getElementById('reg-address')?.value.trim() || '';
+
+      if (!email || !email.includes('@')) {
+        showToast("Lütfen geçerli bir e-posta adresi giriniz.", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/members/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullname,
+            email,
+            phone,
+            password,
+            city: district,
+            district,
+            address,
+            source: 'Hızlı Üyelik Sayfası'
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.member) {
+          appState.member = data.member;
+          localStorage.setItem('gallus_member_v1', JSON.stringify(data.member));
+          updateGlobalBadges();
+          showToast("🎉 Hızlı üyeliğiniz oluşturuldu ve giriş yapıldı!", "success");
+          renderAccountPage(document.getElementById('app-viewport'), false);
+        } else {
+          showToast(data.error || "Kayıt sırasında bir hata oluştu.", "error");
+        }
+      } catch (err) {
+        showToast("Sunucu bağlantı hatası.", "error");
+      }
+    }
+
+    async function handleMemberLoginSubmit(e) {
+      e.preventDefault();
+      const identifier = (document.getElementById('login-identifier')?.value || '').trim().toLowerCase();
+      const password = (document.getElementById('login-password')?.value || '').trim();
+
+      try {
+        const res = await fetch('/api/members/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.member) {
+          appState.member = data.member;
+          localStorage.setItem('gallus_member_v1', JSON.stringify(data.member));
+          updateGlobalBadges();
+          showToast(`Hoş geldiniz, ${data.member.fullname}!`, "success");
+          renderAccountPage(document.getElementById('app-viewport'), false);
+        } else {
+          showToast(data.error || "Giriş yapılamadı. Bilgilerinizi kontrol edin.", "error");
+        }
+      } catch (err) {
+        showToast("Sunucu bağlantı hatası.", "error");
+      }
+    }
+
+    function handleMemberLogout() {
+      appState.member = null;
+      appState.useLoyaltyPoints = false;
+      localStorage.removeItem('gallus_member_v1');
+      updateGlobalBadges();
+      showToast("Hesabınızdan çıkış yapıldı.", "info");
+      renderAccountPage(document.getElementById('app-viewport'), false);
+    }
+
+    async function handleMemberAddressSave(e) {
+      e.preventDefault();
+      if (!appState.member || !appState.member.email) return;
+      const fullname = document.getElementById('prof-fullname')?.value.trim() || appState.member.fullname;
+      const phone = document.getElementById('prof-phone')?.value.trim() || appState.member.phone;
+      const district = document.getElementById('prof-district')?.value.trim() || appState.member.district;
+      const street = document.getElementById('prof-street')?.value.trim() || appState.member.street || '';
+      const address = document.getElementById('prof-address')?.value.trim() || appState.member.address;
+
+      try {
+        const res = await fetch('/api/members/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: appState.member.email,
+            fullname,
+            phone,
+            city: district,
+            district,
+            street,
+            address
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.member) {
+          appState.member = data.member;
+          localStorage.setItem('gallus_member_v1', JSON.stringify(data.member));
+          showToast("✅ Teslimat adresiniz ve profil bilgileriniz kaydedildi!", "success");
+          renderAccountPage(document.getElementById('app-viewport'), false);
+        }
+      } catch (err) {
+        showToast("Bilgiler güncellenemedi.", "error");
+      }
+    }
+
+    function renderAccountPage(container, triggerSync = true) {
+      document.title = "Üyelik, Puanlarım & Sipariş Takibi | Gallus Mama";
+      if (!container) return;
+
+      if (triggerSync && appState.member && appState.member.email) {
+        refreshMemberProfile(true);
+      }
+
+      const member = appState.member;
+
+      if (!member) {
+        container.innerHTML = `
+          <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+              <span class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-900">🎁 Gallus Sadakat & Puan Kulübü</span>
+              <h1 class="text-2xl sm:text-3xl font-black text-gallus-dark">Hızlı Üyelik & Müşteri Girişi</h1>
+              <p class="text-xs text-gray-600 leading-relaxed">
+                Üye olarak her siparişinizde <strong>sipariş tutarının %1'inin 100 katı değerinde puan</strong> kazanın, kayıtlı adresinizle saniyeler içinde sipariş verin!
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              
+              <!-- Fast Registration Form -->
+              <div class="bg-white p-6 sm:p-8 rounded-3xl border-2 border-emerald-600/20 shadow-soft space-y-5">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <div>
+                    <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">⚡ 15 Saniyede Hızlı Kayıt</span>
+                    <h2 class="text-lg font-black text-gallus-dark mt-1">Hızlı Üye Ol</h2>
+                  </div>
+                  <i data-lucide="user-plus" class="w-6 h-6 text-gallus-primary"></i>
+                </div>
+
+                <form onsubmit="handleFastRegisterSubmit(event)" class="space-y-3.5 text-xs">
+                  <div>
+                    <label class="block font-bold text-gray-700 mb-1">Adınız Soyadınız <span class="text-rose-500">*</span></label>
+                    <input type="text" id="reg-fullname" required placeholder="Örn: Ahmet Yılmaz" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                  </div>
+                  <div>
+                    <label class="block font-bold text-gray-700 mb-1">E-Posta Adresiniz <span class="text-rose-500">*</span> <span class="text-[10px] text-gray-400">(Siparişleriniz ve puanlarınız bu maile tanımlanır)</span></label>
+                    <input type="email" id="reg-email" required placeholder="ornek@eposta.com" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block font-bold text-gray-700 mb-1">Telefon Numaranız <span class="text-rose-500">*</span></label>
+                      <input type="tel" id="reg-phone" required placeholder="05XX XXX XX XX" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
                     </div>
-                    <div class="flex justify-between items-center text-gray-600">
-                      <div>
-                        <strong>Ürünler:</strong> ${o.items.map(i => `${i.qty}x ${i.name}`).join(', ')}
-                      </div>
-                      <span class="font-black text-sm text-gallus-dark">${o.total}</span>
+                    <div>
+                      <label class="block font-bold text-gray-700 mb-1">Şifre Belirleyin <span class="text-rose-500">*</span></label>
+                      <input type="password" id="reg-password" required placeholder="En az 4 karakter" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
                     </div>
                   </div>
-                `).join('')}
+                  <div>
+                    <label class="block font-bold text-gray-700 mb-1">İl / İlçe / Bölge (İsteğe Bağlı — Siparişte Otomatik Dolar)</label>
+                    <input type="text" id="reg-district" value="İstanbul / Silivri" placeholder="Örn: Silivri / Değirmenköy" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                  </div>
+                  <div>
+                    <label class="block font-bold text-gray-700 mb-1">Teslimat Adresiniz (İsteğe Bağlı)</label>
+                    <textarea id="reg-address" rows="2" placeholder="Mahalle, sokak, kapı no (Sonraki siparişlerinizde hazır gelir)..." class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
+                  </div>
+                  <button type="submit" class="w-full py-3.5 rounded-xl font-black text-white bg-gallus-primary hover:bg-gallus-primary-hover shadow-lg transition">
+                    ⚡ Hızlı Üye Ol & Puan Kazanmaya Başla
+                  </button>
+                </form>
               </div>
-            `}
+
+              <!-- Member Login Form -->
+              <div class="space-y-6">
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-soft space-y-5">
+                  <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <div>
+                      <span class="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full">🔑 Mevcut Üye</span>
+                      <h2 class="text-lg font-black text-gallus-dark mt-1">Üye Girişi Yap</h2>
+                    </div>
+                    <i data-lucide="log-in" class="w-6 h-6 text-amber-600"></i>
+                  </div>
+
+                  <form onsubmit="handleMemberLoginSubmit(event)" class="space-y-3.5 text-xs">
+                    <div>
+                      <label class="block font-bold text-gray-700 mb-1">E-Posta Adresiniz veya Telefonunuz</label>
+                      <input type="text" id="login-identifier" required placeholder="ornek@eposta.com veya 05XX..." class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                    </div>
+                    <div>
+                      <label class="block font-bold text-gray-700 mb-1">Şifreniz</label>
+                      <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                    </div>
+                    <button type="submit" class="w-full py-3.5 rounded-xl font-black text-white bg-gallus-accent hover:bg-gallus-accent-hover shadow-lg transition">
+                      Giriş Yap & Puanlarımı Gör
+                    </button>
+                  </form>
+                </div>
+
+                <!-- Loyalty Points Explanation Card -->
+                <div class="p-6 rounded-3xl bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 space-y-2 text-xs">
+                  <div class="font-black text-amber-950 text-sm flex items-center gap-1.5">
+                    <span>⭐ Puan Sistemi Nasıl Çalışır?</span>
+                  </div>
+                  <ul class="space-y-1.5 text-amber-900 list-disc pl-4 leading-relaxed">
+                    <li>Yaptığınız her siparişte <strong>sipariş tutarının %1'inin 100 katı kadar puan</strong> kazanırsınız (Örn: 1.000 ₺ siparişe <strong>1.000 Puan</strong>).</li>
+                    <li>Sipariş verirken kullandığınız e-posta ile sipariş sonrasında bile <strong>tek tıkla hızlı kayıt</strong> olabilirsiniz.</li>
+                    <li>Kazanılan puanlar, siparişiniz <strong>Stok & Satış Takip</strong> sistemimizden onaylandığı anda hesabınızda aktifleşir!</li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+        refreshLucideIcons();
+        return;
+      }
+
+      const approvedPts = Number(member.approvedPoints || 0);
+      const pendingPts = Number(member.pendingPoints || 0);
+      const memberOrders = Array.isArray(member.orders) && member.orders.length > 0 ? member.orders : appState.orders;
+
+      container.innerHTML = `
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+          
+          <!-- Top Member Header & Loyalty Points Cards -->
+          <div class="bg-gradient-to-r from-gallus-primary via-emerald-900 to-gallus-dark text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+              <div>
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-amber-400 text-gallus-dark">⭐ Gallus Sadakat Üyesi</span>
+                <h1 class="text-2xl sm:text-3xl font-black mt-2">Hoş Geldiniz, ${escapeHtml(member.fullname)}!</h1>
+                <p class="text-xs text-emerald-200 mt-0.5">${escapeHtml(member.email)} ${member.phone ? `• ${escapeHtml(member.phone)}` : ''}</p>
+              </div>
+              <div class="flex items-center gap-2 self-start sm:self-center">
+                <button onclick="refreshMemberProfile(true); showToast('Puan ve sipariş durumu güncellendi!', 'success');" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition flex items-center gap-1.5">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  <span>Durumu Güncelle</span>
+                </button>
+                <button onclick="handleMemberLogout()" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 text-rose-100 text-xs font-bold transition">
+                  Çıkış Yap
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="p-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm">
+                <span class="text-[11px] text-emerald-200 font-bold block">✅ Onaylı Kullanılabilir Puan</span>
+                <div class="text-2xl sm:text-3xl font-black text-amber-400 mt-1">${approvedPts.toLocaleString('tr-TR')} Puan</div>
+                <span class="text-[11px] text-emerald-100 mt-1 block">Siparişte Kullanılabilir Değer: <strong>${formatPrice(approvedPts / 100)}</strong></span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm">
+                <span class="text-[11px] text-amber-200 font-bold block">⏳ Onay Bekleyen Puan</span>
+                <div class="text-2xl sm:text-3xl font-black text-white mt-1">${pendingPts.toLocaleString('tr-TR')} Puan</div>
+                <span class="text-[11px] text-emerald-200 mt-1 block">Stok & Satış Takip onayından sonra aktifleşir</span>
+              </div>
+
+              <div class="p-4 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm flex flex-col justify-between">
+                <div>
+                  <span class="text-[11px] text-emerald-200 font-bold block">🎁 Puan Kazanım Oranı</span>
+                  <div class="text-lg font-black text-white mt-1">Siparişin %1'i × 100 Katı</div>
+                </div>
+                <a href="/kopek" onclick="navigate('/kopek', event)" class="mt-2 inline-flex items-center justify-center py-2 px-3 rounded-xl bg-amber-400 text-gallus-dark font-black text-xs hover:bg-amber-300 transition">
+                  Alışverişe Başla →
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Saved Address & Profile Editor -->
+            <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-4">
+              <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider border-b border-gray-100 pb-3">📍 Kayıtlı Teslimat Adresim</h2>
+              <form onsubmit="handleMemberAddressSave(event)" class="space-y-3 text-xs">
+                <div>
+                  <label class="block font-bold text-gray-700 mb-1">Ad Soyad</label>
+                  <input type="text" id="prof-fullname" value="${escapeHtml(member.fullname || '')}" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                </div>
+                <div>
+                  <label class="block font-bold text-gray-700 mb-1">Telefon</label>
+                  <input type="tel" id="prof-phone" value="${escapeHtml(member.phone || '')}" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                </div>
+                <div>
+                  <label class="block font-bold text-gray-700 mb-1">İl / İlçe / Bölge</label>
+                  <input type="text" id="prof-district" value="${escapeHtml(member.district || member.city || 'İstanbul / Silivri')}" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                </div>
+                <div>
+                  <label class="block font-bold text-gray-700 mb-1">Mahalle / Cadde / Sokak</label>
+                  <input type="text" id="prof-street" value="${escapeHtml(member.street || '')}" placeholder="Mahalle ve sokak..." class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
+                </div>
+                <div>
+                  <label class="block font-bold text-gray-700 mb-1">Açık Adres ve Kapı Tarifi</label>
+                  <textarea id="prof-address" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">${escapeHtml(member.address || '')}</textarea>
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl font-black text-white bg-gallus-primary hover:bg-gallus-primary-hover transition">
+                  Adres Bilgilerimi Kaydet
+                </button>
+              </form>
+            </div>
+
+            <!-- Member Orders & Point Approval Status -->
+            <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-4">
+              <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <h2 class="text-sm font-black text-gallus-dark uppercase tracking-wider">📦 Siparişlerim & Puan Onay Durumu (${memberOrders.length})</h2>
+              </div>
+
+              ${memberOrders.length === 0 ? `
+                <div class="py-10 text-center text-xs text-gray-400">
+                  Henüz bu e-posta adresine ait bir sipariş bulunmamaktadır.
+                </div>
+              ` : `
+                <div class="space-y-3">
+                  ${memberOrders.map(o => {
+                    const isApp = o.pointsApproved === true || o.status === 'Onaylandı' || o.status === 'Tamamlandı';
+                    const pts = o.earnedPoints !== undefined ? o.earnedPoints : Math.round(((o.totalNumeric || 100) * 0.01) * 100);
+                    return `
+                      <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-xs space-y-2.5">
+                        <div class="flex flex-wrap justify-between items-center gap-2 border-b border-gray-200 pb-2">
+                          <div class="flex items-center gap-2">
+                            <strong class="text-gallus-primary text-sm">#${o.id}</strong>
+                            <span class="text-gray-400">•</span>
+                            <span class="text-gray-500">${o.date}</span>
+                            <span class="px-2 py-0.5 rounded-md bg-gray-200 text-gray-700 text-[10px] font-bold">${escapeHtml(o.paymentMethod || 'Havale / EFT')}</span>
+                          </div>
+                          ${isApp ? `
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              ✅ Onaylandı (+${pts} Puan Aktif)
+                            </span>
+                          ` : `
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                              ⏳ Onay Bekliyor (+${pts} Puan)
+                            </span>
+                          `}
+                        </div>
+                        <div class="text-gray-700">
+                          <strong>Ürünler:</strong> ${(o.items || []).map(i => `${i.qty}x ${escapeHtml(i.name)}`).join(', ')}
+                        </div>
+                        <div class="flex justify-between items-center pt-1 text-gray-500">
+                          <span>📍 ${escapeHtml((o.customer && o.customer.address) || '')} (${escapeHtml((o.customer && o.customer.city) || '')})</span>
+                          <span class="font-black text-sm text-gallus-dark">${o.total}</span>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+
           </div>
         </div>
       `;
+      refreshLucideIcons();
     }
 
     function renderFavoritesPage(container) {
@@ -5596,28 +6300,99 @@
       reader.readAsDataURL(file);
     }
 
+    async function adminApproveOrderPoints(orderId) {
+      try {
+        const res = await fetch('/api/orders/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const ord = appState.orders.find(o => o.id === orderId);
+          if (ord) {
+            ord.pointsApproved = true;
+            ord.status = 'Onaylandı';
+          }
+          saveState();
+          if (appState.member) refreshMemberProfile(false);
+          showToast(`✅ Sipariş (#${orderId}) ve müşteri puanı onaylandı!`, "success");
+          renderAdminPage(document.getElementById('app-viewport'));
+        } else {
+          showToast(data.error || "Onaylama hatası", "error");
+        }
+      } catch (e) {
+        showToast("Sunucu hatası", "error");
+      }
+    }
+
+    async function adminCopyAllSubscriberEmails() {
+      try {
+        const res = await fetch('/api/newsletter');
+        const data = await res.json();
+        const emails = data.subscribers || [];
+        if (emails.length === 0) {
+          showToast("Henüz kayıtlı e-posta bulunmuyor.", "warning");
+          return;
+        }
+        await navigator.clipboard.writeText(emails.join(', '));
+        showToast(`📋 Toplam ${emails.length} adet e-posta panoya toplu kopyalandı!`, "success");
+      } catch (e) {
+        showToast("Kopyalama başarısız oldu.", "error");
+      }
+    }
+
     function renderAdminOrdersTab() {
       return `
-        <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-4">
-          <h2 class="text-sm font-black text-gallus-dark">Gelen Müşteri Siparişleri</h2>
-          ${appState.orders.length === 0 ? `
-            <div class="py-8 text-center text-xs text-gray-400">Henüz sipariş kaydı yok.</div>
-          ` : `
-            <div class="space-y-3">
-              ${appState.orders.map(o => `
-                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-xs space-y-2">
-                  <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                    <span class="font-black text-gallus-primary">#${o.id} - ${o.customer.fullname} (${o.customer.phone})</span>
-                    <span class="font-black text-sm text-gallus-dark">${o.total}</span>
-                  </div>
-                  <div class="text-gray-600">
-                    <div><strong>Adres:</strong> ${o.customer.address}, ${o.customer.city}</div>
-                    <div class="mt-1"><strong>Ürünler:</strong> ${o.items.map(i => `${i.qty}x ${i.name}`).join(' | ')}</div>
-                  </div>
-                </div>
-              `).join('')}
+        <div class="space-y-6">
+          <div class="bg-emerald-950 text-white p-6 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">📧 Bülten & Üye E-Posta Havuzu</h3>
+              <p class="text-xs text-emerald-100 mt-1">Bültene abone olan, üye olan ve sipariş veren tüm müşteri mailleri Stok & Satış Takip uygulamanıza otomatik aktarılır.</p>
             </div>
-          `}
+            <button onclick="adminCopyAllSubscriberEmails()" class="px-5 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-gallus-dark text-xs font-black shrink-0 shadow-lg">
+              📋 Tüm Mailleri Toplu Kopyala
+            </button>
+          </div>
+
+          <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-4">
+            <h2 class="text-sm font-black text-gallus-dark">Gelen Müşteri Siparişleri & Puan Onayı (${appState.orders.length})</h2>
+            ${appState.orders.length === 0 ? `
+              <div class="py-8 text-center text-xs text-gray-400">Henüz sipariş kaydı yok.</div>
+            ` : `
+              <div class="space-y-3">
+                ${appState.orders.map(o => {
+                  const isApp = o.pointsApproved === true || o.status === 'Onaylandı';
+                  const pts = o.earnedPoints !== undefined ? o.earnedPoints : Math.round(((o.totalNumeric || 100) * 0.01) * 100);
+                  return `
+                  <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-xs space-y-2">
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b border-gray-200 pb-2">
+                      <div>
+                        <span class="font-black text-gallus-primary">#${o.id} - ${escapeHtml((o.customer && o.customer.fullname) || '')} (${escapeHtml((o.customer && o.customer.phone) || '')})</span>
+                        <span class="ml-2 text-gray-500">✉️ ${escapeHtml((o.customer && o.customer.email) || o.email || '-')}</span>
+                        <span class="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-800 font-bold text-[10px]">${escapeHtml(o.paymentMethod || '')}</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-black text-sm text-gallus-dark">${o.total}</span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-black text-[10px]">+${pts} Puan</span>
+                        ${isApp ? `
+                          <span class="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-black text-[11px]">✅ Onaylandı</span>
+                        ` : `
+                          <button onclick="adminApproveOrderPoints('${o.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[11px] shadow">
+                            ✅ Siparişi & +${pts} Puanı Onayla
+                          </button>
+                        `}
+                      </div>
+                    </div>
+                    <div class="text-gray-600">
+                      <div><strong>Adres:</strong> ${escapeHtml((o.customer && o.customer.address) || '')}, ${escapeHtml((o.customer && o.customer.city) || '')} ${(o.customer && o.customer.note) ? `| <strong>Not:</strong> ${escapeHtml(o.customer.note)}` : ''}</div>
+                      <div class="mt-1"><strong>Ürünler:</strong> ${(o.items || []).map(i => `${i.qty}x ${escapeHtml(i.name)}`).join(' | ')}</div>
+                    </div>
+                  </div>
+                `}).join('')}
+              </div>
+            `}
+          </div>
         </div>
       `;
     }
@@ -5900,6 +6675,30 @@
         } else {
           bFav.classList.add('hidden');
         }
+      }
+
+      // Update Member & Loyalty Points Header Badges
+      const hAccLabel = document.getElementById('header-account-label');
+      const hPtsBadge = document.getElementById('header-points-badge');
+      const bAccLabel = document.getElementById('bottom-account-label');
+      const bPtsBadge = document.getElementById('bottom-points-badge');
+
+      if (appState.member && appState.member.email) {
+        const firstName = (appState.member.fullname || appState.member.email.split('@')[0]).split(' ')[0];
+        const appPts = Number(appState.member.approvedPoints || 0);
+        const pendPts = Number(appState.member.pendingPoints || 0);
+        if (hAccLabel) hAccLabel.innerText = firstName;
+        if (hPtsBadge) {
+          hPtsBadge.classList.remove('hidden');
+          hPtsBadge.innerText = appPts > 0 ? `⭐ ${appPts} Puan` : (pendPts > 0 ? `⏳ ${pendPts} Puan (Onayda)` : `⭐ 0 Puan`);
+        }
+        if (bAccLabel) bAccLabel.innerText = firstName;
+        if (bPtsBadge) bPtsBadge.classList.remove('hidden');
+      } else {
+        if (hAccLabel) hAccLabel.innerText = 'Üye Ol / Giriş';
+        if (hPtsBadge) hPtsBadge.classList.add('hidden');
+        if (bAccLabel) bAccLabel.innerText = 'Üyelik';
+        if (bPtsBadge) bPtsBadge.classList.add('hidden');
       }
 
       // Drawer Items Render
