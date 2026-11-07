@@ -1018,94 +1018,169 @@
        A. CORE APPLICATION STATE
        ========================================================== */
     const STORAGE_KEYS = {
-      PRODUCTS: 'gallus_products_v6',
+      PRODUCTS: 'gallus_products_v7',
       CART: 'gallus_cart_v4',
       FAVORITES: 'gallus_favorites_v4',
       ORDERS: 'gallus_orders_v4',
       COUPON: 'gallus_coupon_v4'
     };
 
-    // Clear stale product caches so Eriş Yem images and detailed product data load immediately
+    // Clear stale caches that were overwritten before restoration
     try {
       localStorage.removeItem('gallus_products_v4');
       localStorage.removeItem('gallus_products_v5');
+      localStorage.removeItem('gallus_products_v6');
+      const oldSiteInfo = localStorage.getItem('gallus_site_info');
+      if (oldSiteInfo) {
+        const parsed = JSON.parse(oldSiteInfo);
+        if (!parsed.catCard_kedi_img || Object.keys(parsed).length < 40) {
+          localStorage.removeItem('gallus_site_info');
+        }
+      }
     } catch (e) {}
 
     const EXACT_PRODUCT_IMAGE_MAP = {
-      "u6_p1002": "https://cdn.dsmcdn.com/ty662/product/media/images/20221223/17/244790234/658110596/1/1_org_zoom.jpg",
-      "u6_p1003": "https://cdn.dsmcdn.com/ty31/product/media/images/20201204/11/34926560/101559174/1/1_org_zoom.jpg",
+
+      "u6_p1002": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBgKC0vhj3EV9LCOaYsOx4ef5YSsjdgAcOQpIsy3rZuIiDLrzQpimCtNeC&s=10",
+
+      "u6_p1003": "https://cdn.dsmcdn.com/mnresize/400/-/ty1975/prod/QC_PREP/20261010/17/4dc51271-cebe-33f8-b561-4e345cd8e0fc/1_org_zoom.jpg",
+
       "u6_p1004": "https://cdn.dsmcdn.com/ty1835/prod/QC_PREP/20260309/21/8ca7cd6d-437a-3ce0-9c4a-01e9554fd5dc/1_org_zoom.jpg",
+
       "u6_p1005": "https://cdn.dsmcdn.com/ty1941/prod/QC_PREP/20260509/17/b771b011-7c7f-340c-8e5b-4769a8d5e855/1_org_zoom.jpg",
+
       "u6_p1006": "https://cdn.dsmcdn.com/ty1650/prod/QC/20250318/13/098de440-b758-3bbd-a7fe-019bb4ad49d5/1_org_zoom.jpg",
+
       "u6_p1007": "https://cdn.dsmcdn.com/mnresize/420/620/ty1769/prod/QC_ENRICHMENT/20251004/15/419ea9f3-7f42-3273-b3f5-25588eb2726d/1_org_zoom.jpg",
-      "u6_p1008": "https://cdn.dsmcdn.com/ty1621/prod/QC/20250108/09/3032dd1c-a292-306a-9e4b-d1c16b3db6a5/1_org_zoom.jpg",
-      "u6_p1009": "https://cdn.dsmcdn.com/ty1329/product/media/images/prod/QC/20240525/19/699d9791-9122-3030-8396-0cd5bb55d2f7/1_org_zoom.jpg",
-      "u6_p1010": "https://cdn.dsmcdn.com/ty1329/product/media/images/prod/QC/20240525/19/699d9791-9122-3030-8396-0cd5bb55d2f7/1_org_zoom.jpg",
-      "u6_p24": "https://cdn.dsmcdn.com/ty1789/prod/QC_PREP/20251116/00/45347a08-09fc-393c-800d-404f915558f5/1_org_zoom.jpg",
+
+      "u6_p1008": "https://www.petgroup.com.tr/buyukresim/751112825_EximXEc1QsoIavCjS6V.png",
+
+      "u6_p1009": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFGaYoHxvxgVZ5JMxs5V6H7Xzd9L1W-uVPvcr7Z9xKplKFMKJAdMaqZD2W&s=10",
+
+      "u6_p1010": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFGaYoHxvxgVZ5JMxs5V6H7Xzd9L1W-uVPvcr7Z9xKplKFMKJAdMaqZD2W&s=10",
+
+      "u6_p24": "https://koctas-img.mncdn.com/mnpadding/300/300/ffffff/productimages/5003801148/5003801148_1_MC/9584350986290_1788350528442.jpg",
+
       "u6_p25": "https://cdn.dsmcdn.com/ty1852/prod/QC_PREP/20260409/21/f89b428a-53d2-34c5-b96e-931f6c2f1a2c/1_org_zoom.jpg",
-      "u6_p26": "https://cdn.dsmcdn.com/ty1852/prod/QC_PREP/20260409/21/f89b428a-53d2-34c5-b96e-931f6c2f1a2c/1_org_zoom.jpg",
-      "u6_p27": "https://cdn.dsmcdn.com/ty1909/prod/QC_PREP/20260506/16/3a01c9a7-5ad5-3362-b0c8-871a197de6fd/1_org_zoom.jpg",
-      "u6_p28": "https://cdn.dsmcdn.com/ty1909/prod/QC_PREP/20260506/16/3a01c9a7-5ad5-3362-b0c8-871a197de6fd/1_org_zoom.jpg",
+
+      "u6_p26": "https://cdn.akakce.com/z/trendline/trendline-soslu-dana-etli-400-gr-yetiskin-konserve-kopek-mamasi.jpg",
+
+      "u6_p27": "https://cdn.akakce.com/z/trendline/trendline-soslu-tavuklu-400-gr-yetiskin-konserve.jpg",
+
+      "u6_p28": "https://cdn.akakce.com/z/trendline/trendline-soslu-somonlu-400-gr-yetiskin-konserve.jpg",
+
       "u6_p29": "https://cdn.dsmcdn.com/ty1724/prod/QC_PREP/20250811/17/ce5d729a-93fc-34c2-9473-9f4989f2a7bb/1_org_zoom.jpg",
+
       "u6_p30": "https://cdn.dsmcdn.com/mnresize/420/620/ty1857/prod/QC_PREP/20260422/14/e21fe096-dc1f-318a-b021-52fa6a36de92/1_org_zoom.jpg",
+
       "u6_p31": "https://cdn.dsmcdn.com/ty1717/prod/QC_PREP/20250730/15/bc6efd31-aa43-347e-8a01-d4a653bdf71a/1_org_zoom.jpg",
+
       "u6_p32": "https://cdn.dsmcdn.com/ty1857/prod/QC_PREP/20260422/14/20bf0d33-8537-37ee-84cb-e3340827fb5d/1_org_zoom.jpg",
+
       "u6_p33": "https://cdn.dsmcdn.com/ty1694/product/media/images/prod/PIM/20250616/06/2a51c1e2-1e09-49bd-9123-3ea03aae3d54/1_org_zoom.jpg",
-      "u6_p34": "https://petstore.co.ke/wp-content/uploads/2019/02/PetStore-Kenya-Trendline-Dog-Food-Beef-15kg-min-600x600.png",
+
+      "u6_p34": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFd5tyys07VOXGaFlHNFFwNqA4hIcyta6IQTYkjZqWLt8vr_ub7490tcmK&s=10",
+
       "u6_p35": "https://cdn.dsmcdn.com/ty1824/prod/QC_PREP/20260212/11/87846302-2f8d-3ab9-87b1-2d3597d24aae/1_org_zoom.jpg",
+
       "u6_p36": "https://cdn.dsmcdn.com/ty1743/product/media/images/prod/PIM/20251014/13/1e002e2c-b046-44e3-9414-827e0b25eb02/1_org_zoom.jpg",
+
       "u6_p37": "https://cdn.dsmcdn.com/ty1743/product/media/images/prod/PIM/20250909/12/11aaf518-43d8-41e4-b6c5-c5e737f94ba0/1_org_zoom.jpg",
+
       "u6_p38": "https://petstore.co.ke/wp-content/uploads/2019/02/Trendline-Multicolor.png",
+
       "u6_p39": "https://petzonebd.com/wp-content/uploads/2022/07/trendline-cat-salmon-1kg-600x600-1.jpg",
+
       "u6_p40": "https://cdn.dsmcdn.com/ty1793/prod/QC_PREP/20251124/11/25425833-16a5-3066-9a30-9a34755cad6b/1_org_zoom.jpg",
+
       "u6_p41": "https://cdn.dsmcdn.com/ty1773/prod/QC_PREP/20251015/15/2ddb4b6b-f15d-3eb9-997a-abf81c1aac4d/1_org_zoom.jpg",
+
       "u6_p42": "https://cdn.dsmcdn.com/ty1795/prod/QC_PREP/20251201/13/aa88ddd6-8588-3b69-b8f2-adcffb46e018/1_org_zoom.jpg",
+
       "u6_p43": "https://cdn.dsmcdn.com/ty1151/product/media/images/prod/SPM/PIM/20240130/01/1c8d0b02-5a4a-3e52-9fca-69af69f65151/1_org_zoom.jpg",
+
       "u6_p44": "https://cdn.dsmcdn.com/ty1773/prod/QC_PREP/20251015/14/b3b60293-f8cf-3a38-b3cd-e52097ca07d8/1_org_zoom.jpg",
-      "u6_p45": "https://cdn.dsmcdn.com/ty1625/prod/QC/20250116/02/969c2c60-9b63-3ee7-8a71-576018392556/1_org_zoom.jpg",
+
+      "u6_p45": "https://static.ticimax.cloud/50837/Uploads/UrunResimleri/buyuk/9c124069-34d6-475d-8a8f-55fc5fe7b818-df6cde.jpg",
+
       "u6_p46": "https://cdn.dsmcdn.com/ty1790/prod/QC_PREP/20251117/14/6b154e28-2db6-3244-b669-d74995210121/1_org_zoom.jpg",
+
       "u6_p47": "https://static.ticimax.cloud/50837/uploads/urunresimleri/buyuk/pro-plan-kisirlastirilmis-somonlu-kedi-49d8-b.png",
-      "u6_p48": "https://static.ticimax.cloud/50837/uploads/urunresimleri/buyuk/pro-plan-kisirlastirilmis-somonlu-kedi-49d8-b.png",
-      "u6_p49": "https://cdn.dsmcdn.com/ty1743/product/media/images/prod/PIM/20251014/13/1e002e2c-b046-44e3-9414-827e0b25eb02/1_org_zoom.jpg",
+
+      "u6_p48": "https://productimages.hepsiburada.net/s/777/375-375/110001151800369.jpg",
+
+      "u6_p49": "https://cdn.akakce.com/z/enjoy/enjoy-gravy-beyaz-balikli-85-gr-kedi-yas-mamasi.jpg",
+
       "u6_p50": "https://cdn.dsmcdn.com/ty1519/product/media/images/prod/QC/20240902/18/74e0d985-7641-3ce2-aef1-7ad2e756d19b/1_org_zoom.jpg",
+
       "u6_p51": "https://cdn.dsmcdn.com/mnresize/420/620/ty1859/prod/QC_PREP/20260424/16/d71d2b45-7f2a-3278-a51e-100a89f1e398/1_org.jpg",
+
       "u6_p52": "https://cdn.dsmcdn.com/ty1903/prod/QC_PREP/20260428/14/91920fad-9d81-3155-92fd-55473ec08f13/1_org_zoom.jpg",
+
       "u6_p53": "https://cdn.dsmcdn.com/ty1805/prod/QC_PREP/20251227/18/308bfc1e-648c-3c4b-a340-ebc4ac917eb9/1_org_zoom.jpg",
+
       "u6_p54": "https://cdn.dsmcdn.com/ty1803/prod/QC_ENRICHMENT/20251224/10/9441539f-c9b7-3251-80ea-584b627b8750/1_org_zoom.jpg",
+
       "u6_p55": "https://cdn.dsmcdn.com/ty1843/prod/QC_ENRICHMENT/20260324/09/f8948bb5-f429-35c2-99eb-6fef9ee9f54a/1_org_zoom.jpg",
+
       "u6_p56": "https://cdn.dsmcdn.com/ty1767/prod/QC_ENRICHMENT/20251004/00/f62964d2-d53d-3bf1-86c6-43f5aa65da9a/1_org_zoom.jpg",
-      "u6_p57": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
-      "u6_p58": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
-      "u6_p59": "https://cdn.dsmcdn.com/ty1903/prod/QC_PREP/20260509/19/cbcd7513-c24a-34f2-8fc9-60b3cda8cce6/1_org_zoom.jpg",
-      "u6_p60": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
-      "u6_p61": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
+
+      "u6_p57": "https://tavukpazari.net/image/cache/yumurta/tavuk-yumurtasi-60gr-600x600.jpg",
+
+      "u6_p58": "https://tavukpazari.net/image/cache/yumurta/tavuk-yumurtasi-60gr-600x600.jpg",
+
+      "u6_p59": "https://tavukpazari.net/image/cache/yumurta/tavuk-yumurtasi-60gr-600x600.jpg",
+
+      "u6_p60": "https://tavukpazari.net/image/cache/yumurta/tavuk-yumurtasi-60gr-600x600.jpg",
+
+      "u6_p61": "https://tavukpazari.net/image/cache/yumurta/tavuk-yumurtasi-60gr-600x600.jpg",
+
       "u6_p62": "https://cdn.dsmcdn.com/ty1678/prod/QC/20250514/23/b249a9eb-a4e8-3315-8740-993101e88776/1_org_zoom.jpg",
-      "u6_p63": "https://cdn.dsmcdn.com/ty1910/prod/QC_PREP/20260428/19/1d79cb61-3dfe-3ef4-9479-b67894d238a5/1_org_zoom.jpg",
+
+      "u6_p63": "https://n11scdn.akamaized.net/a1/320_480/14/90/38/70/IMG-3491942108901171357.jpg",
+
       "u6_p64": "https://static.ticimax.cloud/37708/uploads/urunresimleri/buyuk/paw-paw-kuzu-etli-yetiskin-kopek-mamas-2cabb6.jpg",
-      "u6_p65": "https://cdn.dsmcdn.com/ty1784/prod/QC_PREP/20251104/13/50b5d5e7-3975-36de-8e7c-2def5a410f73/1_org_zoom.jpg",
+
+      "u6_p65": "https://iis-akakce.akamaized.net/p.x?https%3A%2F%2Fn11scdn.akamaized.net%2Fa1%2F1024%2F06%2F72%2F03%2F81%2FIMG-3356337189065075035.jpg",
+
       "u6_p66": "https://cdn.dsmcdn.com/ty1941/prod/QC_PREP/20260509/17/b771b011-7c7f-340c-8e5b-4769a8d5e855/1_org_zoom.jpg",
+
       "u6_p67": "https://xcdn.gormeklazim.com/img/cac2977f-e396-4b3d-93f0-53606a2b72a5.webp",
+
       "u6_p68": "https://xcdn.gormeklazim.com/img/cac2977f-e396-4b3d-93f0-53606a2b72a5.webp",
+
       "u6_p69": "https://cdn.dsmcdn.com/ty1941/prod/QC_PREP/20260509/17/b771b011-7c7f-340c-8e5b-4769a8d5e855/1_org_zoom.jpg",
+
       "u6_p999": "https://cdn.myikas.com/images/0fc5e2e6-3ea7-443f-a09e-daf74b83e708/50c5bccd-e3f9-455b-a12d-08ddd5a8949e/3840/efe-gezen-tavuk.webp"
+
 };
 
+
+
     function resolveClientProductImage(p) {
+
       if (!p) return '/images/mutlu-patiler-banner.jpg';
+
       const pid = p.id || p.doc_id || p.productId;
+
       const cur = (p.imageUrl || '').trim();
-      // If user uploaded a custom photo via /images/uploads/, keep it
-      if (cur.startsWith('/images/uploads/')) return cur;
-      // Always enforce official Eriş Yem sack images for poultry/chick feed IDs unless custom upload
-      if (pid === 'u6_p1002' || pid === 'u6_p1003' || pid === 'u6_p67' || pid === 'u6_p68') {
-        return EXACT_PRODUCT_IMAGE_MAP[pid];
+
+      // Always honor any valid custom image URL or uploaded image on the product
+
+      if (cur && !cur.includes('images.unsplash.com') && cur !== '/images/mutlu-patiler-banner.jpg') {
+
+        return cur;
+
       }
+
       if (pid && EXACT_PRODUCT_IMAGE_MAP[pid]) {
-        if (!cur || cur.includes('images.unsplash.com') || cur === '/images/mutlu-patiler-banner.jpg') {
-          return EXACT_PRODUCT_IMAGE_MAP[pid];
-        }
+
+        return EXACT_PRODUCT_IMAGE_MAP[pid];
+
       }
-      return cur || (pid && EXACT_PRODUCT_IMAGE_MAP[pid]) || '/images/mutlu-patiler-banner.jpg';
+
+      return cur || '/images/mutlu-patiler-banner.jpg';
+
     }
 
     let appState = {
@@ -1640,14 +1715,12 @@
       updateAdminToolbar();
       closeCmsEditModal();
       
+      localStorage.setItem('gallus_site_info', JSON.stringify(appState.siteInfo));
+      localStorage.setItem('gallus_local_edit_ts', String(Date.now()));
       renderGlobalHeaderAndFooter();
       handleRoute(appState.currentRoute || window.location.pathname, false);
 
-      if (saveImmediately) {
-        await saveAllCmsChangesToServer();
-      } else {
-        showToast("İçerik vitrinde güncellendi. Kalıcı olması için 'Kaydet & Yayınla' yapabilirsiniz.", "info");
-      }
+      await saveAllCmsChangesToServer();
     }
 
     // Activate Quick CMS Editor from Floating Button (Strictly requires Admin Login)
@@ -1805,15 +1878,15 @@
 
     async function saveActiveSectionFromModal(saveToServer = true) {
       saveActiveSectionInputsToState();
+      localStorage.setItem('gallus_site_info', JSON.stringify(appState.siteInfo));
+      localStorage.setItem('gallus_local_edit_ts', String(Date.now()));
       appState.unsavedChanges++;
       updateAdminToolbar();
       renderGlobalHeaderAndFooter();
       handleRoute(appState.currentRoute || window.location.pathname, false);
+      await saveAllCmsChangesToServer();
       if (saveToServer) {
-        await saveAllCmsChangesToServer();
         closeAllSectionsModal();
-      } else {
-        showToast("Bölüm vitrinde güncellendi!", "success");
       }
     }
 
@@ -2128,14 +2201,12 @@
       updateAdminToolbar();
       closeProductEditModal();
 
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(appState.products));
+      localStorage.setItem('gallus_local_edit_ts', String(Date.now()));
       // Live update UI
       handleRoute(appState.currentRoute || window.location.pathname, false);
 
-      if (saveToServerImmediately) {
-        await saveAllCmsChangesToServer();
-      } else {
-        showToast(`"${name}" güncellendi. Kalıcı olması için üst çubuktan 'Kaydet & Yayınla' yapabilirsiniz.`, 'info');
-      }
+      await saveAllCmsChangesToServer();
     }
 
     // Batch Save All to Server and Firestore (Permanent Persistence)
@@ -2346,30 +2417,294 @@
       }
     }
 
+    const DEFAULT_RESTORED_SITE_INFO = {
+
+      "title": "GALLUS MAMA & YUMURTA",
+
+      "slogan": "Premium Pet Beslenmesi & Taze Ciftlik Yumurtasi",
+
+      "logoMamaUrl": "/images/logo-mama.jpg",
+
+      "logoCiftlikUrl": "/images/logo-ciftlik.jpg",
+
+      "heroTitle": "Doğal Çiftlikten Sofranıza, Sevgiyle Beslenen Patilere",
+
+      "heroImage": "/images/mutlu-patiler-banner.jpg",
+
+      "aboutTitle": "Değirmenköy'ün Bereketli Topraklarından Doğan Güven",
+
+      "aboutText": "2018 yılından bu yana Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; hem katkısız günlük taze yumurtalar hem de veteriner hekim onaylı dengeli kedi, köpek, kanatlı yemleri üretiyor ve sunuyoruz.",
+
+      "aboutImage": "/images/tavuklar.jpg",
+
+      "phone": "0551 655 3637",
+
+      "email": "iletisim@gallusmama.com",
+
+      "address": "Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul",
+
+      "workingHours": "Haftanın Her Günü: 08:30 - 21:00",
+
+      "deliveryRegions": "Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Özel Korumalı Kargo İle Tüm Türkiye",
+
+      "whatsappUrl": "https://wa.me/905516553637?text=Merhaba%2C%20Gallus%20Mama%20ve%20Yumurta%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.",
+
+      "instagramGallusMamaUrl": "https://www.instagram.com/gallus_mama/",
+
+      "instagramGallusYumurtaUrl": "https://www.instagram.com/gallusyumurta/",
+
+      "googleMapsEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str",
+
+      "announcementText": "🚚 750 ₺ Üzeri Ücretsiz Kargo | 🥚 Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası | 🐾 %100 Orijinal Mama & Yem Garantisi | 📍 Silivri / Değirmenköy PTT Karşısı Mağazamız Açık!",
+
+      "headerBrandName": "GALLUS",
+
+      "headerBrandBadge": "Pet & Çiftlik",
+
+      "headerBrandSub": "MAMA & TAZE YUMURTA",
+
+      "headerWhatsappLabel": "WhatsApp Danışma",
+
+      "headerHelpLabel": "Yardım & SSS",
+
+      "locationBadge": "Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet",
+
+      "heroSubtitle": "Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan %100 doğal gezen tavuk yumurtaları ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste.",
+
+      "heroBtn1Text": "Alışverişe Başla",
+
+      "heroBtn2Text": "Taze Yumurtaları İncele",
+
+      "heroBannerImg": "https://img.pikbest.com/illustration/20250128/cute-cartoon-chicken-with-puppy-hatching-from-egg_11464317.jpg!f305cw",
+
+      "heroDealBadge": "Günün Fırsatı",
+
+      "heroDealTitle": "Gezen Tavuk Yumurtası (30'lu )",
+
+      "heroDealBtn": "180 ₺ İncele",
+
+      "trust1Title": "Aynı Gün Sevk",
+
+      "trust1Desc": "750 ₺ üzeri kargo bedava",
+
+      "trust2Title": "%100 Taze & Doğal",
+
+      "trust2Desc": "Günlük sabah toplama",
+
+      "trust3Title": "Güvenli Ödeme",
+
+      "trust3Desc": "Kapıda nakit & kart",
+
+      "trust4Title": "Orijinal Mama",
+
+      "trust4Desc": "Veteriner hekim onaylı",
+
+      "catSecBadge": "Kategorileri Keşfedin",
+
+      "catSecTitle": "Öne Çıkan Reyonlarımız",
+
+      "catCard_kedi_title": "Kedi Mamaları & Ürünleri",
+
+      "catCard_kedi_desc": "Kısır, yavru, bentonit kum",
+
+      "catCard_kedi_img": "https://png.pngtree.com/thumb_back/fh260/background/20240913/pngtree-view-of-adorable-looking-kitten-4k-image_16185275.jpg",
+
+      "catCard_kopek_title": "Köpek Mamaları & Ürünleri",
+
+      "catCard_kopek_desc": "Kuru mama, konserve, bakım",
+
+      "catCard_kopek_img": "https://s.widget-club.com/images/YyiR86zpwIMIfrCZoSs4ulVD9RF3/7364d2b406e9ad2085841b8b2ee3ce53/a3ad784836b51cba6cd02344538ebd5b.jpg?q=70&w=500",
+
+      "catCard_tavuk-civciv_title": "Eriş Yem Tavuk & Civciv Yemleri",
+
+      "catCard_tavuk-civciv_desc": "Eriş Yem gezen tavuk ve civciv yemleri",
+
+      "catCard_tavuk-civciv_img": "https://play-lh.googleusercontent.com/DxLbHbU4IsGZ9W6sFFxchnZUjukqDREDxgRlDyjRAykOv-Y3eXRQaCDq35cPs_y4vDMUhRg7N4k8Zdh_gIDy",
+
+      "catCard_guvercin_title": "Güvercin Yemleri",
+
+      "catCard_guvercin_desc": "1. kalite buğday ve tahıllar",
+
+      "catCard_guvercin_img": "https://png.pngtree.com/thumb_back/fh260/background/20240716/pngtree-white-dove-flying-with-river-and-mountain-bird-of-peace-international-image_16008223.jpg",
+
+      "catCard_balik-akvaryum_title": "Balık Yemleri & Akvaryum",
+
+      "catCard_balik-akvaryum_desc": "Pul yem ve su düzenleyiciler",
+
+      "catCard_balik-akvaryum_img": "https://i.pinimg.com/736x/2e/5e/82/2e5e8273d08db6920f989f48af98475a.jpg",
+
+      "catCard_kumes-ekipman_title": "Kümes Ekipmanları",
+
+      "catCard_kumes-ekipman_desc": "Taşıma kafesleri, suluk, yemlik",
+
+      "catCard_kumes-ekipman_img": "https://www.banek.com.tr/upload/slider/450x450/sulama-sistemleri-20220204125854.jpg",
+
+      "catCard_tarim-bahce_title": "Tarım ve Bahçe Ürünleri",
+
+      "catCard_tarim-bahce_desc": "Doğal gübre ve bahçe bakımı",
+
+      "catCard_tarim-bahce_img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXHPAqdyuFzS56hnye32j5jVWJTnMvxufyXDk6jlT2G1rm4LyuMGap8i8A&s=10",
+
+      "catCard_diger_title": "Diğer & Çiftlik Yumurtası",
+
+      "catCard_diger_desc": "Günlük gezen tavuk yumurtaları",
+
+      "catCard_diger_img": "https://videocdn.cdnpk.net/videos/c848fa1a-f5dd-5636-a857-ac5e8110efb8/horizontal/thumbnails/large.jpg?semt=ais_hybrid&item_id=8066353&w=740&q=80",
+
+      "catBannerBadge": "Kategori Vitrini",
+
+      "catBannerSub": "Doğrudan Değirmenköy garantisiyle sevk edilir.",
+
+      "catPageTitle_kedi": "Kedi Mamaları ve Ürünleri",
+
+      "catPageTitle_kopek": "Köpek Mamaları ve Ürünleri",
+
+      "catPageTitle_tavuk-civciv": "Tavuk ve Civciv Yemleri",
+
+      "catPageTitle_guvercin": "Güvercin Yemleri & Tahıllar",
+
+      "catPageTitle_balik-akvaryum": "Balık Yemleri ve Akvaryum",
+
+      "catPageTitle_kumes-ekipman": "Kümes ve Pet Ekipmanları",
+
+      "catPageTitle_tarim-bahce": "Tarım ve Bahçe Ürünleri",
+
+      "catPageTitle_yumurta": "Taze Çiftlik Gezen Tavuk Yumurtası",
+
+      "catPageTitle_diger": "Diğer Ürünler & Taze Çiftlik Yumurtası",
+
+      "eggHeritageImg": "/images/tavuklar.jpg",
+
+      "eggHeritageBadge": "Doğallık ve Hijyen",
+
+      "eggHeritageTitle": "Her Sabah Taze Toplanan, Güneş Gören Gezen Tavuk Yumurtası",
+
+      "eggHeritageDesc": "Değirmenköy tesislerimizde tavuklarımız kapalı kafeslerde değil; yeşil mera alanlarında serbestçe gezer. Doğal mısır, buğday ve soya rasyonlarıyla beslenen tavuklarımızdan elde edilen yumurtalar özel iklimlendirmeli depolarda tasnif edilir ve kırılmaya karşı test edilmiş darbe emici viyollerle sevk edilir.",
+
+      "eggCheck1": "%100 Antibiyotiksiz",
+
+      "eggCheck2": "Altın Sarısı Kıvam",
+
+      "eggCheck3": "Kırılmaz Viyol Garantisi",
+
+      "eggHeritageBtn": "Çiftliğimizi Yakından Tanıyın",
+
+      "dogSecBadge": "Sadık Dostlarımız İçin",
+
+      "dogSecTitle": "Köpek Maması & Beslenme Çözümleri",
+
+      "dogSecLink": "Tüm Köpek Mamaları →",
+
+      "catSpotBadge": "Kedinizin Konforu İçin",
+
+      "catSpotTitle": "Kedi Mamaları & Doğal Bentonit Kumlar",
+
+      "catSpotLink": "Tüm Kedi Ürünleri →",
+
+      "poultrySecBadge": "Çiftlik ve Kümes Yetiştiriciliği",
+
+      "poultrySecTitle": "Kanatlı Yemleri & Kümes Otomasyonu",
+
+      "poultrySecLink": "Kümes Ürünleri →",
+
+      "promoBadge": "Özel Kampanya",
+
+      "promoTitle": "İlk Siparişinize Özel %10 İndirim Fırsatı!",
+
+      "promoDesc": "Sepet adımında GALLUS10 kupon kodunu kullanarak anında indirim kazanın. 750 ₺ üzeri siparişlerde kargonuz ücretsiz.",
+
+      "promoBtnText": "Fırsatları İncele",
+
+      "bestSecBadge": "Müşteri Favorileri",
+
+      "bestSecTitle": "En Çok Tercih Edilenler",
+
+      "bestSecLink": "Tüm Kataloğu Gör",
+
+      "legalDistTitle": "Mesafeli Satış Sözleşmesi",
+
+      "legalDistBody": "İşbu sözleşmenin konusu, ALICI'nın SATICI'ya ait internet sitesinden elektronik ortamda siparişini yaptığı ürünlerin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır. Tüketici, standart ürünlerde 14 gün içinde herhangi bir gerekçe göstermeksizin cayma hakkına sahiptir.",
+
+      "legalPrivTitle": "Gizlilik ve Kişisel Verilerin Korunması (KVKK)",
+
+      "legalPrivBody": "Gallus Mama & Yumurta olarak müşterilerimizin kişisel verilerinin güvenliğine azami önem gösteriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında ad, telefon, teslimat adresi bilgileriniz sadece siparişinizin ulaştırılması ve faturalandırılması amacıyla işlenir. Kredi kartı bilgileriniz sunucularımızda asla saklanmaz.",
+
+      "legalDelivTitle": "Teslimat Koşulları",
+
+      "legalDelivBody": "Siparişleriniz Değirmenköy ana sevkiyat merkezimizden çıkış yapmaktadır. Sipariş onayının ardından anlaşmalı kargo firmasına teslim edilen paketleriniz için SMS ve e-posta ile kargo takip bağlantısı gönderilir.",
+
+      "legalCookieTitle": "Çerez (Cookie) Politikası",
+
+      "legalCookieBody": "Web sitemizde alışveriş sepetinizin hatırlanması, oturum yönetimi ve site performansının iyileştirilmesi amacıyla zorunlu çerezler kullanılmaktadır. Sitemizi kullanarak çerez politikamızı kabul etmiş sayılırsınız.",
+
+      "shipPageTitle": "Kargo ve İade Politikası",
+
+      "shipSec1Title": "1. Teslimat Süreçleri",
+
+      "shipSec1Desc": "Siparişleriniz anlaşmalı kargo firmalarımızla Türkiye'nin her yerine 1-3 iş günü içerisinde ulaştırılır. 750 ₺ ve üzeri tüm alışverişlerde kargo bedavadır.",
+
+      "shipSec2Title": "2. Kırılmaz Yumurta Güvencesi",
+
+      "shipSec2Desc": "Doğal çiftlik yumurtalarımız darbe sönümleyici özel kalıplarla sevk edilir. Kargo tesliminde pakette belirgin hasar olması durumunda kurye nezaretinde tutanak tutturabilir veya WhatsApp hattımızdan fotoğraf göndererek yenisini talep edebilirsiniz.",
+
+      "shipSec3Title": "3. İade ve Değişim Şartları",
+
+      "shipSec3Desc": "Ambalajı açılmamış kuru mama, kedi kumu ve ekipman ürünlerini 14 gün içerisinde yasal cayma hakkınız kapsamında koşulsuz iade edebilirsiniz. Çabuk bozulabilen taze yumurtalarda ise kalite güvencemiz geçerlidir.",
+
+      "helpTitle": "Sıkça Sorulan Sorular",
+
+      "helpSub": "Sipariş, kargo ve ürünlerimizle ilgili en çok merak edilenler.",
+
+      "faq1Q": "Yumurtalar kargoda kırılır mı? Nasıl paketleniyor?",
+
+      "faq1A": "Yumurtalarımız darbeye karşı özel üretilmiş kalın kraft koruyucu viyoller ve hava yastıklı şok emici ambalajlar içinde sevk edilir. Kırılma oranı %0.1'in altındadır. Olası bir hasarda fotoğrafını iletmeniz halinde anında telafi edilir.",
+
+      "faq2Q": "Siparişim ne zaman kargoya verilir?",
+
+      "faq2A": "Hafta içi saat 15:00'e kadar verilen siparişler aynı gün kargoya teslim edilir. Silivri ve çevre bölgelere ise kendi servis araçlarımızla gün içi elden teslimat yapılmaktadır.",
+
+      "faq3Q": "Kapıda ödeme yapabilir miyim?",
+
+      "faq3A": "Evet, sipariş tamamlama adımında kapıda nakit veya POS cihazı ile kredi kartı ödeme seçeneğini seçebilirsiniz.",
+
+      "faq4Q": "Mamalarınızın son kullanma tarihi ve orijinalliği garantili mi?",
+
+      "faq4A": "Mağazamızdaki tüm kedi, köpek, güvercin ve kümes yemleri %100 orijinal ambalajında, yeni üretim partisi ve faturalı olarak gönderilmektedir.",
+
+      "contactPageTitle": "İletişim & Mağaza Bilgileri",
+
+      "contactPageSub": "Sorularınız, siparişleriniz veya ziyaretiniz için bize dilediğiniz zaman ulaşabilirsiniz.",
+
+      "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str",
+
+      "aboutMissionText": "Tüm kedi maması, köpek maması, güvercin ve kanatlı yemlerimiz doğrudan yetkili distribütörlerden ve kendi çiftlik üretim bandımızdan taze parti olarak temin edilmektedir.",
+
+      "aboutPageImg": "https://scontent.cdninstagram.com/v/t51.2885-19/292336033_763647295071141_6334681579095666720_n.jpg?stp=dst-jpg_s150x150_tt6&_nc_cat=101&ig_cache_key=GKGxbBGlo8F9iLYCACAwNWdVT_lXbkULAAAB1501500j-ccb7-5&ccb=7-5&_nc_sid=669407&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLnd3dy41MDAuQzMifQ%3D%3D&_nc_ohc=7jRiV5on8eoQ7kNvwESEONP&_nc_oc=AdoTAqN67mcjUI3uTgGEXILCu_2kwvgj1SmueoH2b3hpVMcozlk9EaJeY-O1_5HQ0ZA&_nc_zt=24&_nc_ht=scontent.cdninstagram.com&_nc_ss=7b689&oh=00_AQRggs-QJaa1vg-UnrqVdNWHLvAEKqCp8f1x6l8pNWmE5Q&oe=6AF510ED"
+
+};
+
+
+
     function loadSavedSiteInfo() {
+
       const saved = localStorage.getItem('gallus_site_info');
+
       if (saved) {
+
         try {
-          appState.siteInfo = JSON.parse(saved);
+
+          const parsed = JSON.parse(saved);
+
+          appState.siteInfo = { ...DEFAULT_RESTORED_SITE_INFO, ...parsed };
+
           return;
+
         } catch (e) {}
+
       }
-      appState.siteInfo = {
-        title: "GALLUS MAMA & YUMURTA",
-        slogan: "Premium Pet Beslenmesi & Taze Çiftlik Yumurtası",
-        heroTitle: "Doğal Çiftlikten Sofranıza, Sevgiyle Beslenen Patilere",
-        heroSubtitle: "Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan %100 doğal gezen tavuk yumurtaları ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste.",
-        locationBadge: "Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet",
-        aboutTitle: "Değirmenköy'ün Bereketli Topraklarından Doğan Güven",
-        aboutText: "2018 yılından bu yana Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; hem katkısız günlük taze yumurtalar hem de veteriner hekim onaylı dengeli kedi, köpek, kanatlı yemleri üretiyor ve sunuyoruz.",
-        phone: "0551 655 3637",
-        email: "iletisim@gallusmama.com",
-        address: "Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul",
-        workingHours: "Haftanın Her Günü: 08:30 - 21:00",
-        deliveryRegions: "Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Özel Korumalı Kargo İle Tüm Türkiye",
-        whatsappUrl: "https://wa.me/905516553637?text=Merhaba%2C%20Gallus%20Mama%20ve%20Yumurta%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.",
-        announcementText: "🚚 750 ₺ Üzeri Ücretsiz Kargo | 🥚 Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası | 🐾 %100 Orijinal Mama & Yem Garantisi | 📍 Silivri / Değirmenköy PTT Karşısı Mağazamız Açık!"
-      };
+
+      appState.siteInfo = { ...DEFAULT_RESTORED_SITE_INFO };
+
     }
 
     // Keyboard Shortcut (Ctrl+Shift+A or Alt+A to toggle live edit or login)
@@ -2460,12 +2795,31 @@
               if (existingIdx >= 0) {
                 const old = appState.products[existingIdx];
                 if (old.price !== normalized.price) {
-                  showToast(`Fiyat Güncellendi: "${normalized.name}" ${old.price} ₺ ➔ ${normalized.price} ₺`, 'info');
+                  showToast(`Fiyat Güncellendi: "${old.name || normalized.name}" ${old.price} ₺ ➔ ${normalized.price} ₺`, 'info');
                 }
                 if (old.stock > 0 && normalized.stock <= 0) {
-                  showToast(`Stok Tükendi: "${normalized.name}" tükendi!`, 'warning');
+                  showToast(`Stok Tükendi: "${old.name || normalized.name}" tükendi!`, 'warning');
                 }
-                appState.products[existingIdx] = normalized;
+                const localEditTs = Number(localStorage.getItem('gallus_local_edit_ts') || 0);
+                if (localEditTs > 0) {
+                  appState.products[existingIdx] = {
+                    ...normalized,
+                    name: old.name || normalized.name,
+                    unit: old.unit || normalized.unit,
+                    packaging: old.packaging || normalized.packaging,
+                    brand: old.brand || normalized.brand,
+                    category: old.category || normalized.category,
+                    categoryName: old.categoryName || normalized.categoryName,
+                    imageUrl: old.imageUrl || normalized.imageUrl,
+                    gallery: old.gallery || [old.imageUrl || normalized.imageUrl],
+                    description: old.description || normalized.description,
+                    ingredients: old.ingredients || normalized.ingredients,
+                    analysis: old.analysis || normalized.analysis,
+                    usage: old.usage || normalized.usage
+                  };
+                } else {
+                  appState.products[existingIdx] = normalized;
+                }
               } else {
                 appState.products.unshift(normalized);
                 console.log(`[Firestore Canlı] Yeni ürün vitrine eklendi: ${normalized.name}`);
@@ -2501,28 +2855,45 @@
         appState.visualEditMode = false;
       }
 
-      // Immediately render global header & footer with clean defaults before network requests complete
+      // Immediately load restored siteInfo & render global header/footer before network requests complete
+      loadSavedSiteInfo();
       renderGlobalHeaderAndFooter();
 
-      // 1. Fetch Site Info (CMS)
+      // 1. Fetch Site Info (CMS) and merge non-destructively so user customizations are never lost
       try {
         const sRes = await fetch('/api/info');
         if (sRes.ok) {
-          appState.siteInfo = await sRes.json();
+          const srvInfo = await sRes.json();
+          const localEditTs = Number(localStorage.getItem('gallus_local_edit_ts') || 0);
+          if (localEditTs > 0 && appState.siteInfo && Object.keys(appState.siteInfo).length > 30) {
+            appState.siteInfo = { ...DEFAULT_RESTORED_SITE_INFO, ...srvInfo, ...appState.siteInfo };
+          } else {
+            appState.siteInfo = { ...DEFAULT_RESTORED_SITE_INFO, ...appState.siteInfo, ...srvInfo };
+          }
           localStorage.setItem('gallus_site_info', JSON.stringify(appState.siteInfo));
-        } else {
-          loadSavedSiteInfo();
         }
       } catch (e) {
         loadSavedSiteInfo();
       }
 
-      // 2. Fetch live products database or fallback
+      // 2. Fetch live products database and preserve any local admin customizations
       try {
+        const savedLocalRaw = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+        const localEditTs = Number(localStorage.getItem('gallus_local_edit_ts') || 0);
+        let localMap = {};
+        if (localEditTs > 0 && savedLocalRaw) {
+          try {
+            JSON.parse(savedLocalRaw).forEach(lp => { if (lp && lp.id) localMap[lp.id] = lp; });
+          } catch (e) {}
+        }
         const res = await fetch('/api/products');
         if (res.ok) {
           const loaded = await res.json();
-          appState.products = (loaded || []).map(p => ({ ...p, imageUrl: resolveClientProductImage(p) }));
+          appState.products = (loaded || []).map(p => {
+            const lp = localMap[p.id];
+            const merged = lp ? { ...p, ...lp } : p;
+            return { ...merged, imageUrl: resolveClientProductImage(merged) };
+          });
           localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(appState.products));
         } else {
           loadSavedProducts();
