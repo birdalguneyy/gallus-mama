@@ -579,17 +579,6 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                         except Exception:
                             pass
 
-                    sale_doc = {
-                        "id": int(order_id.replace("GL-", "")),
-                        "user_id": 6,
-                        "total_amount": total_numeric or 100.0,
-                        "payment_type": payment_method,
-                        "created_at": now_str,
-                        "note": f"Web Siparişi ({order_id}): {customer.get('fullname', '')} ({customer.get('phone', '')}) - {cust_email}",
-                        "items": items
-                    }
-                    db.collection("sales").document(f"u6_s{order_id.replace('GL-', '')}").set(sale_doc)
-
                 except ValueError as val_err:
                     return self.send_json(400, {"success": False, "error": str(val_err)})
                 except Exception as ex:

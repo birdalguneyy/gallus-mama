@@ -1000,16 +1000,6 @@ const server = http.createServer(async (req, res) => {
               date: newOrder.date
             }, { merge: true });
           }
-          const saleId = Number(newOrder.id.replace('GL-', '')) || Date.now();
-          await firestoreDb.collection('sales').doc(`u6_s${saleId}`).set({
-            id: saleId,
-            user_id: 6,
-            total_amount: totalNumeric || 100,
-            payment_type: body.paymentMethod || 'Havale / EFT',
-            created_at: new Date().toISOString(),
-            note: `Web Siparişi: ${body.customer.fullname || ''} (${body.customer.phone || ''}) - ${custEmail}`,
-            items: body.items
-          });
         } catch (fsErr) {
           console.error("Firestore order write warning:", fsErr.message);
         }
