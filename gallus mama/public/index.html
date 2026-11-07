@@ -241,12 +241,26 @@
     </div>
   </div>
 
-  <!-- Floating Always-Accessible CMS Quick Launcher -->
-  <div id="floating-cms-launcher" class="fixed bottom-16 md:bottom-5 left-4 z-[9990] flex items-center gap-2">
+  <!-- Floating CMS Quick Launcher (Strictly Admin-Only, Hidden for Normal Visitors) -->
+  <div id="floating-cms-launcher" class="hidden fixed bottom-16 md:bottom-5 left-4 z-[9990] items-center gap-2">
     <button onclick="activateQuickCmsEditor()" class="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-[#1d2327]/95 hover:bg-[#1d2327] text-white border border-amber-400/60 shadow-2xl text-xs font-extrabold transition transform hover:scale-105 active:scale-95">
       <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
       <span>✏️ Siteyi & Bölümleri Düzenle</span>
     </button>
+  </div>
+
+  <!-- Floating WhatsApp Customer Support & Order Bubble (Visible to All Visitors) -->
+  <div id="floating-whatsapp-bubble" class="fixed bottom-16 md:bottom-5 right-4 z-40 flex items-center">
+    <a id="floating-whatsapp-link" href="https://wa.me/905516553637?text=Merhaba%2C%20Gallus%20Mama%20ve%20Yumurta%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Sipariş ve Destek Hattı" class="group flex items-center gap-2.5 pl-2.5 pr-4 py-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-2xl border-2 border-white/95 transition-all duration-300 transform hover:scale-105 active:scale-95">
+      <span class="relative flex h-8 w-8 items-center justify-center rounded-full bg-white text-[#25D366] shadow-sm shrink-0">
+        <i data-lucide="message-circle" class="w-4 h-4 fill-current"></i>
+        <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-white animate-ping"></span>
+      </span>
+      <div class="flex flex-col leading-tight">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-white/90">WhatsApp Hattı</span>
+        <span class="text-xs font-black tracking-tight">Hızlı Sipariş & Destek</span>
+      </div>
+    </a>
   </div>
 
   <!-- ============================================================ -->
@@ -462,8 +476,8 @@
           <a href="/ciftligimiz" onclick="navigate('/ciftligimiz', event)" class="hover:text-gallus-primary px-2 py-1 rounded transition">Çiftliğimiz</a>
           <a href="/hakkimizda" onclick="navigate('/hakkimizda', event)" class="hover:text-gallus-primary px-2 py-1 rounded transition">Hakkımızda</a>
           <a href="/iletisim" onclick="navigate('/iletisim', event)" class="hover:text-gallus-primary px-2 py-1 rounded transition">İletişim</a>
-          <a href="/admin" onclick="navigate('/admin', event)" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 transition font-bold flex items-center gap-1 ml-2">
-            <i data-lucide="shield-check" class="w-3 h-3 text-gallus-primary"></i> Admin
+          <a id="desktop-nav-admin-btn" href="/admin" onclick="navigate('/admin', event)" class="hidden px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 transition font-bold items-center gap-1 ml-2">
+            <i data-lucide="shield-check" class="w-3 h-3 text-gallus-primary"></i> Yönetim
           </a>
         </div>
       </nav>
@@ -666,7 +680,7 @@
         <a href="/iletisim" onclick="toggleMobileDrawer(false); navigate('/iletisim', event);" class="block px-3 py-2 rounded-xl hover:bg-gray-50">İletişim & Lokasyon</a>
         <a href="/yardim" onclick="toggleMobileDrawer(false); navigate('/yardim', event);" class="block px-3 py-2 rounded-xl hover:bg-gray-50">Yardım & SSS</a>
         <a href="/kargo-ve-iade" onclick="toggleMobileDrawer(false); navigate('/kargo-ve-iade', event);" class="block px-3 py-2 rounded-xl hover:bg-gray-50">Kargo ve İade Koşulları</a>
-        <a href="/admin" onclick="toggleMobileDrawer(false); navigate('/admin', event);" class="block px-3 py-2 rounded-xl text-gallus-dark font-bold hover:bg-gray-100">Yönetici Paneli (Admin)</a>
+        <a id="mobile-nav-admin-btn" href="/admin" onclick="toggleMobileDrawer(false); navigate('/admin', event);" class="hidden px-3 py-2 rounded-xl text-gallus-dark font-bold hover:bg-gray-100">Yönetici Paneli (Admin)</a>
       </div>
     </div>
   </div>
@@ -1636,13 +1650,11 @@
       }
     }
 
-    // Activate Quick CMS Editor from Floating Button (Auto-enables Visual Edit & Opens All-Sections Modal)
+    // Activate Quick CMS Editor from Floating Button (Strictly requires Admin Login)
     function activateQuickCmsEditor() {
       if (!appState.isAdmin) {
-        const savedToken = localStorage.getItem('gallus_admin_token') || '19071907';
-        localStorage.setItem('gallus_admin_token', savedToken);
-        appState.isAdmin = true;
-        appState.adminToken = savedToken;
+        navigate('/admin');
+        return;
       }
       appState.visualEditMode = true;
       updateAdminToolbar();
@@ -1659,12 +1671,7 @@
         event.preventDefault();
       }
       if (!appState.isAdmin) {
-        const savedToken = localStorage.getItem('gallus_admin_token') || '19071907';
-        localStorage.setItem('gallus_admin_token', savedToken);
-        appState.isAdmin = true;
-        appState.adminToken = savedToken;
-        appState.visualEditMode = true;
-        updateAdminToolbar();
+        return;
       }
       if (sectionId) {
         currentActiveSectionId = sectionId;
@@ -1955,14 +1962,20 @@
                 <span>🔒 256-Bit SSL Güvenli Alışveriş</span>
                 <span>•</span>
                 <span>🚚 Kırılmaz Viyol Paketleme Garantisi</span>
-                <span>•</span>
-                <button type="button" onclick="openAllSectionsModal()" class="text-amber-300 hover:text-white underline font-bold">✏️ Tüm Bölümleri Düzenle</button>
-                <span>•</span>
-                <a href="/admin" onclick="navigate('/admin', event)" class="text-gray-300 hover:text-white underline">Admin CMS</a>
+                ${appState.isAdmin ? `
+                  <span>•</span>
+                  <button type="button" onclick="openAllSectionsModal()" class="text-amber-300 hover:text-white underline font-bold">✏️ Tüm Bölümleri Düzenle</button>
+                  <span>•</span>
+                  <a href="/admin" onclick="navigate('/admin', event)" class="text-gray-300 hover:text-white underline">Yönetici Paneli</a>
+                ` : ''}
               </div>
             </div>
           </div>
         `;
+      }
+      const floatWa = document.getElementById('floating-whatsapp-link');
+      if (floatWa) {
+        floatWa.href = cmsVal('whatsappUrl', 'https://wa.me/905516553637?text=Merhaba%2C%20Gallus%20Mama%20ve%20Yumurta%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum.');
       }
       refreshLucideIcons();
     }
@@ -2177,9 +2190,25 @@
       const bar = document.getElementById('gallus-admin-toolbar');
       if (!bar) return;
 
+      const floatingLauncher = document.getElementById('floating-cms-launcher');
+      const desktopAdminBtn = document.getElementById('desktop-nav-admin-btn');
+      const mobileAdminBtn = document.getElementById('mobile-nav-admin-btn');
+
       if (appState.isAdmin) {
         bar.classList.remove('hidden');
         document.body.classList.add('admin-bar-active');
+        if (floatingLauncher) {
+          floatingLauncher.classList.remove('hidden');
+          floatingLauncher.classList.add('flex');
+        }
+        if (desktopAdminBtn) {
+          desktopAdminBtn.classList.remove('hidden');
+          desktopAdminBtn.classList.add('flex');
+        }
+        if (mobileAdminBtn) {
+          mobileAdminBtn.classList.remove('hidden');
+          mobileAdminBtn.classList.add('block');
+        }
 
         const toggleBtn = document.getElementById('toolbar-visual-toggle-btn');
         const toggleText = document.getElementById('toolbar-visual-toggle-text');
@@ -2208,6 +2237,18 @@
       } else {
         bar.classList.add('hidden');
         document.body.classList.remove('admin-bar-active');
+        if (floatingLauncher) {
+          floatingLauncher.classList.add('hidden');
+          floatingLauncher.classList.remove('flex');
+        }
+        if (desktopAdminBtn) {
+          desktopAdminBtn.classList.add('hidden');
+          desktopAdminBtn.classList.remove('flex');
+        }
+        if (mobileAdminBtn) {
+          mobileAdminBtn.classList.add('hidden');
+          mobileAdminBtn.classList.remove('block');
+        }
       }
 
       // Sync header elements with siteInfo
@@ -2256,6 +2297,7 @@
           appState.adminToken = token;
           appState.visualEditMode = true;
           updateAdminToolbar();
+          renderGlobalHeaderAndFooter();
           renderAdminPage(document.getElementById('app-viewport'));
           showToast("✅ Yönetici girişi başarılı! Canlı Düzenleme Modu aktif edildi.", "success");
         } else if (pass === '19071907') {
@@ -2265,6 +2307,7 @@
           appState.adminToken = token;
           appState.visualEditMode = true;
           updateAdminToolbar();
+          renderGlobalHeaderAndFooter();
           renderAdminPage(document.getElementById('app-viewport'));
           showToast("✅ Yönetici girişi başarılı!", "success");
         } else {
@@ -2278,6 +2321,7 @@
           appState.adminToken = token;
           appState.visualEditMode = true;
           updateAdminToolbar();
+          renderGlobalHeaderAndFooter();
           renderAdminPage(document.getElementById('app-viewport'));
           showToast("✅ Yönetici girişi başarılı!", "success");
         } else {
@@ -2292,7 +2336,11 @@
         appState.isAdmin = false;
         appState.adminToken = null;
         appState.visualEditMode = false;
+        closeAllSectionsModal();
+        closeCmsEditModal();
+        closeProductEditModal();
         updateAdminToolbar();
+        renderGlobalHeaderAndFooter();
         showToast("Yönetici oturumu kapatıldı.", "info");
         navigate('/');
       }
@@ -2440,12 +2488,17 @@
 
     /* Initialize Application */
     async function initApp() {
-      // 0. Check Admin Session
+      // 0. Check Admin Session (Only accept real login session tokens, clear any legacy fallback)
       const savedAdminToken = localStorage.getItem('gallus_admin_token');
-      if (savedAdminToken) {
+      if (savedAdminToken && savedAdminToken !== '19071907') {
         appState.isAdmin = true;
         appState.adminToken = savedAdminToken;
         appState.visualEditMode = true;
+      } else {
+        localStorage.removeItem('gallus_admin_token');
+        appState.isAdmin = false;
+        appState.adminToken = null;
+        appState.visualEditMode = false;
       }
 
       // Immediately render global header & footer with clean defaults before network requests complete
