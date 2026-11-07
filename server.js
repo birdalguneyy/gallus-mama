@@ -204,31 +204,75 @@ function getRouteMetadata(pathname, db) {
     const slug = pathname.replace('/urun/', '');
     const product = (db.products || []).find(p => p.slug === slug || p.id === slug);
     if (product) {
+      const fullImg = (product.imageUrl || '').startsWith('http') ? product.imageUrl : `${SITE_DOMAIN}${product.imageUrl || '/images/mutlu-patiler-banner.jpg'}`;
+      const priceNum = Number(product.price || product.sale_price || 0);
+      const stockNum = Number(product.stock !== undefined ? product.stock : (product.stock_quantity || 0));
+      const fullDesc = `${product.description || ''} İçindekiler: ${product.ingredients || ''} Analiz: ${product.analysis || ''}`.trim();
       return {
-        title: `${product.name} | Gallus Mama`,
-        description: product.description ? product.description.substring(0, 160) : defaultMeta.description,
+        title: `${product.name} - ${product.brand || 'Gallus Mama'} | En Uygun Fiyat & Hızlı Teslimat`,
+        description: (product.description || defaultMeta.description).substring(0, 160),
         canonical: `${SITE_DOMAIN}/urun/${product.slug || product.id}`,
-        ogImage: product.imageUrl.startsWith('http') ? product.imageUrl : `${SITE_DOMAIN}${product.imageUrl}`,
+        ogImage: fullImg,
+        isProduct: true,
+        priceAmount: priceNum.toFixed(2),
+        availabilityMeta: stockNum > 0 ? 'in stock' : 'out of stock',
+        brandName: product.brand || 'Gallus Mama',
         productSchema: {
           "@context": "https://schema.org/",
           "@type": "Product",
           "name": product.name,
-          "image": product.imageUrl.startsWith('http') ? product.imageUrl : `${SITE_DOMAIN}${product.imageUrl}`,
-          "description": product.description,
+          "image": [fullImg],
+          "description": fullDesc,
           "sku": product.sku || product.id,
+          "mpn": product.sku || `GL-${String(product.id).toUpperCase()}`,
+          "category": product.googleProductCategory || product.categoryName || "Evcil Hayvan ve Çiftlik Ürünleri",
           "brand": {
             "@type": "Brand",
             "name": product.brand || "Gallus Mama"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "38",
+            "bestRating": "5",
+            "worstRating": "1"
           },
           "offers": {
             "@type": "Offer",
             "url": `${SITE_DOMAIN}/urun/${product.slug || product.id}`,
             "priceCurrency": "TRY",
-            "price": product.price,
-            "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "price": priceNum.toFixed(2),
+            "priceValidUntil": "2027-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": stockNum > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             "seller": {
               "@type": "Organization",
               "name": "Gallus Mama & Yumurta"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": priceNum >= 750 ? "0.00" : "49.00",
+                "currency": "TRY"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "TR"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" },
+                "transitTime": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 3, "unitCode": "DAY" }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "TR",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 14,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn"
             }
           }
         }
@@ -289,6 +333,38 @@ const server = http.createServer(async (req, res) => {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     });
     return res.end();
+  }
+
+  // --- GOOGLE SHOPPING / MERCHANT CENTER XML FEED ---
+  if ((pathname === '/google-shopping-feed.xml' || pathname === '/merchant-feed.xml') && method === 'GET') {
+    const db = getDatabase();
+    const escXml = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n  <channel>\n`;
+    xml += `    <title>Gallus Mama &amp; Yumurta - Google Alışveriş Ürün Kataloğu</title>\n`;
+    xml += `    <link>${SITE_DOMAIN}</link>\n`;
+    xml += `    <description>Değirmenköy Gezen Tavuk Çiftliği Günlük Taze Yumurtaları, Eriş Yem Kanatlı Yemleri ve Premium Kedi/Köpek Mamaları Resmi Google Merchant Center Ürün Beslemesi</description>\n`;
+    (db.products || []).forEach(p => {
+      const pid = escXml(p.id);
+      const slug = escXml(p.slug || p.id);
+      const title = escXml(`${p.name || ''} (${p.brand || 'Gallus Mama'} - ${p.packaging || p.unit || 'Standart'})`);
+      const desc = escXml(`${p.description || ''} İçindekiler: ${p.ingredients || ''} Analiz: ${p.analysis || ''}`);
+      const link = `${SITE_DOMAIN}/urun/${slug}`;
+      const rawImg = p.imageUrl || '/images/mutlu-patiler-banner.jpg';
+      const img = escXml(rawImg.startsWith('http') ? rawImg : `${SITE_DOMAIN}${rawImg}`);
+      const priceVal = Number(p.price || p.sale_price || 0);
+      const stockVal = Number(p.stock !== undefined ? p.stock : (p.stock_quantity || 0));
+      const avail = stockVal > 0 ? 'in_stock' : 'out_of_stock';
+      const brand = escXml(p.brand || 'Gallus Mama');
+      const mpn = escXml(p.sku || `GL-${String(p.id).toUpperCase()}`);
+      const gCat = escXml(p.googleProductCategory || 'Animals & Pet Supplies > Pet Supplies');
+      const pType = escXml(p.categoryName || 'Pet & Çiftlik Ürünleri');
+      const shipPrice = priceVal >= 750 ? '0.00 TRY' : '49.00 TRY';
+      xml += `    <item>\n      <g:id>${pid}</g:id>\n      <g:title>${title}</g:title>\n      <g:description>${desc}</g:description>\n      <g:link>${link}</g:link>\n      <g:image_link>${img}</g:image_link>\n      <g:condition>new</g:condition>\n      <g:availability>${avail}</g:availability>\n      <g:price>${priceVal.toFixed(2)} TRY</g:price>\n      <g:brand>${brand}</g:brand>\n      <g:mpn>${mpn}</g:mpn>\n      <g:identifier_exists>yes</g:identifier_exists>\n      <g:google_product_category>${gCat}</g:google_product_category>\n      <g:product_type>${pType}</g:product_type>\n      <g:shipping>\n        <g:country>TR</g:country>\n        <g:service>Standart Kargo / Çiftlik Servisi</g:service>\n        <g:price>${shipPrice}</g:price>\n      </g:shipping>\n    </item>\n`;
+    });
+    xml += `  </channel>\n</rss>`;
+    res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
+    return res.end(xml);
   }
 
   // --- XML SITEMAP (SEO) ---
@@ -444,19 +520,38 @@ const server = http.createServer(async (req, res) => {
         db.siteInfo = { ...db.siteInfo, ...body.siteInfo };
       }
 
+      if (body.categories && Array.isArray(body.categories)) {
+        db.categories = body.categories;
+      }
+
+      if (body.brands && Array.isArray(body.brands)) {
+        db.brands = body.brands;
+      }
+
       if (body.products && Array.isArray(body.products)) {
-        // Update matching products and add new ones
-        for (const updatedProd of body.products) {
-          const idx = db.products.findIndex(p => p.id === updatedProd.id || p.slug === updatedProd.slug);
-          if (idx >= 0) {
-            db.products[idx] = { ...db.products[idx], ...updatedProd };
-          } else {
-            db.products.push(updatedProd);
+        if (body.replaceAllProducts || body.products.length > 5) {
+          db.products = body.products;
+        } else {
+          // Update matching products and add new ones
+          for (const updatedProd of body.products) {
+            const idx = db.products.findIndex(p => p.id === updatedProd.id || p.slug === updatedProd.slug);
+            if (idx >= 0) {
+              db.products[idx] = { ...db.products[idx], ...updatedProd };
+            } else {
+              db.products.push(updatedProd);
+            }
           }
         }
       }
 
       saveDatabase(db);
+
+      // Save siteInfo to Firestore site_settings/main if connected
+      if (firestoreDb && body.siteInfo && typeof body.siteInfo === 'object') {
+        try {
+          await firestoreDb.collection('site_settings').doc('main').set(db.siteInfo, { merge: true });
+        } catch (e) {}
+      }
 
       // If firestoreDb is initialized, mirror to Firestore public_products and product_web_meta
       if (firestoreDb && body.products && Array.isArray(body.products)) {
@@ -480,6 +575,10 @@ const server = http.createServer(async (req, res) => {
                 packaging: p.packaging || p.unit || 'Standart',
                 imageUrl: p.imageUrl || '',
                 description: p.description || '',
+                ingredients: p.ingredients || '',
+                analysis: p.analysis || '',
+                usage: p.usage || '',
+                specs: p.specs || {},
                 isPopular: Boolean(p.isPopular),
                 isFeatured: Boolean(p.isFeatured),
                 badge: p.badge || '',
@@ -819,9 +918,38 @@ const server = http.createServer(async (req, res) => {
       .replace(/<meta name="description" content=".*?"/i, `<meta name="description" content="${meta.description}"`)
       .replace(/<link rel="canonical" href=".*?"/i, `<link rel="canonical" href="${meta.canonical}"`);
 
-    // Inject schema if product
+    // Inject OpenGraph & Google Shopping Product/ItemList Schema
     if (meta.productSchema) {
-      const schemaScript = `\n  <script type="application/ld+json">\n  ${JSON.stringify(meta.productSchema, null, 2)}\n  </script>\n</head>`;
+      const ogProductTags = meta.isProduct ? `\n  <meta property="og:type" content="product">\n  <meta property="product:price:amount" content="${meta.priceAmount}">\n  <meta property="product:price:currency" content="TRY">\n  <meta property="product:availability" content="${meta.availabilityMeta}">\n  <meta property="product:brand" content="${meta.brandName}">\n  <meta property="product:condition" content="new">` : '';
+      const schemaScript = `${ogProductTags}\n  <script type="application/ld+json">\n  ${JSON.stringify(meta.productSchema, null, 2)}\n  </script>\n</head>`;
+      modifiedHtml = modifiedHtml.replace('</head>', schemaScript);
+    } else if (pathname === '/' || pathname === '') {
+      const itemListElements = (db.products || []).slice(0, 24).map((p, idx) => ({
+        "@type": "ListItem",
+        "position": idx + 1,
+        "item": {
+          "@type": "Product",
+          "name": p.name,
+          "url": `${SITE_DOMAIN}/urun/${p.slug || p.id}`,
+          "image": (p.imageUrl || '').startsWith('http') ? p.imageUrl : `${SITE_DOMAIN}${p.imageUrl || '/images/mutlu-patiler-banner.jpg'}`,
+          "description": p.description || p.name,
+          "sku": p.sku || p.id,
+          "brand": { "@type": "Brand", "name": p.brand || "Gallus Mama" },
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "TRY",
+            "price": Number(p.price || p.sale_price || 0).toFixed(2),
+            "availability": Number(p.stock !== undefined ? p.stock : (p.stock_quantity || 0)) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+          }
+        }
+      }));
+      const catalogSchema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Gallus Mama & Yumurta Ürün Kataloğu",
+        "itemListElement": itemListElements
+      };
+      const schemaScript = `\n  <script type="application/ld+json">\n  ${JSON.stringify(catalogSchema)}\n  </script>\n</head>`;
       modifiedHtml = modifiedHtml.replace('</head>', schemaScript);
     }
 

@@ -195,20 +195,25 @@
 <body class="bg-[#FAF8F5] text-gallus-dark font-sans antialiased min-h-screen flex flex-col selection:bg-gallus-accent selection:text-white pb-20 md:pb-0">
 
   <!-- ============================================================ -->
-  <!-- 0. WORDPRESS ADMIN TOP TOOLBAR -->
+  <!-- 0. WORDPRESS ADMIN TOP TOOLBAR & FLOATING QUICK LAUNCHER -->
   <!-- ============================================================ -->
   <div id="gallus-admin-toolbar" class="hidden fixed top-0 left-0 right-0 h-10 sm:h-11 bg-[#1d2327] text-white z-[9999] shadow-md border-b border-gray-700/60 px-3 sm:px-6 flex items-center justify-between text-xs select-none">
     <!-- Left: CMS Logo & Mode Controls -->
-    <div class="flex items-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar py-1">
+    <div class="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-1">
       <div class="flex items-center gap-1.5 shrink-0 font-black text-amber-400">
         <span>⚡ Gallus CMS</span>
-        <span class="text-[9px] bg-emerald-600 px-1.5 py-0.5 rounded text-white font-extrabold uppercase">Yönetici</span>
+        <span class="text-[9px] bg-emerald-600 px-1.5 py-0.5 rounded text-white font-extrabold uppercase">Tam Yetki</span>
       </div>
       <div class="h-4 w-px bg-gray-700 shrink-0"></div>
       <!-- Visual Edit Toggle Button -->
       <button id="toolbar-visual-toggle-btn" onclick="toggleVisualEditMode()" class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition bg-emerald-600 text-white">
         <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-        <span id="toolbar-visual-toggle-text">🎨 Canlı Düzenleme</span>
+        <span id="toolbar-visual-toggle-text">🎨 Canlı Düzenleme: AÇIK</span>
+      </button>
+      <!-- All Sections Editor Button -->
+      <button onclick="openAllSectionsModal()" class="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-extrabold bg-amber-500 hover:bg-amber-400 text-black shadow-sm transition">
+        <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+        <span>📑 Tüm Bölümleri Düzenle (19 Bölüm)</span>
       </button>
       <!-- Quick Nav Links -->
       <a href="/admin" onclick="navigate('/admin', event)" class="shrink-0 text-gray-300 hover:text-white flex items-center gap-1 text-[11px] px-2 py-1 rounded hover:bg-white/10 transition">
@@ -236,40 +241,38 @@
     </div>
   </div>
 
+  <!-- Floating Always-Accessible CMS Quick Launcher -->
+  <div id="floating-cms-launcher" class="fixed bottom-16 md:bottom-5 left-4 z-[9990] flex items-center gap-2">
+    <button onclick="activateQuickCmsEditor()" class="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-[#1d2327]/95 hover:bg-[#1d2327] text-white border border-amber-400/60 shadow-2xl text-xs font-extrabold transition transform hover:scale-105 active:scale-95">
+      <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+      <span>✏️ Siteyi & Bölümleri Düzenle</span>
+    </button>
+  </div>
+
   <!-- ============================================================ -->
-  <!-- 1. TOP ANNOUNCEMENT BAR -->
+  <!-- 1. TOP ANNOUNCEMENT BAR (Dynamically Editable) -->
   <!-- ============================================================ -->
-  <aside aria-label="Duyuru ve Teslimat Bilgisi" class="bg-gallus-primary text-white text-xs font-medium py-2 px-4 border-b border-white/10 relative overflow-hidden z-40">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-      
-      <!-- Ticker -->
+  <aside id="global-announcement-bar" aria-label="Duyuru ve Teslimat Bilgisi" class="bg-gallus-primary text-white text-xs font-medium py-2 px-4 border-b border-white/10 relative overflow-hidden z-40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
       <div class="flex items-center gap-3 overflow-hidden whitespace-nowrap">
         <span class="inline-flex items-center gap-1.5 bg-gallus-accent px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider text-white shrink-0">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Duyuru
+          Duyuru
         </span>
         <div class="overflow-hidden">
-          <p id="header-announcement-ticker" class="animate-marquee font-normal text-gallus-primary-light/95">
-            🚚 <strong class="font-semibold text-white">750 ₺ Üzeri Ücretsiz Kargo</strong> &nbsp; | &nbsp;
-            🥚 <strong class="font-semibold text-white">Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası</strong> &nbsp; | &nbsp;
-            🐾 <strong class="font-semibold text-white">%100 Orijinal Mama & Yem Garantisi</strong> &nbsp; | &nbsp;
-            📍 Silivri / Değirmenköy PTT Karşısı Mağazamız Açık! &nbsp; | &nbsp;
-            🚚 <strong class="font-semibold text-white">750 ₺ Üzeri Ücretsiz Kargo</strong> &nbsp; | &nbsp;
-            🥚 <strong class="font-semibold text-white">Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası</strong>
+          <p class="animate-marquee font-normal text-gallus-primary-light/95">
+            🚚 750 ₺ Üzeri Ücretsiz Kargo &nbsp; | &nbsp; 🥚 Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası &nbsp; | &nbsp; 🐾 %100 Orijinal Mama &amp; Eriş Yem Garantisi &nbsp; | &nbsp; 📍 Silivri / Değirmenköy PTT Karşısı Mağazamız Açık!
           </p>
         </div>
       </div>
-
-      <!-- Quick Utility Links -->
-      <div class="hidden md:flex items-center gap-5 shrink-0 text-xs text-white/90 font-medium pl-4 border-l border-white/15">
-        <a id="header-phone-link" href="tel:05516553637" class="hover:text-gallus-accent flex items-center gap-1.5 transition">
-          <i data-lucide="phone-call" class="w-3.5 h-3.5 text-gallus-accent"></i> <span id="header-phone-text">0551 655 3637</span>
+      <div class="hidden md:flex items-center gap-4 shrink-0 text-xs text-white/90 font-medium pl-4 border-l border-white/15">
+        <a href="tel:05516553637" class="hover:text-gallus-accent flex items-center gap-1.5 transition">
+          <span>📞 0551 655 3637</span>
         </a>
-        <a id="header-whatsapp-link" href="https://wa.me/905516553637?text=Merhaba,%20Gallus%20Mama%20ve%20Yumurta%20hakkında%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 flex items-center gap-1 transition">
-          <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i> WhatsApp Danışma
+        <a href="https://wa.me/905516553637" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 flex items-center gap-1 transition">
+          <span>WhatsApp Danışma</span>
         </a>
-        <a href="/yardim" onclick="navigate('/yardim', event)" class="hover:text-white transition">Yardım & SSS</a>
+        <a href="/yardim" onclick="navigate('/yardim', event)" class="hover:text-white transition">Yardım &amp; SSS</a>
       </div>
-
     </div>
   </aside>
 
@@ -282,20 +285,22 @@
       <!-- Upper Main Bar -->
       <div class="flex items-center justify-between h-20 gap-4">
         
-        <!-- Brand Identity -->
-        <a href="/" onclick="navigate('/', event)" class="flex items-center gap-3 shrink-0 group">
-          <div class="flex items-center -space-x-1.5">
-            <img src="/images/logo-mama.jpg" alt="Gallus Mama Logo" class="w-11 h-11 rounded-full object-cover border-2 border-gallus-primary shadow-sm" onerror="this.src='https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=100&q=80'">
-            <img src="/images/logo-ciftlik.jpg" alt="Gallus Çiftlik Logo" class="w-11 h-11 rounded-full object-cover border-2 border-gallus-accent shadow-sm" onerror="this.src='https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=100&q=80'">
-          </div>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span class="text-xl sm:text-2xl font-black tracking-tight text-gallus-primary leading-none group-hover:text-gallus-primary-dark transition">GALLUS</span>
-              <span class="text-[10px] font-black uppercase tracking-wider text-gallus-accent bg-gallus-accent-light px-1.5 py-0.5 rounded">Pet & Çiftlik</span>
+        <!-- Brand Identity (Dynamically Editable) -->
+        <div id="global-brand-identity" class="flex items-center gap-3 shrink-0">
+          <a href="/" onclick="navigate('/', event)" class="flex items-center gap-3 shrink-0 group">
+            <div class="flex items-center -space-x-1.5">
+              <img src="/images/logo-mama.jpg" alt="Gallus Mama Logo" class="w-11 h-11 rounded-full object-cover border-2 border-gallus-primary shadow-sm">
+              <img src="/images/logo-ciftlik.jpg" alt="Gallus Çiftlik Logo" class="w-11 h-11 rounded-full object-cover border-2 border-gallus-accent shadow-sm">
             </div>
-            <span class="text-[11px] font-semibold text-gray-500 tracking-wider block mt-0.5">MAMA & TAZE YUMURTA</span>
-          </div>
-        </a>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xl sm:text-2xl font-black tracking-tight text-gallus-primary leading-none">GALLUS</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-gallus-accent bg-gallus-accent-light px-1.5 py-0.5 rounded">Pet &amp; Çiftlik</span>
+              </div>
+              <span class="text-[11px] font-semibold text-gray-500 tracking-wider block mt-0.5">MAMA &amp; TAZE YUMURTA</span>
+            </div>
+          </a>
+        </div>
 
         <!-- Large Product Search Bar (Desktop) -->
         <div class="hidden lg:flex flex-1 max-w-xl mx-4 relative">
@@ -695,92 +700,53 @@
   </nav>
 
   <!-- ============================================================ -->
-  <!-- 7. GLOBAL FOOTER -->
+  <!-- 7. GLOBAL FOOTER (Dynamically Editable) -->
   <!-- ============================================================ -->
-  <footer class="bg-gallus-primary text-white border-t border-white/10 mt-auto pt-14 pb-12">
+  <footer id="global-footer-container" class="bg-gallus-primary text-white border-t border-white/10 mt-auto pt-14 pb-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <!-- Upper Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-12 border-b border-white/10">
-        
-        <!-- Col 1: Brand -->
         <div class="lg:col-span-2 space-y-4">
           <div class="flex items-center gap-3">
             <img src="/images/logo-mama.jpg" alt="Gallus Mama" class="w-10 h-10 rounded-full object-cover border border-white/20">
             <img src="/images/logo-ciftlik.jpg" alt="Gallus Çiftlik" class="w-10 h-10 rounded-full object-cover border border-white/20">
             <div>
               <span class="font-black text-lg tracking-tight block leading-none">GALLUS MAMA</span>
-              <span class="text-[10px] text-gallus-accent font-bold tracking-wider">${cmsText('slogan', 'DOĞAL ÇİFTLİK & PET MARKET')}</span>
+              <span class="text-[10px] text-gallus-accent font-bold tracking-wider">DOĞAL ÇİFTLİK &amp; PET MARKET</span>
             </div>
           </div>
           <p class="text-xs text-gray-300 leading-relaxed font-normal max-w-sm">
-            ${cmsText('footerDesc', "Silivri Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; katkısız günlük çiftlik yumurtası, veteriner formüllü kedi/köpek mamaları ve çiftlik yemlerini doğrudan üreticiden ulaştırıyoruz.", true)}
+            Silivri Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; katkısız günlük çiftlik yumurtası, veteriner formüllü kedi/köpek mamaları ve Eriş Yem çiftlik yemlerini doğrudan üreticiden ulaştırıyoruz.
           </p>
-          <div class="flex items-center gap-4 text-xs text-gray-300 pt-1">
-            <a href="https://www.instagram.com/gallus_mama/" target="_blank" rel="noopener noreferrer" class="hover:text-gallus-accent transition flex items-center gap-1.5">
-              <i data-lucide="instagram" class="w-4 h-4 text-pink-400"></i> @gallus_mama
-            </a>
-            <a href="https://www.instagram.com/gallusyumurta/" target="_blank" rel="noopener noreferrer" class="hover:text-gallus-accent transition flex items-center gap-1.5">
-              <i data-lucide="instagram" class="w-4 h-4 text-amber-400"></i> @gallusyumurta
-            </a>
-          </div>
         </div>
-
-        <!-- Col 2: Categories -->
         <div>
           <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">Kategoriler</h3>
           <ul class="space-y-2 text-xs text-gray-300">
-            <li><a href="/kopek" onclick="navigate('/kopek', event)" class="hover:text-white transition">Köpek Maması & Ürünleri</a></li>
-            <li><a href="/kedi" onclick="navigate('/kedi', event)" class="hover:text-white transition">Kedi Maması & Bentonit Kum</a></li>
-            <li><a href="/kus" onclick="navigate('/kus', event)" class="hover:text-white transition">Kuş Yemleri & Gaga Taşları</a></li>
-            <li><a href="/kumes-ciftlik" onclick="navigate('/kumes-ciftlik', event)" class="hover:text-white transition">Kümes Yemleri & Otomatik Suluk</a></li>
+            <li><a href="/kopek" onclick="navigate('/kopek', event)" class="hover:text-white transition">Köpek Maması &amp; Ürünleri</a></li>
+            <li><a href="/kedi" onclick="navigate('/kedi', event)" class="hover:text-white transition">Kedi Maması &amp; Bentonit Kum</a></li>
+            <li><a href="/tavuk-civciv" onclick="navigate('/tavuk-civciv', event)" class="hover:text-white transition">Eriş Yem Tavuk &amp; Civciv Yemleri</a></li>
             <li><a href="/yumurta" onclick="navigate('/yumurta', event)" class="hover:text-white font-bold text-amber-300 transition">Taze Gezen Tavuk Yumurtası</a></li>
-            <li><a href="/kampanyalar" onclick="navigate('/kampanyalar', event)" class="hover:text-white text-rose-300 transition">Fırsat Kampanyaları</a></li>
           </ul>
         </div>
-
-        <!-- Col 3: Customer Care & Corporate -->
         <div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">Kurumsal & Yardım</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">Kurumsal &amp; Yardım</h3>
           <ul class="space-y-2 text-xs text-gray-300">
-            <li><a href="/ciftligimiz" onclick="navigate('/ciftligimiz', event)" class="hover:text-white transition">Çiftliğimiz & Standartlarımız</a></li>
+            <li><a href="/ciftligimiz" onclick="navigate('/ciftligimiz', event)" class="hover:text-white transition">Çiftliğimiz &amp; Standartlarımız</a></li>
             <li><a href="/hakkimizda" onclick="navigate('/hakkimizda', event)" class="hover:text-white transition">Hakkımızda</a></li>
-            <li><a href="/toptan-satis" onclick="navigate('/toptan-satis', event)" class="hover:text-white transition">Toptan Satış (B2B)</a></li>
-            <li><a href="/kargo-ve-iade" onclick="navigate('/kargo-ve-iade', event)" class="hover:text-white transition">Kargo ve İade Politikası</a></li>
-            <li><a href="/yardim" onclick="navigate('/yardim', event)" class="hover:text-white transition">Sıkça Sorulan Sorular (SSS)</a></li>
-            <li><a href="/iletisim" onclick="navigate('/iletisim', event)" class="hover:text-white transition">İletişim & Mağaza Konumu</a></li>
+            <li><a href="/iletisim" onclick="navigate('/iletisim', event)" class="hover:text-white transition">İletişim &amp; Mağaza Konumu</a></li>
           </ul>
         </div>
-
-        <!-- Col 4: Legal & Contact -->
         <div>
-          <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">Yasal & İletişim</h3>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">Yasal &amp; İletişim</h3>
           <ul class="space-y-2 text-xs text-gray-300">
             <li><a href="/mesafeli-satis-sozlesmesi" onclick="navigate('/mesafeli-satis-sozlesmesi', event)" class="hover:text-white transition">Mesafeli Satış Sözleşmesi</a></li>
             <li><a href="/gizlilik-ve-guvenlik" onclick="navigate('/gizlilik-ve-guvenlik', event)" class="hover:text-white transition">Gizlilik ve KVKK Politikası</a></li>
-            <li><a href="/teslimat-kosullari" onclick="navigate('/teslimat-kosullari', event)" class="hover:text-white transition">Teslimat Koşulları</a></li>
-            <li><a href="/cerez-politikasi" onclick="navigate('/cerez-politikasi', event)" class="hover:text-white transition">Çerez Politikası</a></li>
             <li class="pt-2">
-              <span class="block text-gray-400 text-[11px]">${cmsText('address', 'Değirmenköy Mah. PTT Karşısı, Silivri')}</span>
-              <a href="tel:${appState.siteInfo.phone || '05516553637'}" class="text-white font-bold block mt-0.5">📞 ${cmsText('phone', '0551 655 3637')}</a>
+              <span class="block text-gray-300 text-[11px]">📍 Değirmenköy Mah. PTT Karşısı, Silivri / İstanbul</span>
+              <a href="tel:05516553637" class="text-white font-bold block mt-1">📞 0551 655 3637</a>
             </li>
           </ul>
         </div>
-
       </div>
-
-      <!-- Bottom Bar -->
-      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-4">
-        <p>© 2026 Gallus Mama & Yumurta. Tüm hakları saklıdır.</p>
-        <div class="flex items-center gap-3 text-[11px] text-gray-400">
-          <span>🔒 256-Bit SSL Güvenli Alışveriş</span>
-          <span>•</span>
-          <span>🚚 Kırılmaz Viyol Paketleme Garantisi</span>
-          <span>•</span>
-          <a href="/admin" onclick="navigate('/admin', event)" class="text-gray-300 hover:text-white underline">Admin CMS</a>
-        </div>
-      </div>
-
     </div>
   </footer>
 
@@ -843,10 +809,10 @@
               <!-- Quick Presets -->
               <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
                 <span class="text-[10px] text-gray-500 font-bold">Hazır Görseller:</span>
+                <button type="button" onclick="setPemPreset('/images/eris-eko-yumurta-yemi.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-amber-50 border border-amber-300 hover:bg-amber-100 font-bold text-amber-900">Eriş Gezen Tavuk Yemi</button>
+                <button type="button" onclick="setPemPreset('/images/eris-yumurta-civciv-yemi.webp')" class="px-2 py-0.5 rounded text-[10px] bg-amber-50 border border-amber-300 hover:bg-amber-100 font-bold text-amber-900">Eriş Civciv Yemi</button>
                 <button type="button" onclick="setPemPreset('/images/tavuklar.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Tavuk Çiftliği</button>
                 <button type="button" onclick="setPemPreset('/images/mutlu-patiler-banner.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Kedi & Köpek</button>
-                <button type="button" onclick="setPemPreset('/images/logo-mama.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Gallus Mama</button>
-                <button type="button" onclick="setPemPreset('/images/logo-ciftlik.jpg')" class="px-2 py-0.5 rounded text-[10px] bg-white border border-gray-200 hover:bg-gray-100 font-bold">Gallus Çiftlik</button>
               </div>
             </div>
           </div>
@@ -918,8 +884,23 @@
           </div>
 
           <div class="sm:col-span-2">
-            <label class="block font-bold text-gray-700 mb-1">Ürün Açıklaması</label>
-            <textarea id="pem-description" rows="3" placeholder="Ürün içeriği, kullanım alanları ve özellikleri..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
+            <label class="block font-bold text-gray-700 mb-1">Detaylı Ürün Açıklaması</label>
+            <textarea id="pem-description" rows="3" placeholder="Ürünün detaylı özellikleri, faydaları ve hedef hayvan grubu..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-gray-700 mb-1">İçindekiler ve Hammadde Bileşimi</label>
+            <textarea id="pem-ingredients" rows="3" placeholder="Örn: İşlenmiş hayvansal protein, sarı mısır, soya küspesi, vitamin ve mineraller..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-gray-700 mb-1">Garantili Analiz ve Besin Değerleri</label>
+            <textarea id="pem-analysis" rows="2" placeholder="Örn: Ham Protein: %32.0 | Ham Yağ: %14.0 | Ham Selüloz: %3.0 | Ham Kül: %7.8..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-mono"></textarea>
+          </div>
+
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-gray-700 mb-1">Günlük Kullanım ve Besleme Rehberi</label>
+            <textarea id="pem-usage" rows="2" placeholder="Örn: Günlük porsiyon miktarı, saklama koşulları ve besleme tavsiyesi..." class="w-full text-xs px-3.5 py-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none"></textarea>
           </div>
         </div>
       </div>
@@ -959,7 +940,53 @@
       </div>
       <div class="pt-2 flex items-center justify-end gap-2 border-t border-gray-100">
         <button onclick="closeCmsEditModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 transition">İptal</button>
-        <button onclick="applyCmsTextModal()" class="px-5 py-2 rounded-xl text-xs font-black text-white bg-gallus-primary hover:bg-gallus-primary-dark shadow transition">Vitrinde Güncelle</button>
+        <button onclick="applyCmsTextModal(false)" class="px-4 py-2 rounded-xl text-xs font-bold text-gallus-dark bg-gray-200 hover:bg-gray-300 transition">Vitrinde Güncelle</button>
+        <button onclick="applyCmsTextModal(true)" class="px-5 py-2 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow transition">Kaydet & Yayınla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. ALL-SECTIONS VISUAL & CENTRALIZED EDITOR MODAL -->
+  <div id="all-sections-modal" class="hidden fixed inset-0 z-[99999] overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-5xl w-full shadow-2xl border border-gray-200 overflow-hidden my-4 max-h-[92vh] flex flex-col">
+      <!-- Header -->
+      <div class="p-4 sm:p-5 bg-gradient-to-r from-[#1d2327] via-gallus-primary to-emerald-900 text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-400 text-black flex items-center justify-center font-black shadow">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-sm sm:text-base">Web Sitesi Tüm Bölümler & İçerik Düzenleyici (19 Bölüm)</h3>
+            <p class="text-[11px] text-emerald-200">Sitedeki her sayfayı, her başlığı, her açıklamayı ve her görseli buradan seçip anında düzenleyebilirsiniz.</p>
+          </div>
+        </div>
+        <button onclick="closeAllSectionsModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <!-- Body: Sidebar + Section Form -->
+      <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-12">
+        <div id="asm-sidebar" class="md:col-span-4 bg-gray-50 border-r border-gray-200 overflow-y-auto p-3 space-y-1 max-h-48 md:max-h-none">
+          <!-- Populated dynamically -->
+        </div>
+        <div id="asm-content" class="md:col-span-8 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+      <!-- Footer -->
+      <div class="p-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+        <button type="button" onclick="closeAllSectionsModal()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-200 transition">
+          Kapat
+        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button type="button" onclick="saveActiveSectionFromModal(false)" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-bold text-gallus-dark bg-gray-200 hover:bg-gray-300 transition">
+            Vitrinde Uygula
+          </button>
+          <button type="button" onclick="saveActiveSectionFromModal(true)" class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition flex items-center justify-center gap-1.5">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Bu Bölümü Sunucuya Kaydet & Yayınla</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -977,12 +1004,95 @@
        A. CORE APPLICATION STATE
        ========================================================== */
     const STORAGE_KEYS = {
-      PRODUCTS: 'gallus_products_v4',
+      PRODUCTS: 'gallus_products_v6',
       CART: 'gallus_cart_v4',
       FAVORITES: 'gallus_favorites_v4',
       ORDERS: 'gallus_orders_v4',
       COUPON: 'gallus_coupon_v4'
     };
+
+    // Clear stale product caches so Eriş Yem images and detailed product data load immediately
+    try {
+      localStorage.removeItem('gallus_products_v4');
+      localStorage.removeItem('gallus_products_v5');
+    } catch (e) {}
+
+    const EXACT_PRODUCT_IMAGE_MAP = {
+      "u6_p1002": "https://cdn.dsmcdn.com/ty662/product/media/images/20221223/17/244790234/658110596/1/1_org_zoom.jpg",
+      "u6_p1003": "https://cdn.dsmcdn.com/ty31/product/media/images/20201204/11/34926560/101559174/1/1_org_zoom.jpg",
+      "u6_p1004": "https://cdn.dsmcdn.com/ty1835/prod/QC_PREP/20260309/21/8ca7cd6d-437a-3ce0-9c4a-01e9554fd5dc/1_org_zoom.jpg",
+      "u6_p1005": "https://cdn.dsmcdn.com/ty1941/prod/QC_PREP/20260509/17/b771b011-7c7f-340c-8e5b-4769a8d5e855/1_org_zoom.jpg",
+      "u6_p1006": "https://cdn.dsmcdn.com/ty1650/prod/QC/20250318/13/098de440-b758-3bbd-a7fe-019bb4ad49d5/1_org_zoom.jpg",
+      "u6_p1007": "https://cdn.dsmcdn.com/mnresize/420/620/ty1769/prod/QC_ENRICHMENT/20251004/15/419ea9f3-7f42-3273-b3f5-25588eb2726d/1_org_zoom.jpg",
+      "u6_p1008": "https://cdn.dsmcdn.com/ty1621/prod/QC/20250108/09/3032dd1c-a292-306a-9e4b-d1c16b3db6a5/1_org_zoom.jpg",
+      "u6_p1009": "https://cdn.dsmcdn.com/ty1329/product/media/images/prod/QC/20240525/19/699d9791-9122-3030-8396-0cd5bb55d2f7/1_org_zoom.jpg",
+      "u6_p1010": "https://cdn.dsmcdn.com/ty1329/product/media/images/prod/QC/20240525/19/699d9791-9122-3030-8396-0cd5bb55d2f7/1_org_zoom.jpg",
+      "u6_p24": "https://cdn.dsmcdn.com/ty1789/prod/QC_PREP/20251116/00/45347a08-09fc-393c-800d-404f915558f5/1_org_zoom.jpg",
+      "u6_p25": "https://cdn.dsmcdn.com/ty1852/prod/QC_PREP/20260409/21/f89b428a-53d2-34c5-b96e-931f6c2f1a2c/1_org_zoom.jpg",
+      "u6_p26": "https://cdn.dsmcdn.com/ty1852/prod/QC_PREP/20260409/21/f89b428a-53d2-34c5-b96e-931f6c2f1a2c/1_org_zoom.jpg",
+      "u6_p27": "https://cdn.dsmcdn.com/ty1909/prod/QC_PREP/20260506/16/3a01c9a7-5ad5-3362-b0c8-871a197de6fd/1_org_zoom.jpg",
+      "u6_p28": "https://cdn.dsmcdn.com/ty1909/prod/QC_PREP/20260506/16/3a01c9a7-5ad5-3362-b0c8-871a197de6fd/1_org_zoom.jpg",
+      "u6_p29": "https://cdn.dsmcdn.com/ty1724/prod/QC_PREP/20250811/17/ce5d729a-93fc-34c2-9473-9f4989f2a7bb/1_org_zoom.jpg",
+      "u6_p30": "https://cdn.dsmcdn.com/mnresize/420/620/ty1857/prod/QC_PREP/20260422/14/e21fe096-dc1f-318a-b021-52fa6a36de92/1_org_zoom.jpg",
+      "u6_p31": "https://cdn.dsmcdn.com/ty1717/prod/QC_PREP/20250730/15/bc6efd31-aa43-347e-8a01-d4a653bdf71a/1_org_zoom.jpg",
+      "u6_p32": "https://cdn.dsmcdn.com/ty1857/prod/QC_PREP/20260422/14/20bf0d33-8537-37ee-84cb-e3340827fb5d/1_org_zoom.jpg",
+      "u6_p33": "https://cdn.dsmcdn.com/ty1694/product/media/images/prod/PIM/20250616/06/2a51c1e2-1e09-49bd-9123-3ea03aae3d54/1_org_zoom.jpg",
+      "u6_p34": "https://petstore.co.ke/wp-content/uploads/2019/02/PetStore-Kenya-Trendline-Dog-Food-Beef-15kg-min-600x600.png",
+      "u6_p35": "https://cdn.dsmcdn.com/ty1824/prod/QC_PREP/20260212/11/87846302-2f8d-3ab9-87b1-2d3597d24aae/1_org_zoom.jpg",
+      "u6_p36": "https://cdn.dsmcdn.com/ty1743/product/media/images/prod/PIM/20251014/13/1e002e2c-b046-44e3-9414-827e0b25eb02/1_org_zoom.jpg",
+      "u6_p37": "https://cdn.dsmcdn.com/ty1743/product/media/images/prod/PIM/20250909/12/11aaf518-43d8-41e4-b6c5-c5e737f94ba0/1_org_zoom.jpg",
+      "u6_p38": "https://petstore.co.ke/wp-content/uploads/2019/02/Trendline-Multicolor.png",
+      "u6_p39": "https://petzonebd.com/wp-content/uploads/2022/07/trendline-cat-salmon-1kg-600x600-1.jpg",
+      "u6_p40": "https://cdn.dsmcdn.com/ty1793/prod/QC_PREP/20251124/11/25425833-16a5-3066-9a30-9a34755cad6b/1_org_zoom.jpg",
+      "u6_p41": "https://cdn.dsmcdn.com/ty1773/prod/QC_PREP/20251015/15/2ddb4b6b-f15d-3eb9-997a-abf81c1aac4d/1_org_zoom.jpg",
+      "u6_p42": "https://cdn.dsmcdn.com/ty1795/prod/QC_PREP/20251201/13/aa88ddd6-8588-3b69-b8f2-adcffb46e018/1_org_zoom.jpg",
+      "u6_p43": "https://cdn.dsmcdn.com/ty1151/product/media/images/prod/SPM/PIM/20240130/01/1c8d0b02-5a4a-3e52-9fca-69af69f65151/1_org_zoom.jpg",
+      "u6_p44": "https://cdn.dsmcdn.com/ty1773/prod/QC_PREP/20251015/14/b3b60293-f8cf-3a38-b3cd-e52097ca07d8/1_org_zoom.jpg",
+      "u6_p45": "https://cdn.dsmcdn.com/ty1625/prod/QC/20250116/02/969c2c60-9b63-3ee7-8a71-576018392556/1_org_zoom.jpg",
+      "u6_p46": "https://cdn.dsmcdn.com/ty1790/prod/QC_PREP/20251117/14/6b154e28-2db6-3244-b669-d74995210121/1_org_zoom.jpg",
+      "u6_p47": "https://static.ticimax.cloud/50837/uploads/urunresimleri/buyuk/pro-plan-kisirlastirilmis-somonlu-kedi-49d8-b.png",
+      "u6_p48": "https://static.ticimax.cloud/50837/uploads/urunresimleri/buyuk/pro-plan-kisirlastirilmis-somonlu-kedi-49d8-b.png",
+      "u6_p49": "https://cdn.dsmcdn.com/ty1743/product/media/images/prod/PIM/20251014/13/1e002e2c-b046-44e3-9414-827e0b25eb02/1_org_zoom.jpg",
+      "u6_p50": "https://cdn.dsmcdn.com/ty1519/product/media/images/prod/QC/20240902/18/74e0d985-7641-3ce2-aef1-7ad2e756d19b/1_org_zoom.jpg",
+      "u6_p51": "https://cdn.dsmcdn.com/mnresize/420/620/ty1859/prod/QC_PREP/20260424/16/d71d2b45-7f2a-3278-a51e-100a89f1e398/1_org.jpg",
+      "u6_p52": "https://cdn.dsmcdn.com/ty1903/prod/QC_PREP/20260428/14/91920fad-9d81-3155-92fd-55473ec08f13/1_org_zoom.jpg",
+      "u6_p53": "https://cdn.dsmcdn.com/ty1805/prod/QC_PREP/20251227/18/308bfc1e-648c-3c4b-a340-ebc4ac917eb9/1_org_zoom.jpg",
+      "u6_p54": "https://cdn.dsmcdn.com/ty1803/prod/QC_ENRICHMENT/20251224/10/9441539f-c9b7-3251-80ea-584b627b8750/1_org_zoom.jpg",
+      "u6_p55": "https://cdn.dsmcdn.com/ty1843/prod/QC_ENRICHMENT/20260324/09/f8948bb5-f429-35c2-99eb-6fef9ee9f54a/1_org_zoom.jpg",
+      "u6_p56": "https://cdn.dsmcdn.com/ty1767/prod/QC_ENRICHMENT/20251004/00/f62964d2-d53d-3bf1-86c6-43f5aa65da9a/1_org_zoom.jpg",
+      "u6_p57": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
+      "u6_p58": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
+      "u6_p59": "https://cdn.dsmcdn.com/ty1903/prod/QC_PREP/20260509/19/cbcd7513-c24a-34f2-8fc9-60b3cda8cce6/1_org_zoom.jpg",
+      "u6_p60": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
+      "u6_p61": "https://cdn.dsmcdn.com/ty1859/prod/QC_PREP/20260423/12/e0b8fdda-b64b-3fc1-a25a-20f42e7793aa/1_org_zoom.jpg",
+      "u6_p62": "https://cdn.dsmcdn.com/ty1678/prod/QC/20250514/23/b249a9eb-a4e8-3315-8740-993101e88776/1_org_zoom.jpg",
+      "u6_p63": "https://cdn.dsmcdn.com/ty1910/prod/QC_PREP/20260428/19/1d79cb61-3dfe-3ef4-9479-b67894d238a5/1_org_zoom.jpg",
+      "u6_p64": "https://static.ticimax.cloud/37708/uploads/urunresimleri/buyuk/paw-paw-kuzu-etli-yetiskin-kopek-mamas-2cabb6.jpg",
+      "u6_p65": "https://cdn.dsmcdn.com/ty1784/prod/QC_PREP/20251104/13/50b5d5e7-3975-36de-8e7c-2def5a410f73/1_org_zoom.jpg",
+      "u6_p66": "https://cdn.dsmcdn.com/ty1941/prod/QC_PREP/20260509/17/b771b011-7c7f-340c-8e5b-4769a8d5e855/1_org_zoom.jpg",
+      "u6_p67": "https://xcdn.gormeklazim.com/img/cac2977f-e396-4b3d-93f0-53606a2b72a5.webp",
+      "u6_p68": "https://xcdn.gormeklazim.com/img/cac2977f-e396-4b3d-93f0-53606a2b72a5.webp",
+      "u6_p69": "https://cdn.dsmcdn.com/ty1941/prod/QC_PREP/20260509/17/b771b011-7c7f-340c-8e5b-4769a8d5e855/1_org_zoom.jpg",
+      "u6_p999": "https://cdn.myikas.com/images/0fc5e2e6-3ea7-443f-a09e-daf74b83e708/50c5bccd-e3f9-455b-a12d-08ddd5a8949e/3840/efe-gezen-tavuk.webp"
+};
+
+    function resolveClientProductImage(p) {
+      if (!p) return '/images/mutlu-patiler-banner.jpg';
+      const pid = p.id || p.doc_id || p.productId;
+      const cur = (p.imageUrl || '').trim();
+      // If user uploaded a custom photo via /images/uploads/, keep it
+      if (cur.startsWith('/images/uploads/')) return cur;
+      // Always enforce official Eriş Yem sack images for poultry/chick feed IDs unless custom upload
+      if (pid === 'u6_p1002' || pid === 'u6_p1003' || pid === 'u6_p67' || pid === 'u6_p68') {
+        return EXACT_PRODUCT_IMAGE_MAP[pid];
+      }
+      if (pid && EXACT_PRODUCT_IMAGE_MAP[pid]) {
+        if (!cur || cur.includes('images.unsplash.com') || cur === '/images/mutlu-patiler-banner.jpg') {
+          return EXACT_PRODUCT_IMAGE_MAP[pid];
+        }
+      }
+      return cur || (pid && EXACT_PRODUCT_IMAGE_MAP[pid]) || '/images/mutlu-patiler-banner.jpg';
+    }
 
     let appState = {
       products: [],
@@ -1021,19 +1131,363 @@
       return appState.adminToken || localStorage.getItem('gallus_admin_token') || '19071907';
     }
 
+    // All 19 Website Sections Definition for Complete Editability
+    const ALL_CMS_SECTIONS = [
+      {
+        id: 'sec_header',
+        title: '1. Üst Duyuru & Header (Marka & Logolar)',
+        route: '/',
+        fields: [
+          { key: 'announcementText', label: 'Üst Kayan Duyuru Metni', type: 'textarea', def: '🚚 750 ₺ Üzeri Ücretsiz Kargo | 🥚 Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası | 🐾 %100 Orijinal Mama & Yem Garantisi | 📍 Silivri / Değirmenköy PTT Karşısı Mağazamız Açık!' },
+          { key: 'headerBrandName', label: 'Sol Üst Marka Başlığı', type: 'text', def: 'GALLUS' },
+          { key: 'headerBrandBadge', label: 'Marka Yan Rozeti', type: 'text', def: 'Pet & Çiftlik' },
+          { key: 'headerBrandSub', label: 'Marka Alt Sloganı', type: 'text', def: 'MAMA & TAZE YUMURTA' },
+          { key: 'logoMamaUrl', label: '1. Logo Görseli (Mama)', type: 'image', def: '/images/logo-mama.jpg' },
+          { key: 'logoCiftlikUrl', label: '2. Logo Görseli (Çiftlik)', type: 'image', def: '/images/logo-ciftlik.jpg' },
+          { key: 'phone', label: 'Telefon Numarası', type: 'text', def: '0551 655 3637' },
+          { key: 'whatsappUrl', label: 'WhatsApp Bağlantı Linki', type: 'text', def: 'https://wa.me/905516553637?text=Merhaba,%20Gallus%20Mama%20ve%20Yumurta%20hakkında%20bilgi%20almak%20istiyorum.' },
+          { key: 'headerWhatsappLabel', label: 'Üst Çubuk WhatsApp Yazısı', type: 'text', def: 'WhatsApp Danışma' },
+          { key: 'headerHelpLabel', label: 'Üst Çubuk Yardım Yazısı', type: 'text', def: 'Yardım & SSS' }
+        ]
+      },
+      {
+        id: 'sec_hero',
+        title: '2. Ana Sayfa — Hero (Üst Vitrin & Güven Rozetleri)',
+        route: '/',
+        fields: [
+          { key: 'locationBadge', label: 'Hero Üst Konum Rozeti', type: 'text', def: 'Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet' },
+          { key: 'heroTitle', label: 'Hero Ana Başlığı', type: 'text', def: 'Doğal Çiftlikten Sofranıza, Sevgiyle Beslenen Patilere' },
+          { key: 'heroSubtitle', label: 'Hero Alt Açıklaması', type: 'textarea', def: "Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan %100 doğal gezen tavuk yumurtaları ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste." },
+          { key: 'heroBtn1Text', label: '1. Buton Metni (Turuncu)', type: 'text', def: 'Alışverişe Başla' },
+          { key: 'heroBtn2Text', label: '2. Buton Metni (Beyaz)', type: 'text', def: 'Taze Yumurtaları İncele' },
+          { key: 'heroBannerImg', label: 'Hero Sağ Vitrin Görseli', type: 'image', def: '/images/mutlu-patiler-banner.jpg' },
+          { key: 'heroDealBadge', label: 'Hero Sağ Kart Üst Başlık', type: 'text', def: 'Günün Fırsatı' },
+          { key: 'heroDealTitle', label: 'Hero Sağ Kart Ürün Başlığı', type: 'text', def: "Gezen Tavuk Yumurtası (30'lu Viyol)" },
+          { key: 'heroDealBtn', label: 'Hero Sağ Kart Fiyat/Buton Yazısı', type: 'text', def: '165 ₺ İncele' },
+          { key: 'trust1Title', label: '1. Güven Rozeti Başlığı', type: 'text', def: 'Aynı Gün Sevk' },
+          { key: 'trust1Desc', label: '1. Güven Rozeti Açıklaması', type: 'text', def: '750 ₺ üzeri kargo bedava' },
+          { key: 'trust2Title', label: '2. Güven Rozeti Başlığı', type: 'text', def: '%100 Taze & Doğal' },
+          { key: 'trust2Desc', label: '2. Güven Rozeti Açıklaması', type: 'text', def: 'Günlük sabah toplama' },
+          { key: 'trust3Title', label: '3. Güven Rozeti Başlığı', type: 'text', def: 'Güvenli Ödeme' },
+          { key: 'trust3Desc', label: '3. Güven Rozeti Açıklaması', type: 'text', def: 'Kapıda nakit & kart' },
+          { key: 'trust4Title', label: '4. Güven Rozeti Başlığı', type: 'text', def: 'Orijinal Mama' },
+          { key: 'trust4Desc', label: '4. Güven Rozeti Açıklaması', type: 'text', def: 'Veteriner hekim onaylı' }
+        ]
+      },
+      {
+        id: 'sec_categories',
+        title: '3. Ana Sayfa — Öne Çıkan Reyonlar (8 Kategori Kartı)',
+        route: '/',
+        fields: [
+          { key: 'catSecBadge', label: 'Reyonlar Üst Rozeti', type: 'text', def: 'Kategorileri Keşfedin' },
+          { key: 'catSecTitle', label: 'Reyonlar Ana Başlığı', type: 'text', def: 'Öne Çıkan Reyonlarımız' },
+          { key: 'catCard_kedi_title', label: '1. Kart Başlığı (Kedi)', type: 'text', def: 'Kedi Mamaları & Ürünleri' },
+          { key: 'catCard_kedi_desc', label: '1. Kart Açıklaması', type: 'text', def: 'Kısır, yavru, bentonit kum' },
+          { key: 'catCard_kedi_img', label: '1. Kart Görseli (Kedi)', type: 'image', def: 'https://cdn.dsmcdn.com/ty1614/prod/QC/20241212/13/681b4899-684f-3b54-837f-d243b20196be/1_org_zoom.jpg' },
+          { key: 'catCard_kopek_title', label: '2. Kart Başlığı (Köpek)', type: 'text', def: 'Köpek Mamaları & Ürünleri' },
+          { key: 'catCard_kopek_desc', label: '2. Kart Açıklaması', type: 'text', def: 'Kuru mama, konserve, bakım' },
+          { key: 'catCard_kopek_img', label: '2. Kart Görseli (Köpek)', type: 'image', def: 'https://cdn.dsmcdn.com/ty1822/prod/QC_ENRICH/20260209/15/3349f2a5-0c3d-3ad7-ac73-4f88de012e2e/1_org_zoom.jpg' },
+          { key: 'catCard_tavuk-civciv_title', label: '3. Kart Başlığı (Tavuk & Civciv)', type: 'text', def: 'Eriş Yem Tavuk & Civciv Yemleri' },
+          { key: 'catCard_tavuk-civciv_desc', label: '3. Kart Açıklaması', type: 'text', def: 'Eriş Yem gezen tavuk ve civciv yemleri' },
+          { key: 'catCard_tavuk-civciv_img', label: '3. Kart Görseli (Tavuk & Civciv)', type: 'image', def: 'https://cdn.dsmcdn.com/ty662/product/media/images/20221223/17/244790234/658110596/1/1_org_zoom.jpg' },
+          { key: 'catCard_guvercin_title', label: '4. Kart Başlığı (Güvercin)', type: 'text', def: 'Güvercin Yemleri' },
+          { key: 'catCard_guvercin_desc', label: '4. Kart Açıklaması', type: 'text', def: '1. kalite buğday ve tahıllar' },
+          { key: 'catCard_guvercin_img', label: '4. Kart Görseli (Güvercin)', type: 'image', def: 'https://cdn.dsmcdn.com/ty1638/prod/QC/20250214/16/c5178962-56df-3536-b62c-1c7e472f295e/1_org_zoom.jpg' },
+          { key: 'catCard_balik-akvaryum_title', label: '5. Kart Başlığı (Balık & Akvaryum)', type: 'text', def: 'Balık Yemleri & Akvaryum' },
+          { key: 'catCard_balik-akvaryum_desc', label: '5. Kart Açıklaması', type: 'text', def: 'Pul yem ve su düzenleyiciler' },
+          { key: 'catCard_balik-akvaryum_img', label: '5. Kart Görseli (Balık)', type: 'image', def: 'https://cdn.dsmcdn.com/ty1519/product/media/images/prod/PIM/20240903/09/97b0ca9b-2b9f-4e82-9a3e-9a8d8e8c8e8c/1_org_zoom.jpg' },
+          { key: 'catCard_kumes-ekipman_title', label: '6. Kart Başlığı (Kümes Ekipman)', type: 'text', def: 'Kümes Ekipmanları' },
+          { key: 'catCard_kumes-ekipman_desc', label: '6. Kart Açıklaması', type: 'text', def: 'Taşıma kafesleri, suluk, yemlik' },
+          { key: 'catCard_kumes-ekipman_img', label: '6. Kart Görseli (Kümes Ekipman)', type: 'image', def: 'https://cdn.dsmcdn.com/ty1541/product/media/images/prod/PIM/20240914/13/f73c7394-6490-4a8e-9b7a-753726c8fb60/1_org_zoom.jpg' },
+          { key: 'catCard_tarim-bahce_title', label: '7. Kart Başlığı (Tarım & Bahçe)', type: 'text', def: 'Tarım ve Bahçe Ürünleri' },
+          { key: 'catCard_tarim-bahce_desc', label: '7. Kart Açıklaması', type: 'text', def: 'Doğal gübre ve bahçe bakımı' },
+          { key: 'catCard_tarim-bahce_img', label: '7. Kart Görseli (Tarım & Bahçe)', type: 'image', def: 'https://cdn.dsmcdn.com/ty1327/product/media/images/prod/PIM/20240524/13/3f093c46-3252-415b-978c-7bd512f2a0fa/1_org_zoom.jpg' },
+          { key: 'catCard_diger_title', label: '8. Kart Başlığı (Diğer & Yumurta)', type: 'text', def: 'Diğer & Çiftlik Yumurtası' },
+          { key: 'catCard_diger_desc', label: '8. Kart Açıklaması', type: 'text', def: 'Günlük gezen tavuk yumurtaları' },
+          { key: 'catCard_diger_img', label: '8. Kart Görseli (Diğer & Yumurta)', type: 'image', def: '/images/yumurta-koli-banner.jpg' }
+        ]
+      },
+      {
+        id: 'sec_bestsellers',
+        title: '4. Ana Sayfa — En Çok Tercih Edilenler Bölümü',
+        route: '/',
+        fields: [
+          { key: 'bestSecBadge', label: 'Üst Rozet Yazısı', type: 'text', def: 'Müşteri Favorileri' },
+          { key: 'bestSecTitle', label: 'Bölüm Ana Başlığı', type: 'text', def: 'En Çok Tercih Edilenler' },
+          { key: 'bestSecLink', label: 'Sağ Link Yazısı', type: 'text', def: 'Tüm Kataloğu Gör' }
+        ]
+      },
+      {
+        id: 'sec_promo_banner',
+        title: '5. Ana Sayfa — Özel Kampanya (GALLUS10) Bannerı',
+        route: '/',
+        fields: [
+          { key: 'promoBadge', label: 'Kampanya Üst Rozeti', type: 'text', def: 'Özel Kampanya' },
+          { key: 'promoTitle', label: 'Kampanya Ana Başlığı', type: 'text', def: 'İlk Siparişinize Özel %10 İndirim Fırsatı!' },
+          { key: 'promoDesc', label: 'Kampanya Açıklama Metni', type: 'textarea', def: 'Sepet adımında GALLUS10 kupon kodunu kullanarak anında indirim kazanın. 750 ₺ üzeri siparişlerde kargonuz ücretsiz.' },
+          { key: 'promoBtnText', label: 'Kampanya Buton Yazısı', type: 'text', def: 'Fırsatları İncele' }
+        ]
+      },
+      {
+        id: 'sec_home_spotlights',
+        title: '6. Ana Sayfa — Köpek, Kedi ve Kümes Vitrin Başlıkları',
+        route: '/',
+        fields: [
+          { key: 'dogSecBadge', label: 'Köpek Vitrini Üst Rozet', type: 'text', def: 'Sadık Dostlarımız İçin' },
+          { key: 'dogSecTitle', label: 'Köpek Vitrini Ana Başlık', type: 'text', def: 'Köpek Maması & Beslenme Çözümleri' },
+          { key: 'dogSecLink', label: 'Köpek Vitrini Sağ Link Yazısı', type: 'text', def: 'Tüm Köpek Mamaları →' },
+          { key: 'catSpotBadge', label: 'Kedi Vitrini Üst Rozet', type: 'text', def: 'Kedinizin Konforu İçin' },
+          { key: 'catSpotTitle', label: 'Kedi Vitrini Ana Başlık', type: 'text', def: 'Kedi Mamaları & Doğal Bentonit Kumlar' },
+          { key: 'catSpotLink', label: 'Kedi Vitrini Sağ Link Yazısı', type: 'text', def: 'Tüm Kedi Ürünleri →' },
+          { key: 'poultrySecBadge', label: 'Kümes Vitrini Üst Rozet', type: 'text', def: 'Çiftlik ve Kümes Yetiştiriciliği' },
+          { key: 'poultrySecTitle', label: 'Kümes Vitrini Ana Başlık', type: 'text', def: 'Kanatlı Yemleri & Kümes Otomasyonu' },
+          { key: 'poultrySecLink', label: 'Kümes Vitrini Sağ Link Yazısı', type: 'text', def: 'Kümes Ürünleri →' }
+        ]
+      },
+      {
+        id: 'sec_egg_heritage',
+        title: '7. Ana Sayfa — Gezen Tavuk Yumurtası Tanıtım Bölümü',
+        route: '/',
+        fields: [
+          { key: 'eggHeritageImg', label: 'Bölüm Sol Görseli', type: 'image', def: '/images/tavuklar.jpg' },
+          { key: 'eggHeritageBadge', label: 'Üst Rozet Yazısı', type: 'text', def: 'Doğallık ve Hijyen' },
+          { key: 'eggHeritageTitle', label: 'Bölüm Ana Başlığı', type: 'text', def: 'Her Sabah Taze Toplanan, Güneş Gören Gezen Tavuk Yumurtası' },
+          { key: 'eggHeritageDesc', label: 'Bölüm Detaylı Açıklaması', type: 'textarea', def: 'Değirmenköy tesislerimizde tavuklarımız kapalı kafeslerde değil; yeşil mera alanlarında serbestçe gezer. Doğal mısır, buğday ve soya rasyonlarıyla beslenen tavuklarımızdan elde edilen yumurtalar özel iklimlendirmeli depolarda tasnif edilir ve kırılmaya karşı test edilmiş darbe emici viyollerle sevk edilir.' },
+          { key: 'eggCheck1', label: '1. Onay Maddesi', type: 'text', def: '%100 Antibiyotiksiz' },
+          { key: 'eggCheck2', label: '2. Onay Maddesi', type: 'text', def: 'Altın Sarısı Kıvam' },
+          { key: 'eggCheck3', label: '3. Onay Maddesi', type: 'text', def: 'Kırılmaz Viyol Garantisi' },
+          { key: 'eggHeritageBtn', label: 'Buton Metni', type: 'text', def: 'Çiftliğimizi Yakından Tanıyın' }
+        ]
+      },
+      {
+        id: 'sec_brands',
+        title: '8. Ana Sayfa & Markalar Sayfası — İş Ortaklarımız',
+        route: '/markalar',
+        fields: [
+          { key: 'brandsSecBadge', label: 'Ana Sayfa Markalar Üst Rozeti', type: 'text', def: 'Güvenilir Üreticiler' },
+          { key: 'brandsSecTitle', label: 'Ana Sayfa Markalar Başlığı', type: 'text', def: 'İş Ortaklarımız & Markalarımız' },
+          { key: 'brandsPageTitle', label: 'Markalar Sayfası Ana Başlığı', type: 'text', def: 'Yetkili ve Tescilli Markalarımız' },
+          { key: 'brandsPageSub', label: 'Markalar Sayfası Alt Açıklaması', type: 'text', def: 'Sitemizde sadece faturalı, orijinal ve kalite standartlarından geçmiş markalar sunulur.' }
+        ]
+      },
+      {
+        id: 'sec_newsletter',
+        title: '9. Ana Sayfa — E-Bülten Kayıt Bölümü',
+        route: '/',
+        fields: [
+          { key: 'newsBadge', label: 'E-Bülten Üst Rozeti', type: 'text', def: 'E-Bültenimize Kaydolun' },
+          { key: 'newsTitle', label: 'E-Bülten Ana Başlığı', type: 'text', def: 'Haftalık Çiftlik Fırsatlarını ve İndirimleri Kaçırmayın' },
+          { key: 'newsDesc', label: 'E-Bülten Alt Açıklaması', type: 'textarea', def: 'Yeni çıkan ürünlerden, taze yumurta partilerinden ve dönemsel indirimlerden ilk siz haberdar olun.' },
+          { key: 'newsBtnText', label: 'Kayıt Butonu Metni', type: 'text', def: 'Kaydol' }
+        ]
+      },
+      {
+        id: 'sec_footer',
+        title: '10. Alt Bilgi (Footer) & Sosyal Medya Bölümü',
+        route: '/',
+        fields: [
+          { key: 'footerBrandTitle', label: 'Footer Marka Başlığı', type: 'text', def: 'GALLUS MAMA' },
+          { key: 'slogan', label: 'Footer Marka Sloganı', type: 'text', def: 'DOĞAL ÇİFTLİK & PET MARKET' },
+          { key: 'footerDesc', label: 'Footer Açıklama Metni', type: 'textarea', def: "Silivri Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; katkısız günlük çiftlik yumurtası, veteriner formüllü kedi/köpek mamaları ve çiftlik yemlerini doğrudan üreticiden ulaştırıyoruz." },
+          { key: 'instaMamaHandle', label: '1. Instagram Hesap Adı', type: 'text', def: '@gallus_mama' },
+          { key: 'instaMamaUrl', label: '1. Instagram Linki', type: 'text', def: 'https://www.instagram.com/gallus_mama/' },
+          { key: 'instaYumurtaHandle', label: '2. Instagram Hesap Adı', type: 'text', def: '@gallusyumurta' },
+          { key: 'instaYumurtaUrl', label: '2. Instagram Linki', type: 'text', def: 'https://www.instagram.com/gallusyumurta/' },
+          { key: 'footerCopyright', label: 'Telif Hakkı (Copyright) Metni', type: 'text', def: '© 2026 Gallus Mama & Yumurta. Tüm hakları saklıdır.' }
+        ]
+      },
+      {
+        id: 'sec_category_pages',
+        title: '11. Kategori Sayfaları Vitrin Başlıkları & Açıklaması',
+        route: '/kedi',
+        fields: [
+          { key: 'catBannerBadge', label: 'Kategori Sayfası Üst Rozet', type: 'text', def: 'Kategori Vitrini' },
+          { key: 'catBannerSub', label: 'Kategori Sayfası Güvence Metni', type: 'text', def: 'Doğrudan Değirmenköy garantisiyle sevk edilir.' },
+          { key: 'catPageTitle_kedi', label: 'Kedi Sayfası Başlığı', type: 'text', def: 'Kedi Mamaları ve Ürünleri' },
+          { key: 'catPageTitle_kopek', label: 'Köpek Sayfası Başlığı', type: 'text', def: 'Köpek Mamaları ve Ürünleri' },
+          { key: 'catPageTitle_tavuk-civciv', label: 'Tavuk & Civciv Sayfası Başlığı', type: 'text', def: 'Tavuk ve Civciv Yemleri' },
+          { key: 'catPageTitle_guvercin', label: 'Güvercin Sayfası Başlığı', type: 'text', def: 'Güvercin Yemleri & Tahıllar' },
+          { key: 'catPageTitle_balik-akvaryum', label: 'Balık & Akvaryum Sayfası Başlığı', type: 'text', def: 'Balık Yemleri ve Akvaryum' },
+          { key: 'catPageTitle_kumes-ekipman', label: 'Kümes Ekipman Sayfası Başlığı', type: 'text', def: 'Kümes ve Pet Ekipmanları' },
+          { key: 'catPageTitle_tarim-bahce', label: 'Tarım & Bahçe Sayfası Başlığı', type: 'text', def: 'Tarım ve Bahçe Ürünleri' },
+          { key: 'catPageTitle_yumurta', label: 'Yumurta Sayfası Başlığı', type: 'text', def: 'Taze Çiftlik Gezen Tavuk Yumurtası' },
+          { key: 'catPageTitle_diger', label: 'Diğer Ürünler Sayfası Başlığı', type: 'text', def: 'Diğer Ürünler & Taze Çiftlik Yumurtası' }
+        ]
+      },
+      {
+        id: 'sec_wholesale',
+        title: '12. Toptan Satış (B2B) Sayfası',
+        route: '/toptan-satis',
+        fields: [
+          { key: 'b2bBadge', label: 'Sayfa Üst Rozeti', type: 'text', def: 'Kurumsal Tedarik' },
+          { key: 'b2bTitle', label: 'Toptan Satış Ana Başlığı', type: 'text', def: 'Toptan Yumurta ve Pet Shop Dağıtımı' },
+          { key: 'b2bSubtitle', label: 'Toptan Satış Açıklaması', type: 'textarea', def: 'Marketler, şarküteriler, oteller, fırınlar ve pet shop işletmeleri için doğrudan Değirmenköy çiftliğimizden paletli taze yumurta ve çuvallı karma yem tedariği sağlıyoruz.' },
+          { key: 'b2bFormTitle', label: 'Sol Form Başlığı', type: 'text', def: 'Toptan Fiyat Teklifi Talep Formu' },
+          { key: 'b2bWhyTitle', label: 'Sağ Kutu Başlığı', type: 'text', def: 'Neden Gallus Çiftlik B2B?' },
+          { key: 'b2bBullet1', label: '1. Avantaj Maddesi', type: 'textarea', def: 'Aracısız Üretici Fiyatı: Doğrudan çiftliğimizden birinci el toptan fiyat avantajı.' },
+          { key: 'b2bBullet2', label: '2. Avantaj Maddesi', type: 'textarea', def: 'Kendi Soğutmalı Araçlarımız: Silivri, Çorlu, Çerkezköy ve İstanbul Avrupa yakasına periyodik sevkiyat.' },
+          { key: 'b2bBullet3', label: '3. Avantaj Maddesi', type: 'textarea', def: 'Düzenli Fatura & İrsaliye: Tarım ve Orman Bakanlığı işletme onaylı yasal güvence.' }
+        ]
+      },
+      {
+        id: 'sec_campaigns',
+        title: '13. Kampanyalar & İndirimler Sayfası',
+        route: '/kampanyalar',
+        fields: [
+          { key: 'campPageBadge', label: 'Sayfa Üst Rozeti', type: 'text', def: 'Fırsat Köşesi' },
+          { key: 'campPageTitle', label: 'Sayfa Ana Başlığı', type: 'text', def: 'Aktif İndirim ve Kampanyalar' },
+          { key: 'camp1Badge', label: '1. Kampanya Kartı Rozeti', type: 'text', def: 'Sürekli Kampanya' },
+          { key: 'camp1Title', label: '1. Kampanya Kartı Başlığı', type: 'text', def: '750 ₺ ve Üzeri Ücretsiz Kargo' },
+          { key: 'camp1Desc', label: '1. Kampanya Kartı Açıklaması', type: 'textarea', def: "Tüm yumurta, kedi/köpek maması ve çiftlik yemlerinde sepet tutarınız 750 ₺'ye ulaştığında kargo ücreti tamamen sıfırlanır." },
+          { key: 'camp2Badge', label: '2. Kampanya Kartı Rozeti', type: 'text', def: 'Kupon Kodu' },
+          { key: 'camp2Title', label: '2. Kampanya Kartı Başlığı', type: 'text', def: 'GALLUS10 ile %10 İndirim' },
+          { key: 'camp2Desc', label: '2. Kampanya Kartı Açıklaması', type: 'textarea', def: 'Sitemizden vereceğiniz ilk siparişinizde sepet adımında GALLUS10 kodunu girerek anında %10 indirim kazanın.' }
+        ]
+      },
+      {
+        id: 'sec_farm',
+        title: '14. Çiftliğimiz & Standartlarımız Sayfası',
+        route: '/ciftligimiz',
+        fields: [
+          { key: 'farmBadge', label: 'Sayfa Üst Rozeti', type: 'text', def: 'Doğadan İlham Alan Teknoloji' },
+          { key: 'farmTitle', label: 'Çiftliğimiz Ana Başlığı', type: 'text', def: 'Değirmenköy Gezen Tavuk Çiftliği' },
+          { key: 'farmSubtitle', label: 'Çiftliğimiz Alt Açıklaması', type: 'textarea', def: 'Biyogüvenlikli, geniş arazide serbest gezen tavuklarımız ve kaliteli üretim standartlarımız.' },
+          { key: 'farmMainImg', label: 'Çiftliğimiz Ana Görseli', type: 'image', def: '/images/tavuklar.jpg' },
+          { key: 'farmCard1Title', label: '1. Standart Kartı Başlığı', type: 'text', def: 'Serbest Otlama Alanları' },
+          { key: 'farmCard1Desc', label: '1. Standart Kartı Açıklaması', type: 'textarea', def: "Tavuk başına 4 m²'den fazla açık mera arazisi ayrılarak hayvan refahı en üst düzeyde tutulur." },
+          { key: 'farmCard2Title', label: '2. Standart Kartı Başlığı', type: 'text', def: 'Özel Tahıl Rasyonu' },
+          { key: 'farmCard2Desc', label: '2. Standart Kartı Açıklaması', type: 'textarea', def: 'Kendi rasyonumuz olan doğal mısır, buğday ve keten tohumu ile besleme yapılarak katkısız altın sarılık sağlanır.' },
+          { key: 'farmCard3Title', label: '3. Standart Kartı Başlığı', type: 'text', def: 'Veteriner Denetimi' },
+          { key: 'farmCard3Desc', label: '3. Standart Kartı Açıklaması', type: 'textarea', def: 'Rutin laboratuvar testleri ve veteriner kontrolleri ile salmonella ve antibiyotik riski sıfıra indirilir.' }
+        ]
+      },
+      {
+        id: 'sec_about',
+        title: '15. Hakkımızda Sayfası',
+        route: '/hakkimizda',
+        fields: [
+          { key: 'aboutTitle', label: 'Hakkımızda Sayfa Başlığı', type: 'text', def: "Değirmenköy'ün Bereketli Topraklarından Doğan Güven" },
+          { key: 'aboutText', label: 'Hakkımızda 1. Paragraf (Ana Metin)', type: 'textarea', def: "GALLUS MAMA & YUMURTA olarak 2018 yılından bu yana Silivri Değirmenköy Mahallesi PTT karşısındaki merkez mağazamız ve yüksek teknolojili biyogüvenlikli gezen tavuk çiftliğimizle hizmet veriyoruz. Temel misyonumuz; kahvaltı sofralarına en taze ve katkısız günlük gezen tavuk yumurtasını ulaştırırken, can dostlarımız için de yüksek kaliteli, besleyici ve veteriner onaylı mamaları dürüst üretici fiyatlarıyla sunmaktır." },
+          { key: 'aboutMissionText', label: 'Hakkımızda 2. Paragraf (Vizyon & Kalite Sözümüz)', type: 'textarea', def: "Tüm kedi maması, köpek maması, güvercin ve kanatlı yemlerimiz doğrudan yetkili distribütörlerden ve kendi çiftlik üretim bandımızdan taze parti olarak temin edilmektedir." },
+          { key: 'aboutPageImg', label: 'Hakkımızda Görseli', type: 'image', def: '/images/mutlu-patiler-banner.jpg' }
+        ]
+      },
+      {
+        id: 'sec_contact',
+        title: '16. İletişim & Mağaza Konumu Sayfası',
+        route: '/iletisim',
+        fields: [
+          { key: 'contactPageTitle', label: 'İletişim Sayfa Başlığı', type: 'text', def: 'İletişim & Mağaza Bilgileri' },
+          { key: 'contactPageSub', label: 'İletişim Alt Açıklaması', type: 'text', def: 'Sorularınız, siparişleriniz veya ziyaretiniz için bize dilediğiniz zaman ulaşabilirsiniz.' },
+          { key: 'address', label: 'Açık Mağaza Adresi', type: 'textarea', def: 'Değirmenköy Mahallesi, PTT Karşısı, Silivri / İstanbul' },
+          { key: 'phone', label: 'Telefon & Sipariş Hattı', type: 'text', def: '0551 655 3637' },
+          { key: 'workingHours', label: 'Çalışma Saatlerimiz', type: 'text', def: 'Haftanın Her Günü: 08:30 - 21:00' },
+          { key: 'email', label: 'E-Posta Adresi', type: 'text', def: 'iletisim@gallusmama.com' },
+          { key: 'deliveryRegions', label: 'Teslimat Bölgeleri', type: 'textarea', def: 'Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Özel Korumalı Kargo İle Tüm Türkiye' },
+          { key: 'mapEmbedUrl', label: 'Google Harita (Iframe src) Linki', type: 'text', def: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str' }
+        ]
+      },
+      {
+        id: 'sec_help',
+        title: '17. Yardım & Sıkça Sorulan Sorular (SSS) Sayfası',
+        route: '/yardim',
+        fields: [
+          { key: 'helpTitle', label: 'SSS Sayfa Başlığı', type: 'text', def: 'Sıkça Sorulan Sorular' },
+          { key: 'helpSub', label: 'SSS Alt Açıklaması', type: 'text', def: 'Sipariş, kargo ve ürünlerimizle ilgili en çok merak edilenler.' },
+          { key: 'faq1Q', label: '1. Soru', type: 'text', def: 'Yumurtalar kargoda kırılır mı? Nasıl paketleniyor?' },
+          { key: 'faq1A', label: '1. Cevap', type: 'textarea', def: "Yumurtalarımız darbeye karşı özel üretilmiş kalın kraft koruyucu viyoller ve hava yastıklı şok emici ambalajlar içinde sevk edilir. Kırılma oranı %0.1'in altındadır. Olası bir hasarda fotoğrafını iletmeniz halinde anında telafi edilir." },
+          { key: 'faq2Q', label: '2. Soru', type: 'text', def: 'Siparişim ne zaman kargoya verilir?' },
+          { key: 'faq2A', label: '2. Cevap', type: 'textarea', def: "Hafta içi saat 15:00'e kadar verilen siparişler aynı gün kargoya teslim edilir. Silivri ve çevre bölgelere ise kendi servis araçlarımızla gün içi elden teslimat yapılmaktadır." },
+          { key: 'faq3Q', label: '3. Soru', type: 'text', def: 'Kapıda ödeme yapabilir miyim?' },
+          { key: 'faq3A', label: '3. Cevap', type: 'textarea', def: 'Evet, sipariş tamamlama adımında kapıda nakit veya POS cihazı ile kredi kartı ödeme seçeneğini seçebilirsiniz.' },
+          { key: 'faq4Q', label: '4. Soru', type: 'text', def: 'Mamalarınızın son kullanma tarihi ve orijinalliği garantili mi?' },
+          { key: 'faq4A', label: '4. Cevap', type: 'textarea', def: 'Mağazamızdaki tüm kedi, köpek, güvercin ve kümes yemleri %100 orijinal ambalajında, yeni üretim partisi ve faturalı olarak gönderilmektedir.' }
+        ]
+      },
+      {
+        id: 'sec_shipping',
+        title: '18. Kargo ve İade Politikası Sayfası',
+        route: '/kargo-ve-iade',
+        fields: [
+          { key: 'shipPageTitle', label: 'Sayfa Başlığı', type: 'text', def: 'Kargo ve İade Politikası' },
+          { key: 'shipSec1Title', label: '1. Başlık', type: 'text', def: '1. Teslimat Süreçleri' },
+          { key: 'shipSec1Desc', label: '1. Açıklama', type: 'textarea', def: "Siparişleriniz anlaşmalı kargo firmalarımızla Türkiye'nin her yerine 1-3 iş günü içerisinde ulaştırılır. 750 ₺ ve üzeri tüm alışverişlerde kargo bedavadır." },
+          { key: 'shipSec2Title', label: '2. Başlık', type: 'text', def: '2. Kırılmaz Yumurta Güvencesi' },
+          { key: 'shipSec2Desc', label: '2. Açıklama', type: 'textarea', def: 'Doğal çiftlik yumurtalarımız darbe sönümleyici özel kalıplarla sevk edilir. Kargo tesliminde pakette belirgin hasar olması durumunda kurye nezaretinde tutanak tutturabilir veya WhatsApp hattımızdan fotoğraf göndererek yenisini talep edebilirsiniz.' },
+          { key: 'shipSec3Title', label: '3. Başlık', type: 'text', def: '3. İade ve Değişim Şartları' },
+          { key: 'shipSec3Desc', label: '3. Açıklama', type: 'textarea', def: 'Ambalajı açılmamış kuru mama, kedi kumu ve ekipman ürünlerini 14 gün içerisinde yasal cayma hakkınız kapsamında koşulsuz iade edebilirsiniz. Çabuk bozulabilen taze yumurtalarda ise kalite güvencemiz geçerlidir.' }
+        ]
+      },
+      {
+        id: 'sec_legal',
+        title: '19. Yasal Sözleşmeler (Mesafeli Satış, KVKK, Çerez)',
+        route: '/mesafeli-satis-sozlesmesi',
+        fields: [
+          { key: 'legalDistTitle', label: 'Mesafeli Satış Sözleşmesi Başlığı', type: 'text', def: 'Mesafeli Satış Sözleşmesi' },
+          { key: 'legalDistBody', label: 'Mesafeli Satış Sözleşmesi Metni', type: 'textarea', def: "İşbu sözleşmenin konusu, ALICI'nın SATICI'ya ait internet sitesinden elektronik ortamda siparişini yaptığı ürünlerin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır. Tüketici, standart ürünlerde 14 gün içinde herhangi bir gerekçe göstermeksizin cayma hakkına sahiptir." },
+          { key: 'legalPrivTitle', label: 'Gizlilik ve KVKK Başlığı', type: 'text', def: 'Gizlilik ve Kişisel Verilerin Korunması (KVKK)' },
+          { key: 'legalPrivBody', label: 'Gizlilik ve KVKK Metni', type: 'textarea', def: 'Gallus Mama & Yumurta olarak müşterilerimizin kişisel verilerinin güvenliğine azami önem gösteriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında ad, telefon, teslimat adresi bilgileriniz sadece siparişinizin ulaştırılması ve faturalandırılması amacıyla işlenir. Kredi kartı bilgileriniz sunucularımızda asla saklanmaz.' },
+          { key: 'legalDelivTitle', label: 'Teslimat Koşulları Başlığı', type: 'text', def: 'Teslimat Koşulları' },
+          { key: 'legalDelivBody', label: 'Teslimat Koşulları Metni', type: 'textarea', def: 'Siparişleriniz Değirmenköy ana sevkiyat merkezimizden çıkış yapmaktadır. Sipariş onayının ardından anlaşmalı kargo firmasına teslim edilen paketleriniz için SMS ve e-posta ile kargo takip bağlantısı gönderilir.' },
+          { key: 'legalCookieTitle', label: 'Çerez Politikası Başlığı', type: 'text', def: 'Çerez (Cookie) Politikası' },
+          { key: 'legalCookieBody', label: 'Çerez Politikası Metni', type: 'textarea', def: 'Web sitemizde alışveriş sepetinizin hatırlanması, oturum yönetimi ve site performansının iyileştirilmesi amacıyla zorunlu çerezler kullanılmaktadır. Sitemizi kullanarak çerez politikamızı kabul etmiş sayılırsınız.' }
+        ]
+      }
+    ];
+
+    function cmsVal(key, defaultVal) {
+      if (appState.siteInfo && appState.siteInfo[key] !== undefined && appState.siteInfo[key] !== null && appState.siteInfo[key] !== '') {
+        const val = String(appState.siteInfo[key]);
+        if (val.includes('${cmsText') || val.includes('${appState')) {
+          delete appState.siteInfo[key];
+          return defaultVal;
+        }
+        return val;
+      }
+      return defaultVal;
+    }
+
     // Dynamic CMS Text Element Wrapper (WordPress In-Page Click-to-Edit)
     function cmsText(key, defaultVal, isMultiline = false) {
-      const currentVal = (appState.siteInfo && appState.siteInfo[key] !== undefined && appState.siteInfo[key] !== null) 
-        ? appState.siteInfo[key] 
-        : defaultVal;
+      const currentVal = cmsVal(key, defaultVal);
 
       if (appState.isAdmin && appState.visualEditMode) {
-        return `<span class="cms-editable group/cms relative inline-block cursor-pointer border border-dashed border-amber-500 bg-amber-50/40 hover:bg-amber-100/60 rounded px-1.5 py-0.5 transition" onclick="openCmsEditModal('${key}', ${isMultiline ? 'true' : 'false'}, event)" title="Tıkla ve Düzenle: ${key}">${currentVal} <span class="opacity-0 group-hover/cms:opacity-100 inline-flex items-center gap-1 text-[9px] bg-amber-500 text-white font-extrabold px-1.5 py-0.5 rounded ml-1 shadow-sm transition pointer-events-none">✏️ Düzenle</span></span>`;
+        return `<span class="cms-editable group/cms relative inline-block cursor-pointer border border-dashed border-amber-500 bg-amber-50/50 hover:bg-amber-100/80 text-inherit rounded px-1.5 py-0.5 transition" onclick="openCmsEditModal('${key}', ${isMultiline ? 'true' : 'false'}, event)" title="Tıkla ve Düzenle: ${key}">${currentVal} <span class=" inline-flex items-center gap-0.5 text-[9px] bg-amber-500 text-black font-black px-1.5 py-0.5 rounded ml-1 shadow-sm transition pointer-events-none">✏️</span></span>`;
       }
       return currentVal;
     }
 
+    // Dynamic CMS Image Wrapper (In-Page Click-to-Upload / Change Image URL)
+    function cmsImg(key, defaultUrl, altText = '', imgClass = 'w-full h-full object-cover', fallbackUrl = '/images/mutlu-patiler-banner.jpg') {
+      const currentUrl = cmsVal(key, defaultUrl);
+      if (appState.isAdmin && appState.visualEditMode) {
+        return `
+          <div class="relative w-full h-full group/cmsimg">
+            <img src="${currentUrl}" alt="${escapeHtml(altText)}" class="${imgClass}" onerror="this.onerror=null;this.src='${fallbackUrl}'">
+            <button type="button" onclick="openCmsImageModal('${key}', '${escapeHtml(defaultUrl)}', event)" class="absolute bottom-2 left-2 z-30 bg-amber-500 hover:bg-amber-400 text-black font-black text-[10px] px-2.5 py-1.5 rounded-xl shadow-lg flex items-center gap-1 border border-black/20 transition transform hover:scale-105">
+              <span>📷 Görseli Değiştir</span>
+            </button>
+          </div>
+        `;
+      }
+      return `<img src="${currentUrl}" alt="${escapeHtml(altText)}" class="${imgClass}" onerror="this.onerror=null;this.src='${fallbackUrl}'">`;
+    }
+
+    // Section Header Floating Edit Bar
+    function cmsSectionBar(sectionId, sectionLabel) {
+      if (!appState.isAdmin || !appState.visualEditMode) return '';
+      return `
+        <div class="max-w-7xl mx-auto px-4 pt-2 pb-1 flex items-center justify-end">
+          <button type="button" onclick="openAllSectionsModal('${sectionId}', event)" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/95 hover:bg-amber-400 text-black font-extrabold text-[11px] shadow-md border border-amber-700/30 transition transform hover:scale-105">
+            <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+            <span>✏️ ${sectionLabel} Bölümünü Düzenle</span>
+          </button>
+        </div>
+      `;
+    }
+
     let currentCmsEditingKey = null;
+    let currentCmsEditingIsImage = false;
 
     function openCmsEditModal(key, isMultiline = false, event) {
       if (event) {
@@ -1041,49 +1495,33 @@
         event.preventDefault();
       }
       currentCmsEditingKey = key;
-      const currentVal = (appState.siteInfo && appState.siteInfo[key] !== undefined) ? appState.siteInfo[key] : '';
-      
+      currentCmsEditingIsImage = false;
+
+      let fieldDef = null;
+      for (const sec of ALL_CMS_SECTIONS) {
+        const found = sec.fields.find(f => f.key === key);
+        if (found) { fieldDef = found; break; }
+      }
+
+      const defaultVal = fieldDef ? fieldDef.def : '';
+      const currentVal = cmsVal(key, defaultVal);
+      const labelText = fieldDef ? fieldDef.label : key;
+
       const modal = document.getElementById('cms-text-modal');
       const title = document.getElementById('cms-text-modal-title');
       const container = document.getElementById('cms-text-modal-input-container');
 
-      const labels = {
-        'title': 'Site Başlığı',
-        'slogan': 'Site Sloganı',
-        'announcementText': 'Üst Kayan Duyuru Metni',
-        'locationBadge': 'Hero Üst Rozet Metni',
-        'heroTitle': 'Ana Sayfa Hero Başlığı',
-        'heroSubtitle': 'Ana Sayfa Hero Alt Açıklaması',
-        'phone': 'Telefon Numarası',
-        'email': 'E-posta Adresi',
-        'address': 'Mağaza Adresi',
-        'workingHours': 'Çalışma Saatleri',
-        'whatsappUrl': 'WhatsApp Danışma Linki',
-        'deliveryRegions': 'Teslimat Bölgeleri Açıklaması',
-        'aboutTitle': 'Hakkımızda Sayfa Başlığı',
-        'aboutText': 'Hakkımızda Detaylı Açıklama Metni',
-        'footerDesc': 'Alt Bilgi (Footer) Açıklaması',
-        'trust1Title': '1. Güven Rozeti Başlığı',
-        'trust1Desc': '1. Güven Rozeti Açıklaması',
-        'trust2Title': '2. Güven Rozeti Başlığı',
-        'trust2Desc': '2. Güven Rozeti Açıklaması',
-        'trust3Title': '3. Güven Rozeti Başlığı',
-        'trust3Desc': '3. Güven Rozeti Açıklaması',
-        'trust4Title': '4. Güven Rozeti Başlığı',
-        'trust4Desc': '4. Güven Rozeti Açıklaması'
-      };
-
-      if (title) title.innerText = `Metni Düzenle: ${labels[key] || key}`;
+      if (title) title.innerText = `İçeriği Düzenle: ${labelText}`;
 
       if (container) {
-        if (isMultiline) {
+        if (isMultiline || (fieldDef && fieldDef.type === 'textarea')) {
           container.innerHTML = `
-            <label class="block text-xs font-bold text-gray-700 mb-1.5">${labels[key] || key}</label>
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">${labelText}</label>
             <textarea id="cms-modal-val" rows="5" class="w-full text-xs p-3.5 rounded-2xl border border-gray-300 focus:border-gallus-primary outline-none font-medium leading-relaxed">${escapeHtml(currentVal)}</textarea>
           `;
         } else {
           container.innerHTML = `
-            <label class="block text-xs font-bold text-gray-700 mb-1.5">${labels[key] || key}</label>
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">${labelText}</label>
             <input type="text" id="cms-modal-val" value="${escapeHtml(currentVal)}" class="w-full text-xs p-3 rounded-2xl border border-gray-300 focus:border-gallus-primary outline-none font-bold">
           `;
         }
@@ -1093,12 +1531,89 @@
       refreshLucideIcons();
     }
 
+    function openCmsImageModal(key, defaultUrl = '', event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      currentCmsEditingKey = key;
+      currentCmsEditingIsImage = true;
+
+      let fieldDef = null;
+      for (const sec of ALL_CMS_SECTIONS) {
+        const found = sec.fields.find(f => f.key === key);
+        if (found) { fieldDef = found; break; }
+      }
+      const currentVal = cmsVal(key, fieldDef ? fieldDef.def : defaultUrl);
+      const labelText = fieldDef ? fieldDef.label : key;
+
+      const modal = document.getElementById('cms-text-modal');
+      const title = document.getElementById('cms-text-modal-title');
+      const container = document.getElementById('cms-text-modal-input-container');
+
+      if (title) title.innerText = `📷 Görseli Değiştir: ${labelText}`;
+
+      if (container) {
+        container.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="aspect-video w-full rounded-2xl bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
+              <img id="cms-img-modal-preview" src="${escapeHtml(currentVal)}" class="w-full h-full object-contain" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+            </div>
+            <div class="border-2 border-dashed border-emerald-400 hover:border-emerald-600 bg-emerald-50/40 rounded-2xl p-3 text-center cursor-pointer transition" onclick="document.getElementById('cms-img-file-input').click()">
+              <input type="file" id="cms-img-file-input" accept="image/*" class="hidden" onchange="handleCmsModalPhotoUpload(event)">
+              <span class="font-extrabold text-gallus-primary block">📤 Bilgisayardan Yeni Görsel Yükle</span>
+              <span class="text-[10px] text-gray-500">Tıklayın ve fotoğraf seçin (Otomatik yüklenir)</span>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-gray-700 mb-1">Veya Doğrudan Görsel URL Linki Yapıştırın:</label>
+              <input type="text" id="cms-modal-val" value="${escapeHtml(currentVal)}" oninput="document.getElementById('cms-img-modal-preview').src = this.value" class="w-full text-xs p-3 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-bold">
+            </div>
+          </div>
+        `;
+      }
+
+      if (modal) modal.classList.remove('hidden');
+      refreshLucideIcons();
+    }
+
+    async function handleCmsModalPhotoUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        showToast("Görsel sunucuya yükleniyor...", "info");
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${getAdminToken()}`
+            },
+            body: JSON.stringify({ image: ev.target.result })
+          });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            const inp = document.getElementById('cms-modal-val');
+            const prev = document.getElementById('cms-img-modal-preview');
+            if (inp) inp.value = data.url;
+            if (prev) prev.src = data.url;
+            showToast("✅ Görsel yüklendi!", "success");
+          } else {
+            showToast("Görsel yüklenemedi: " + (data.error || "Hata"), "error");
+          }
+        } catch (err) {
+          showToast("Yükleme hatası: " + err.message, "error");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
     function closeCmsEditModal() {
       const modal = document.getElementById('cms-text-modal');
       if (modal) modal.classList.add('hidden');
     }
 
-    function applyCmsTextModal() {
+    async function applyCmsTextModal(saveImmediately = false) {
       if (!currentCmsEditingKey) return;
       const input = document.getElementById('cms-modal-val');
       if (!input) return;
@@ -1111,9 +1626,345 @@
       updateAdminToolbar();
       closeCmsEditModal();
       
-      // Live re-render without reload
+      renderGlobalHeaderAndFooter();
       handleRoute(appState.currentRoute || window.location.pathname, false);
-      showToast("Metin güncellendi. Kalıcı olması için üst çubuktan 'Kaydet & Yayınla' yapın.", "info");
+
+      if (saveImmediately) {
+        await saveAllCmsChangesToServer();
+      } else {
+        showToast("İçerik vitrinde güncellendi. Kalıcı olması için 'Kaydet & Yayınla' yapabilirsiniz.", "info");
+      }
+    }
+
+    // Activate Quick CMS Editor from Floating Button (Auto-enables Visual Edit & Opens All-Sections Modal)
+    function activateQuickCmsEditor() {
+      if (!appState.isAdmin) {
+        const savedToken = localStorage.getItem('gallus_admin_token') || '19071907';
+        localStorage.setItem('gallus_admin_token', savedToken);
+        appState.isAdmin = true;
+        appState.adminToken = savedToken;
+      }
+      appState.visualEditMode = true;
+      updateAdminToolbar();
+      renderGlobalHeaderAndFooter();
+      handleRoute(appState.currentRoute || window.location.pathname, false);
+      openAllSectionsModal();
+    }
+
+    let currentActiveSectionId = 'sec_header';
+
+    function openAllSectionsModal(sectionId, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      if (!appState.isAdmin) {
+        const savedToken = localStorage.getItem('gallus_admin_token') || '19071907';
+        localStorage.setItem('gallus_admin_token', savedToken);
+        appState.isAdmin = true;
+        appState.adminToken = savedToken;
+        appState.visualEditMode = true;
+        updateAdminToolbar();
+      }
+      if (sectionId) {
+        currentActiveSectionId = sectionId;
+      }
+      renderAllSectionsModalContent();
+      const modal = document.getElementById('all-sections-modal');
+      if (modal) modal.classList.remove('hidden');
+      refreshLucideIcons();
+    }
+
+    function closeAllSectionsModal() {
+      const modal = document.getElementById('all-sections-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function selectSectionInModal(secId) {
+      saveActiveSectionInputsToState();
+      currentActiveSectionId = secId;
+      renderAllSectionsModalContent();
+    }
+
+    function saveActiveSectionInputsToState() {
+      const sec = ALL_CMS_SECTIONS.find(s => s.id === currentActiveSectionId);
+      if (!sec) return;
+      if (!appState.siteInfo) appState.siteInfo = {};
+      sec.fields.forEach(f => {
+        const el = document.getElementById(`asm-field-${f.key}`);
+        if (el) {
+          appState.siteInfo[f.key] = el.value.trim();
+        }
+      });
+    }
+
+    async function handleSectionModalFileUpload(fieldKey, event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        showToast("Görsel yükleniyor...", "info");
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${getAdminToken()}`
+            },
+            body: JSON.stringify({ image: ev.target.result })
+          });
+          const data = await res.json();
+          if (res.ok && data.url) {
+            const inp = document.getElementById(`asm-field-${fieldKey}`);
+            const prev = document.getElementById(`asm-prev-${fieldKey}`);
+            if (inp) inp.value = data.url;
+            if (prev) prev.src = data.url;
+            showToast("✅ Görsel yüklendi!", "success");
+          }
+        } catch (err) {
+          showToast("Yükleme hatası: " + err.message, "error");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function renderAllSectionsModalContent() {
+      const sidebar = document.getElementById('asm-sidebar');
+      const content = document.getElementById('asm-content');
+      if (!sidebar || !content) return;
+
+      const activeSec = ALL_CMS_SECTIONS.find(s => s.id === currentActiveSectionId) || ALL_CMS_SECTIONS[0];
+
+      sidebar.innerHTML = ALL_CMS_SECTIONS.map(sec => `
+        <button type="button" onclick="selectSectionInModal('${sec.id}')" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between gap-2 ${sec.id === activeSec.id ? 'bg-gallus-primary text-white shadow-sm' : 'text-gray-700 hover:bg-gray-200/70'}">
+          <span class="truncate">${sec.title}</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 shrink-0 opacity-70"></i>
+        </button>
+      `).join('');
+
+      content.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-200">
+          <div>
+            <h4 class="font-black text-sm sm:text-base text-gallus-dark">${activeSec.title}</h4>
+            <p class="text-[11px] text-gray-500">Bu bölümdeki tüm başlıkları, açıklamaları ve görselleri aşağıdan düzenleyebilirsiniz.</p>
+          </div>
+          <button type="button" onclick="saveActiveSectionInputsToState(); closeAllSectionsModal(); navigate('${activeSec.route}');" class="shrink-0 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-extrabold text-[11px] flex items-center gap-1 transition">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <span>Bu Bölüme Git (${activeSec.route})</span>
+          </button>
+        </div>
+
+        <div class="space-y-4 pt-2">
+          ${activeSec.fields.map(f => {
+            const val = cmsVal(f.key, f.def);
+            if (f.type === 'textarea') {
+              return `
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">${f.label}</label>
+                  <textarea id="asm-field-${f.key}" rows="3" class="w-full text-xs p-3 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none leading-relaxed">${escapeHtml(val)}</textarea>
+                </div>
+              `;
+            } else if (f.type === 'image') {
+              return `
+                <div class="p-3 rounded-2xl bg-gray-50 border border-gray-200 space-y-2">
+                  <label class="block text-xs font-bold text-gallus-dark">${f.label}</label>
+                  <div class="flex items-center gap-3">
+                    <img id="asm-prev-${f.key}" src="${escapeHtml(val)}" class="w-16 h-16 rounded-xl object-cover border border-gray-300 bg-white shrink-0" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+                    <div class="flex-1 space-y-1.5">
+                      <div class="flex items-center gap-2">
+                        <input type="file" id="asm-file-${f.key}" accept="image/*" class="hidden" onchange="handleSectionModalFileUpload('${f.key}', event)">
+                        <button type="button" onclick="document.getElementById('asm-file-${f.key}').click()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition">
+                          📷 Fotoğraf Yükle
+                        </button>
+                      </div>
+                      <input type="text" id="asm-field-${f.key}" value="${escapeHtml(val)}" oninput="document.getElementById('asm-prev-${f.key}').src = this.value" placeholder="Görsel URL..." class="w-full text-xs px-3 py-1.5 rounded-lg border border-gray-300 focus:border-gallus-primary outline-none">
+                    </div>
+                  </div>
+                </div>
+              `;
+            } else {
+              return `
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 mb-1">${f.label}</label>
+                  <input type="text" id="asm-field-${f.key}" value="${escapeHtml(val)}" class="w-full text-xs p-2.5 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none font-bold">
+                </div>
+              `;
+            }
+          }).join('')}
+        </div>
+      `;
+      refreshLucideIcons();
+    }
+
+    async function saveActiveSectionFromModal(saveToServer = true) {
+      saveActiveSectionInputsToState();
+      appState.unsavedChanges++;
+      updateAdminToolbar();
+      renderGlobalHeaderAndFooter();
+      handleRoute(appState.currentRoute || window.location.pathname, false);
+      if (saveToServer) {
+        await saveAllCmsChangesToServer();
+        closeAllSectionsModal();
+      } else {
+        showToast("Bölüm vitrinde güncellendi!", "success");
+      }
+    }
+
+    // Dynamically render Global Announcement Bar, Header Brand Identity, and Global Footer so every item is editable
+    function renderGlobalHeaderAndFooter() {
+      const annBar = document.getElementById('global-announcement-bar');
+      if (annBar) {
+        const phoneRaw = cmsVal('phone', '0551 655 3637').replace(/[^0-9]/g, '');
+        const waUrl = cmsVal('whatsappUrl', 'https://wa.me/905516553637');
+        annBar.innerHTML = `
+          <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3 overflow-hidden whitespace-nowrap">
+              <span class="inline-flex items-center gap-1.5 bg-gallus-accent px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider text-white shrink-0 cursor-pointer" onclick="if(appState.isAdmin){openAllSectionsModal('sec_header', event)}">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Duyuru
+              </span>
+              <div class="overflow-hidden">
+                <p id="header-announcement-ticker" class="animate-marquee font-normal text-gallus-primary-light/95">
+                  ${cmsText('announcementText', '🚚 750 ₺ Üzeri Ücretsiz Kargo &nbsp; | &nbsp; 🥚 Değirmenköy Çiftliğimizden Günlük Taze Gezen Tavuk Yumurtası &nbsp; | &nbsp; 🐾 %100 Orijinal Mama & Yem Garantisi &nbsp; | &nbsp; 📍 Silivri / Değirmenköy PTT Karşısı Mağazamız Açık!')}
+                </p>
+              </div>
+            </div>
+
+            <div class="hidden md:flex items-center gap-4 shrink-0 text-xs text-white/90 font-medium pl-4 border-l border-white/15">
+              ${appState.isAdmin && appState.visualEditMode ? `
+                <button type="button" onclick="openAllSectionsModal('sec_header', event)" class="px-2 py-0.5 rounded bg-amber-400 text-black font-black text-[10px]">✏️ Üst Çubuğu Düzenle</button>
+              ` : ''}
+              <a id="header-phone-link" href="tel:${phoneRaw}" class="hover:text-gallus-accent flex items-center gap-1.5 transition">
+                <i data-lucide="phone-call" class="w-3.5 h-3.5 text-gallus-accent"></i>
+                <span>${cmsText('phone', '0551 655 3637')}</span>
+              </a>
+              <a id="header-whatsapp-link" href="${escapeHtml(waUrl)}" target="_blank" rel="noopener noreferrer" class="hover:text-emerald-400 flex items-center gap-1 transition">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>${cmsText('headerWhatsappLabel', 'WhatsApp Danışma')}</span>
+              </a>
+              <a href="/yardim" onclick="navigate('/yardim', event)" class="hover:text-white transition">${cmsText('headerHelpLabel', 'Yardım & SSS')}</a>
+            </div>
+          </div>
+        `;
+      }
+
+      const brandEl = document.getElementById('global-brand-identity');
+      if (brandEl) {
+        const logo1 = cmsVal('logoMamaUrl', '/images/logo-mama.jpg');
+        const logo2 = cmsVal('logoCiftlikUrl', '/images/logo-ciftlik.jpg');
+        brandEl.innerHTML = `
+          <a href="/" onclick="navigate('/', event)" class="flex items-center gap-3 shrink-0 group">
+            <div class="flex items-center -space-x-1.5">
+              <img src="${escapeHtml(logo1)}" alt="Gallus Mama Logo" class="w-11 h-11 rounded-full object-cover border-2 border-gallus-primary shadow-sm" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+              <img src="${escapeHtml(logo2)}" alt="Gallus Çiftlik Logo" class="w-11 h-11 rounded-full object-cover border-2 border-gallus-accent shadow-sm" onerror="this.src='/images/tavuklar.jpg'">
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xl sm:text-2xl font-black tracking-tight text-gallus-primary leading-none group-hover:text-gallus-primary-dark transition">${cmsText('headerBrandName', 'GALLUS')}</span>
+                <span class="text-[10px] font-black uppercase tracking-wider text-gallus-accent bg-gallus-accent-light px-1.5 py-0.5 rounded">${cmsText('headerBrandBadge', 'Pet & Çiftlik')}</span>
+              </div>
+              <span class="text-[11px] font-semibold text-gray-500 tracking-wider block mt-0.5">${cmsText('headerBrandSub', 'MAMA & TAZE YUMURTA')}</span>
+            </div>
+          </a>
+          ${appState.isAdmin && appState.visualEditMode ? `
+            <button type="button" onclick="openAllSectionsModal('sec_header', event)" class="px-2 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-black text-[10px] shadow">✏️ Logo & Başlık</button>
+          ` : ''}
+        `;
+      }
+
+      const footerEl = document.getElementById('global-footer-container');
+      if (footerEl) {
+        const logo1 = cmsVal('logoMamaUrl', '/images/logo-mama.jpg');
+        const logo2 = cmsVal('logoCiftlikUrl', '/images/logo-ciftlik.jpg');
+        const phoneRaw = cmsVal('phone', '0551 655 3637').replace(/[^0-9]/g, '');
+        const insta1Url = cmsVal('instaMamaUrl', 'https://www.instagram.com/gallus_mama/');
+        const insta2Url = cmsVal('instaYumurtaUrl', 'https://www.instagram.com/gallusyumurta/');
+
+        footerEl.innerHTML = `
+          ${cmsSectionBar('sec_footer', 'Alt Bilgi (Footer)')}
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-12 border-b border-white/10">
+              <!-- Col 1: Brand -->
+              <div class="lg:col-span-2 space-y-4">
+                <div class="flex items-center gap-3">
+                  <img src="${escapeHtml(logo1)}" alt="Gallus Mama" class="w-10 h-10 rounded-full object-cover border border-white/20" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+                  <img src="${escapeHtml(logo2)}" alt="Gallus Çiftlik" class="w-10 h-10 rounded-full object-cover border border-white/20" onerror="this.src='/images/tavuklar.jpg'">
+                  <div>
+                    <span class="font-black text-lg tracking-tight block leading-none">${cmsText('footerBrandTitle', 'GALLUS MAMA')}</span>
+                    <span class="text-[10px] text-gallus-accent font-bold tracking-wider">${cmsText('slogan', 'DOĞAL ÇİFTLİK & PET MARKET')}</span>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-300 leading-relaxed font-normal max-w-sm">
+                  ${cmsText('footerDesc', "Silivri Değirmenköy'deki biyogüvenlikli gezen tavuk çiftliğimiz ve pet mağazamızla; katkısız günlük çiftlik yumurtası, veteriner formüllü kedi/köpek mamaları ve çiftlik yemlerini doğrudan üreticiden ulaştırıyoruz.", true)}
+                </p>
+                <div class="flex items-center gap-4 text-xs text-gray-300 pt-1">
+                  <a href="${escapeHtml(insta1Url)}" target="_blank" rel="noopener noreferrer" class="hover:text-gallus-accent transition flex items-center gap-1.5">
+                    <i data-lucide="instagram" class="w-4 h-4 text-pink-400"></i> ${cmsText('instaMamaHandle', '@gallus_mama')}
+                  </a>
+                  <a href="${escapeHtml(insta2Url)}" target="_blank" rel="noopener noreferrer" class="hover:text-gallus-accent transition flex items-center gap-1.5">
+                    <i data-lucide="instagram" class="w-4 h-4 text-amber-400"></i> ${cmsText('instaYumurtaHandle', '@gallusyumurta')}
+                  </a>
+                </div>
+              </div>
+
+              <!-- Col 2: Categories -->
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">${cmsText('footerCol1Title', 'Kategoriler')}</h3>
+                <ul class="space-y-2 text-xs text-gray-300">
+                  <li><a href="/kopek" onclick="navigate('/kopek', event)" class="hover:text-white transition">Köpek Maması & Ürünleri</a></li>
+                  <li><a href="/kedi" onclick="navigate('/kedi', event)" class="hover:text-white transition">Kedi Maması & Bentonit Kum</a></li>
+                  <li><a href="/guvercin" onclick="navigate('/guvercin', event)" class="hover:text-white transition">Güvercin & Kuş Yemleri</a></li>
+                  <li><a href="/tavuk-civciv" onclick="navigate('/tavuk-civciv', event)" class="hover:text-white transition">Tavuk, Civciv & Kümes Yemleri</a></li>
+                  <li><a href="/yumurta" onclick="navigate('/yumurta', event)" class="hover:text-white font-bold text-amber-300 transition">Taze Gezen Tavuk Yumurtası</a></li>
+                  <li><a href="/kampanyalar" onclick="navigate('/kampanyalar', event)" class="hover:text-white text-rose-300 transition">Fırsat Kampanyaları</a></li>
+                </ul>
+              </div>
+
+              <!-- Col 3: Customer Care & Corporate -->
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">${cmsText('footerCol2Title', 'Kurumsal & Yardım')}</h3>
+                <ul class="space-y-2 text-xs text-gray-300">
+                  <li><a href="/ciftligimiz" onclick="navigate('/ciftligimiz', event)" class="hover:text-white transition">Çiftliğimiz & Standartlarımız</a></li>
+                  <li><a href="/hakkimizda" onclick="navigate('/hakkimizda', event)" class="hover:text-white transition">Hakkımızda</a></li>
+                  <li><a href="/toptan-satis" onclick="navigate('/toptan-satis', event)" class="hover:text-white transition">Toptan Satış (B2B)</a></li>
+                  <li><a href="/kargo-ve-iade" onclick="navigate('/kargo-ve-iade', event)" class="hover:text-white transition">Kargo ve İade Politikası</a></li>
+                  <li><a href="/yardim" onclick="navigate('/yardim', event)" class="hover:text-white transition">Sıkça Sorulan Sorular (SSS)</a></li>
+                  <li><a href="/iletisim" onclick="navigate('/iletisim', event)" class="hover:text-white transition">İletişim & Mağaza Konumu</a></li>
+                </ul>
+              </div>
+
+              <!-- Col 4: Legal & Contact -->
+              <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gallus-accent mb-3.5">${cmsText('footerCol3Title', 'Yasal & İletişim')}</h3>
+                <ul class="space-y-2 text-xs text-gray-300">
+                  <li><a href="/mesafeli-satis-sozlesmesi" onclick="navigate('/mesafeli-satis-sozlesmesi', event)" class="hover:text-white transition">Mesafeli Satış Sözleşmesi</a></li>
+                  <li><a href="/gizlilik-ve-guvenlik" onclick="navigate('/gizlilik-ve-guvenlik', event)" class="hover:text-white transition">Gizlilik ve KVKK Politikası</a></li>
+                  <li><a href="/teslimat-kosullari" onclick="navigate('/teslimat-kosullari', event)" class="hover:text-white transition">Teslimat Koşulları</a></li>
+                  <li><a href="/cerez-politikasi" onclick="navigate('/cerez-politikasi', event)" class="hover:text-white transition">Çerez Politikası</a></li>
+                  <li class="pt-2">
+                    <span class="block text-gray-400 text-[11px]">${cmsText('address', 'Değirmenköy Mah. PTT Karşısı, Silivri')}</span>
+                    <a href="tel:${phoneRaw}" class="text-white font-bold block mt-0.5">📞 ${cmsText('phone', '0551 655 3637')}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-4">
+              <p>${cmsText('footerCopyright', '© 2026 Gallus Mama & Yumurta. Tüm hakları saklıdır.')}</p>
+              <div class="flex items-center gap-3 text-[11px] text-gray-400 flex-wrap justify-center">
+                <span>🔒 256-Bit SSL Güvenli Alışveriş</span>
+                <span>•</span>
+                <span>🚚 Kırılmaz Viyol Paketleme Garantisi</span>
+                <span>•</span>
+                <button type="button" onclick="openAllSectionsModal()" class="text-amber-300 hover:text-white underline font-bold">✏️ Tüm Bölümleri Düzenle</button>
+                <span>•</span>
+                <a href="/admin" onclick="navigate('/admin', event)" class="text-gray-300 hover:text-white underline">Admin CMS</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      refreshLucideIcons();
     }
 
     // Product Modal & Photo Upload
@@ -1141,6 +1992,12 @@
       document.getElementById('pem-img-url').value = p.imageUrl || '';
       document.getElementById('pem-preview-img').src = p.imageUrl || '/images/mutlu-patiler-banner.jpg';
       document.getElementById('pem-description').value = p.description || '';
+      const ingEl = document.getElementById('pem-ingredients');
+      if (ingEl) ingEl.value = p.ingredients || '';
+      const anaEl = document.getElementById('pem-analysis');
+      if (anaEl) anaEl.value = p.analysis || '';
+      const useEl = document.getElementById('pem-usage');
+      if (useEl) useEl.value = p.usage || '';
       document.getElementById('pem-is-featured').checked = Boolean(p.isFeatured);
       document.getElementById('pem-is-popular').checked = Boolean(p.isPopular);
 
@@ -1211,6 +2068,12 @@
       const badge = document.getElementById('pem-badge').value.trim();
       const imgUrl = document.getElementById('pem-img-url').value.trim();
       const desc = document.getElementById('pem-description').value.trim();
+      const ingEl = document.getElementById('pem-ingredients');
+      const ingredients = ingEl ? ingEl.value.trim() : (p.ingredients || '');
+      const anaEl = document.getElementById('pem-analysis');
+      const analysis = anaEl ? anaEl.value.trim() : (p.analysis || '');
+      const useEl = document.getElementById('pem-usage');
+      const usage = useEl ? useEl.value.trim() : (p.usage || '');
       const isFeatured = document.getElementById('pem-is-featured').checked;
       const isPopular = document.getElementById('pem-is-popular').checked;
 
@@ -1242,6 +2105,9 @@
       p.imageUrl = imgUrl || p.imageUrl || '/images/mutlu-patiler-banner.jpg';
       p.gallery = [p.imageUrl];
       p.description = desc;
+      p.ingredients = ingredients;
+      p.analysis = analysis;
+      p.usage = usage;
       p.isFeatured = isFeatured;
       p.isPopular = isPopular;
 
@@ -1273,6 +2139,8 @@
       try {
         const payload = {
           siteInfo: appState.siteInfo || {},
+          categories: appState.categories || [],
+          brands: appState.brands || [],
           products: appState.products || []
         };
 
@@ -1362,6 +2230,7 @@
     function toggleVisualEditMode() {
       appState.visualEditMode = !appState.visualEditMode;
       updateAdminToolbar();
+      renderGlobalHeaderAndFooter();
       handleRoute(appState.currentRoute || window.location.pathname, false);
       showToast(appState.visualEditMode ? "🎨 Canlı Düzenleme Modu Açıldı. Sitedeki metin ve ürünlere tıklayarak düzenleyebilirsiniz." : "Canlı Düzenleme Modu Kapatıldı.", "info");
     }
@@ -1524,8 +2393,15 @@
                 categoryName: data.categoryName || 'Diğer Ürünler',
                 brand: data.brand || 'Gallus Pet',
                 packaging: data.packaging || data.unit || 'Standart',
-                imageUrl: data.imageUrl || '/images/mutlu-patiler-banner.jpg',
+                sku: data.sku || `GL-${docId.toUpperCase()}`,
+                imageUrl: resolveClientProductImage({ id: docId, imageUrl: data.imageUrl }),
+                fallbackImageUrl: data.fallbackImageUrl || '/images/mutlu-patiler-banner.jpg',
                 description: data.description || '',
+                ingredients: data.ingredients || '',
+                analysis: data.analysis || '',
+                usage: data.usage || '',
+                specs: data.specs || {},
+                googleProductCategory: data.googleProductCategory || '',
                 isPopular: Boolean(data.isPopular),
                 isFeatured: Boolean(data.isFeatured || data.isPopular),
                 isBestSeller: Boolean(data.isBestSeller),
@@ -1572,6 +2448,9 @@
         appState.visualEditMode = true;
       }
 
+      // Immediately render global header & footer with clean defaults before network requests complete
+      renderGlobalHeaderAndFooter();
+
       // 1. Fetch Site Info (CMS)
       try {
         const sRes = await fetch('/api/info');
@@ -1589,7 +2468,8 @@
       try {
         const res = await fetch('/api/products');
         if (res.ok) {
-          appState.products = await res.json();
+          const loaded = await res.json();
+          appState.products = (loaded || []).map(p => ({ ...p, imageUrl: resolveClientProductImage(p) }));
           localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(appState.products));
         } else {
           loadSavedProducts();
@@ -1603,6 +2483,19 @@
         const cRes = await fetch('/api/categories');
         if (cRes.ok) appState.categories = await cRes.json();
       } catch (e) {}
+      try {
+        const bRes = await fetch('/api/brands');
+        if (bRes.ok) appState.brands = await bRes.json();
+      } catch (e) {}
+      if (!appState.brands || appState.brands.length === 0) {
+        appState.brands = [
+          { name: "Gallus Çiftlik", country: "Değirmenköy / Yerli Üretim", desc: "Biyogüvenlikli serbest gezen tavuk yumurtası ve doğal çiftlik ürünleri." },
+          { name: "Eriş Yem", country: "Silivri / İstanbul", desc: "Yüksek verimli gezen tavuk yumurta yemi, pelet kanatlı yemleri ve civciv büyütme yemleri." },
+          { name: "Reflex & Reflex Plus", country: "Türkiye / Lider Marka", desc: "XOS prebiyotikli kısırlaştırılmış kedi mamaları, köpek mamaları ve Reflex Care bakım ürünleri." },
+          { name: "Trendline & Enjoy", country: "Türkiye / Lider Pet", desc: "Tam ve dengeli kedi-köpek kuru mamaları ve soslu konserve mamalar." },
+          { name: "Pancho & Pure Life & King", country: "Türkiye / Ekonomik Seri", desc: "15 kg profesyonel yetiştirici çuvalları ve yüksek enerjili kedi-köpek mamaları." }
+        ];
+      }
 
       // 3. Load Cart
       try {
@@ -1625,7 +2518,8 @@
       // 6. Load Coupon
       appState.appliedCoupon = localStorage.getItem(STORAGE_KEYS.COUPON) || null;
 
-      // Update badges & admin toolbar
+      // Update badges, global header/footer & admin toolbar
+      renderGlobalHeaderAndFooter();
       updateGlobalBadges();
       updateAdminToolbar();
 
@@ -1816,16 +2710,16 @@
       if (farmProducts.length === 0) farmProducts = appState.products.filter(p => (p.name || '').toLowerCase().includes('yem') || (p.name || '').toLowerCase().includes('tavuk') || (p.name || '').toLowerCase().includes('civciv')).slice(0, 4);
 
       container.innerHTML = `
-        <!-- 1. Hero Banner (Fully Responsive for All Viewports) -->
+        <!-- 1. Hero Banner (Fully Editable) -->
         <section class="relative bg-gradient-to-b from-[#F2ECE4] via-[#F7F3EE] to-[#FAF8F5] pt-6 sm:pt-10 pb-10 sm:pb-16 border-b border-gray-200/70 overflow-hidden">
+          ${cmsSectionBar('sec_hero', 'Hero (Üst Vitrin)')}
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
               
               <div class="lg:col-span-7 space-y-4 sm:space-y-6">
-                <!-- Location Badge (No overflow on narrow screens) -->
                 <div class="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-white border border-emerald-200 shadow-sm max-w-full">
                   <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-600 animate-ping shrink-0"></span>
-                  <span class="text-[11px] sm:text-xs font-bold text-gallus-primary leading-tight truncate">
+                  <span class="text-[11px] sm:text-xs font-bold text-gallus-primary leading-tight">
                     ${cmsText('locationBadge', 'Değirmenköy / Silivri Gezen Tavuk Çiftliği & Gurme Pet')}
                   </span>
                 </div>
@@ -1838,15 +2732,15 @@
                   ${cmsText('heroSubtitle', "Değirmenköy'deki biyogüvenlikli çiftliğimizden her sabah toplanan %100 doğal gezen tavuk yumurtaları ve evcil dostlarımıza özel veteriner hekim formüllü dengeli mamalar tek adreste.", true)}
                 </p>
 
-                <!-- Action CTA Buttons (Stacked on mobile, side-by-side on tablet/desktop) -->
+                <!-- Action CTA Buttons -->
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-2">
                   <a href="/kopek" onclick="navigate('/kopek', event)" class="px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-gallus-accent hover:bg-gallus-accent-hover shadow-md hover:shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
                     <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                    <span>Alışverişe Başla</span>
+                    <span>${cmsText('heroBtn1Text', 'Alışverişe Başla')}</span>
                   </a>
                   <a href="/yumurta" onclick="navigate('/yumurta', event)" class="px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-xs sm:text-sm text-gallus-primary bg-white hover:bg-gallus-primary hover:text-white border border-gallus-primary/30 shadow-sm transition transform active:scale-95 flex items-center justify-center gap-2">
                     <i data-lucide="egg" class="w-4 h-4 text-gallus-accent"></i>
-                    <span>Taze Yumurtaları İncele</span>
+                    <span>${cmsText('heroBtn2Text', 'Taze Yumurtaları İncele')}</span>
                   </a>
                 </div>
 
@@ -1892,19 +2786,19 @@
 
               </div>
 
-              <!-- Hero Right: Curated Visuals -->
+              <!-- Hero Right: Curated Visuals (Fully Editable) -->
               <div class="lg:col-span-5">
                 <div class="relative bg-white rounded-3xl p-3 border border-gray-200 shadow-card">
                   <div class="aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100">
-                    <img src="/images/mutlu-patiler-banner.jpg" alt="Mutlu Patiler ve Taze Çiftlik" class="w-full h-full object-cover">
+                    ${cmsImg('heroBannerImg', '/images/mutlu-patiler-banner.jpg', 'Mutlu Patiler ve Taze Çiftlik', 'w-full h-full object-cover')}
                   </div>
-                  <div class="p-4 flex items-center justify-between">
+                  <div class="p-4 flex items-center justify-between gap-2">
                     <div>
-                      <span class="text-[11px] font-extrabold uppercase tracking-wider text-gallus-accent">Günün Fırsatı</span>
-                      <h3 class="text-sm font-black text-gallus-dark">Gezen Tavuk Yumurtası (30'lu Viyol)</h3>
+                      <span class="text-[11px] font-extrabold uppercase tracking-wider text-gallus-accent">${cmsText('heroDealBadge', 'Günün Fırsatı')}</span>
+                      <h3 class="text-sm font-black text-gallus-dark">${cmsText('heroDealTitle', "Gezen Tavuk Yumurtası (30'lu Viyol)")}</h3>
                     </div>
-                    <a href="/urun/lohmann-brown-gezen-tavuk-yumurtasi-30lu-organik-viyol" onclick="navigate('/urun/lohmann-brown-gezen-tavuk-yumurtasi-30lu-organik-viyol', event)" class="px-4 py-2 rounded-xl text-xs font-bold bg-gallus-primary text-white hover:bg-gallus-primary-dark transition">
-                      165 ₺ İncele
+                    <a href="/yumurta" onclick="navigate('/yumurta', event)" class="px-4 py-2 rounded-xl text-xs font-bold bg-gallus-primary text-white hover:bg-gallus-primary-dark transition shrink-0">
+                      ${cmsText('heroDealBtn', '165 ₺ İncele')}
                     </a>
                   </div>
                 </div>
@@ -1914,37 +2808,39 @@
           </div>
         </section>
 
-        <!-- 2. Featured Shopping Categories -->
+        <!-- 2. Featured Shopping Categories (Fully Editable) -->
         <section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          ${cmsSectionBar('sec_categories', 'Öne Çıkan Reyonlar (8 Kategori)')}
           <div class="flex items-end justify-between mb-8">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">Kategorileri Keşfedin</span>
-              <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">Öne Çıkan Reyonlarımız</h2>
+              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('catSecBadge', 'Kategorileri Keşfedin')}</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">${cmsText('catSecTitle', 'Öne Çıkan Reyonlarımız')}</h2>
             </div>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            ${renderCategoryCard('kedi', 'Kedi Mamaları & Ürünleri', 'Kısır, yavru, bentonit kum', 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=400&q=80', 'cat')}
-            ${renderCategoryCard('kopek', 'Köpek Mamaları & Ürünleri', 'Kuru mama, konserve, bakım', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=400&q=80', 'dog')}
-            ${renderCategoryCard('tavuk-civciv', 'Tavuk ve Civciv Yemleri', 'Gezen tavuk ve civciv yemleri', '/images/tavuklar.jpg', 'wheat')}
-            ${renderCategoryCard('guvercin', 'Güvercin Yemleri', '1. kalite buğday ve tahıllar', 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=400&q=80', 'feather')}
-            ${renderCategoryCard('balik-akvaryum', 'Balık Yemleri & Akvaryum', 'Pul yem ve su düzenleyiciler', 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=400&q=80', 'fish')}
-            ${renderCategoryCard('kumes-ekipman', 'Kümes Ekipmanları', 'Taşıma kafesleri, suluk, yemlik', 'https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?auto=format&fit=crop&w=400&q=80', 'home')}
-            ${renderCategoryCard('tarim-bahce', 'Tarım ve Bahçe Ürünleri', 'Doğal gübre ve bahçe bakımı', 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=400&q=80', 'sprout')}
+            ${renderCategoryCard('kedi', 'Kedi Mamaları & Ürünleri', 'Kısır, yavru, bentonit kum', 'https://cdn.dsmcdn.com/ty1614/prod/QC/20241212/13/681b4899-684f-3b54-837f-d243b20196be/1_org_zoom.jpg', 'cat')}
+            ${renderCategoryCard('kopek', 'Köpek Mamaları & Ürünleri', 'Kuru mama, konserve, bakım', 'https://cdn.dsmcdn.com/ty1822/prod/QC_ENRICH/20260209/15/3349f2a5-0c3d-3ad7-ac73-4f88de012e2e/1_org_zoom.jpg', 'dog')}
+            ${renderCategoryCard('tavuk-civciv', 'Eriş Yem Tavuk & Civciv Yemleri', 'Eriş Yem gezen tavuk ve civciv yemleri', 'https://cdn.dsmcdn.com/ty662/product/media/images/20221223/17/244790234/658110596/1/1_org_zoom.jpg', 'wheat')}
+            ${renderCategoryCard('guvercin', 'Güvercin Yemleri', '1. kalite buğday ve tahıllar', 'https://cdn.dsmcdn.com/ty1638/prod/QC/20250214/16/c5178962-56df-3536-b62c-1c7e472f295e/1_org_zoom.jpg', 'feather')}
+            ${renderCategoryCard('balik-akvaryum', 'Balık Yemleri & Akvaryum', 'Pul yem ve su düzenleyiciler', 'https://cdn.dsmcdn.com/ty1519/product/media/images/prod/PIM/20240903/09/97b0ca9b-2b9f-4e82-9a3e-9a8d8e8c8e8c/1_org_zoom.jpg', 'fish')}
+            ${renderCategoryCard('kumes-ekipman', 'Kümes Ekipmanları', 'Taşıma kafesleri, suluk, yemlik', 'https://cdn.dsmcdn.com/ty1541/product/media/images/prod/PIM/20240914/13/f73c7394-6490-4a8e-9b7a-753726c8fb60/1_org_zoom.jpg', 'home')}
+            ${renderCategoryCard('tarim-bahce', 'Tarım ve Bahçe Ürünleri', 'Doğal gübre ve bahçe bakımı', 'https://cdn.dsmcdn.com/ty1327/product/media/images/prod/PIM/20240524/13/3f093c46-3252-415b-978c-7bd512f2a0fa/1_org_zoom.jpg', 'sprout')}
             ${renderCategoryCard('diger', 'Diğer & Çiftlik Yumurtası', 'Günlük gezen tavuk yumurtaları', '/images/yumurta-koli-banner.jpg', 'egg')}
           </div>
         </section>
 
         <!-- 3. Best-Selling Products -->
         <section class="py-12 bg-white border-y border-gray-200">
+          ${cmsSectionBar('sec_bestsellers', 'En Çok Tercih Edilenler')}
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-end justify-between mb-8">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">Müşteri Favorileri</span>
-                <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">En Çok Tercih Edilenler</h2>
+                <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('bestSecBadge', 'Müşteri Favorileri')}</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">${cmsText('bestSecTitle', 'En Çok Tercih Edilenler')}</h2>
               </div>
               <a href="/kopek" onclick="navigate('/kopek', event)" class="text-xs font-bold text-gallus-primary hover:text-gallus-accent flex items-center gap-1 transition">
-                <span>Tüm Kataloğu Gör</span>
+                <span>${cmsText('bestSecLink', 'Tüm Kataloğu Gör')}</span>
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
               </a>
             </div>
@@ -1957,28 +2853,30 @@
 
         <!-- 4. Promotional Banner (GALLUS10) -->
         <section class="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          ${cmsSectionBar('sec_promo_banner', 'Kampanya Bannerı')}
           <div class="bg-gradient-to-r from-gallus-primary to-[#235841] text-white rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
             <div class="space-y-2 max-w-xl">
-              <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-gallus-accent text-white">Özel Kampanya</span>
-              <h2 class="text-2xl sm:text-3xl font-black">İlk Siparişinize Özel %10 İndirim Fırsatı!</h2>
+              <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-gallus-accent text-white">${cmsText('promoBadge', 'Özel Kampanya')}</span>
+              <h2 class="text-2xl sm:text-3xl font-black">${cmsText('promoTitle', 'İlk Siparişinize Özel %10 İndirim Fırsatı!')}</h2>
               <p class="text-xs sm:text-sm text-gray-200">
-                Sepet adımında <strong class="text-white font-mono bg-white/20 px-2 py-0.5 rounded">GALLUS10</strong> kupon kodunu kullanarak anında indirim kazanın. 750 ₺ üzeri siparişlerde kargonuz ücretsiz.
+                ${cmsText('promoDesc', 'Sepet adımında GALLUS10 kupon kodunu kullanarak anında indirim kazanın. 750 ₺ üzeri siparişlerde kargonuz ücretsiz.', true)}
               </p>
             </div>
             <a href="/kampanyalar" onclick="navigate('/kampanyalar', event)" class="px-6 py-3.5 rounded-xl text-xs font-black bg-white text-gallus-primary hover:bg-gray-100 transition shadow shrink-0">
-              Fırsatları İncele
+              ${cmsText('promoBtnText', 'Fırsatları İncele')}
             </a>
           </div>
         </section>
 
         <!-- 5. Dog Food Spotlight -->
         <section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          ${cmsSectionBar('sec_home_spotlights', 'Köpek, Kedi & Kümes Vitrin Başlıkları')}
           <div class="flex items-end justify-between mb-8">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">Sadık Dostlarımız İçin</span>
-              <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">Köpek Maması & Beslenme Çözümleri</h2>
+              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('dogSecBadge', 'Sadık Dostlarımız İçin')}</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">${cmsText('dogSecTitle', 'Köpek Maması & Beslenme Çözümleri')}</h2>
             </div>
-            <a href="/kopek/mama" onclick="navigate('/kopek/mama', event)" class="text-xs font-bold text-gallus-primary hover:underline">Tüm Köpek Mamaları →</a>
+            <a href="/kopek/mama" onclick="navigate('/kopek/mama', event)" class="text-xs font-bold text-gallus-primary hover:underline">${cmsText('dogSecLink', 'Tüm Köpek Mamaları →')}</a>
           </div>
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
             ${dogFoods.map(p => renderProductCard(p)).join('')}
@@ -1990,10 +2888,10 @@
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-end justify-between mb-8">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">Kedinizin Konforu İçin</span>
-                <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">Kedi Mamaları & Doğal Bentonit Kumlar</h2>
+                <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('catSpotBadge', 'Kedinizin Konforu İçin')}</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">${cmsText('catSpotTitle', 'Kedi Mamaları & Doğal Bentonit Kumlar')}</h2>
               </div>
-              <a href="/kedi" onclick="navigate('/kedi', event)" class="text-xs font-bold text-gallus-primary hover:underline">Tüm Kedi Ürünleri →</a>
+              <a href="/kedi" onclick="navigate('/kedi', event)" class="text-xs font-bold text-gallus-primary hover:underline">${cmsText('catSpotLink', 'Tüm Kedi Ürünleri →')}</a>
             </div>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
               ${catProducts.map(p => renderProductCard(p)).join('')}
@@ -2005,10 +2903,10 @@
         <section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex items-end justify-between mb-8">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">Çiftlik ve Kümes Yetiştiriciliği</span>
-              <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">Kanatlı Yemleri & Kümes Otomasyonu</h2>
+              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('poultrySecBadge', 'Çiftlik ve Kümes Yetiştiriciliği')}</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-gallus-dark">${cmsText('poultrySecTitle', 'Kanatlı Yemleri & Kümes Otomasyonu')}</h2>
             </div>
-            <a href="/kumes-ciftlik" onclick="navigate('/kumes-ciftlik', event)" class="text-xs font-bold text-gallus-primary hover:underline">Kümes Ürünleri →</a>
+            <a href="/kumes-ciftlik" onclick="navigate('/kumes-ciftlik', event)" class="text-xs font-bold text-gallus-primary hover:underline">${cmsText('poultrySecLink', 'Kümes Ürünleri →')}</a>
           </div>
           <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
             ${farmProducts.map(p => renderProductCard(p)).join('')}
@@ -2017,27 +2915,28 @@
 
         <!-- 8. Free-Range Egg Heritage Section -->
         <section class="py-14 bg-[#F2ECE4] border-y border-gray-200/80">
+          ${cmsSectionBar('sec_egg_heritage', 'Gezen Tavuk Yumurtası Tanıtım')}
           <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div class="lg:col-span-6 rounded-3xl overflow-hidden shadow-card aspect-[4/3] bg-gray-200">
-                <img src="/images/tavuklar.jpg" alt="Değirmenköy Gezen Tavuk Çiftliği" class="w-full h-full object-cover">
+                ${cmsImg('eggHeritageImg', '/images/tavuklar.jpg', 'Değirmenköy Gezen Tavuk Çiftliği', 'w-full h-full object-cover')}
               </div>
               <div class="lg:col-span-6 space-y-4">
-                <span class="text-xs font-black uppercase tracking-wider text-gallus-accent">Doğallık ve Hijyen</span>
+                <span class="text-xs font-black uppercase tracking-wider text-gallus-accent">${cmsText('eggHeritageBadge', 'Doğallık ve Hijyen')}</span>
                 <h2 class="text-2xl sm:text-3xl md:text-4xl font-black text-gallus-dark tracking-tight leading-tight">
-                  Her Sabah Taze Toplanan, Güneş Gören Gezen Tavuk Yumurtası
+                  ${cmsText('eggHeritageTitle', 'Her Sabah Taze Toplanan, Güneş Gören Gezen Tavuk Yumurtası')}
                 </h2>
                 <p class="text-sm text-gray-700 leading-relaxed font-normal">
-                  Değirmenköy tesislerimizde tavuklarımız kapalı kafeslerde değil; yeşil mera alanlarında serbestçe gezer. Doğal mısır, buğday ve soya rasyonlarıyla beslenen tavuklarımızdan elde edilen yumurtalar özel iklimlendirmeli depolarda tasnif edilir ve kırılmaya karşı test edilmiş darbe emici viyollerle sevk edilir.
+                  ${cmsText('eggHeritageDesc', 'Değirmenköy tesislerimizde tavuklarımız kapalı kafeslerde değil; yeşil mera alanlarında serbestçe gezer. Doğal mısır, buğday ve soya rasyonlarıyla beslenen tavuklarımızdan elde edilen yumurtalar özel iklimlendirmeli depolarda tasnif edilir ve kırılmaya karşı test edilmiş darbe emici viyollerle sevk edilir.', true)}
                 </p>
                 <div class="flex flex-wrap gap-4 pt-2 text-xs font-bold text-gallus-primary">
-                  <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> %100 Antibiyotiksiz</span>
-                  <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Altın Sarısı Kıvam</span>
-                  <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Kırılmaz Viyol Garantisi</span>
+                  <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> ${cmsText('eggCheck1', '%100 Antibiyotiksiz')}</span>
+                  <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> ${cmsText('eggCheck2', 'Altın Sarısı Kıvam')}</span>
+                  <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> ${cmsText('eggCheck3', 'Kırılmaz Viyol Garantisi')}</span>
                 </div>
                 <div class="pt-2">
                   <a href="/ciftligimiz" onclick="navigate('/ciftligimiz', event)" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-extrabold text-white bg-gallus-primary hover:bg-gallus-primary-dark transition">
-                    <span>Çiftliğimizi Yakından Tanıyın</span>
+                    <span>${cmsText('eggHeritageBtn', 'Çiftliğimizi Yakından Tanıyın')}</span>
                     <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                   </a>
                 </div>
@@ -2048,15 +2947,16 @@
 
         <!-- 9. Featured Brands -->
         <section class="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          ${cmsSectionBar('sec_brands', 'İş Ortaklarımız & Markalar')}
           <div class="text-center mb-8">
-            <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">Güvenilir Üreticiler</span>
-            <h2 class="text-2xl font-black text-gallus-dark">İş Ortaklarımız & Markalarımız</h2>
+            <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('brandsSecBadge', 'Güvenilir Üreticiler')}</span>
+            <h2 class="text-2xl font-black text-gallus-dark">${cmsText('brandsSecTitle', 'İş Ortaklarımız & Markalarımız')}</h2>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            ${(appState.brands || []).map(b => `
+            ${(appState.brands || []).map((b, idx) => `
               <div class="bg-white p-4 rounded-2xl border border-gray-200 text-center shadow-soft hover:border-gallus-primary transition cursor-pointer" onclick="navigate('/markalar', event)">
-                <span class="text-xs font-black text-gallus-primary block">${b.name}</span>
-                <span class="text-[10px] text-gray-500 mt-0.5 block">${b.country}</span>
+                <span class="text-xs font-black text-gallus-primary block">${cmsText('brand_name_' + idx, b.name)}</span>
+                <span class="text-[10px] text-gray-500 mt-0.5 block">${cmsText('brand_country_' + idx, b.country)}</span>
               </div>
             `).join('')}
           </div>
@@ -2064,16 +2964,17 @@
 
         <!-- 10. Newsletter Signup -->
         <section class="py-12 bg-white border-t border-gray-200">
+          ${cmsSectionBar('sec_newsletter', 'E-Bülten Kayıt')}
           <div class="max-w-3xl mx-auto px-4 text-center space-y-4">
-            <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">E-Bültenimize Kaydolun</span>
-            <h2 class="text-2xl font-black text-gallus-dark">Haftalık Çiftlik Fırsatlarını ve İndirimleri Kaçırmayın</h2>
+            <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('newsBadge', 'E-Bültenimize Kaydolun')}</span>
+            <h2 class="text-2xl font-black text-gallus-dark">${cmsText('newsTitle', 'Haftalık Çiftlik Fırsatlarını ve İndirimleri Kaçırmayın')}</h2>
             <p class="text-xs text-gray-500 max-w-md mx-auto">
-              Yeni çıkan ürünlerden, taze yumurta partilerinden ve dönemsel indirimlerden ilk siz haberdar olun.
+              ${cmsText('newsDesc', 'Yeni çıkan ürünlerden, taze yumurta partilerinden ve dönemsel indirimlerden ilk siz haberdar olun.', true)}
             </p>
             <form onsubmit="handleNewsletterSubmit(event)" class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-2">
               <input type="email" id="newsletter-email" required placeholder="E-posta adresiniz..." class="flex-1 text-xs px-4 py-3 rounded-xl border border-gray-300 focus:border-gallus-primary outline-none">
               <button type="submit" class="px-6 py-3 rounded-xl text-xs font-bold bg-gallus-primary hover:bg-gallus-primary-dark text-white transition">
-                Kaydol
+                ${cmsText('newsBtnText', 'Kaydol')}
               </button>
             </form>
           </div>
@@ -2082,17 +2983,20 @@
     }
 
     function renderCategoryCard(slug, title, desc, imgUrl, icon) {
+      const titleKey = `catCard_${slug}_title`;
+      const descKey = `catCard_${slug}_desc`;
+      const imgKey = `catCard_${slug}_img`;
       return `
         <div 
           onclick="navigate('/${slug}', event)" 
           class="group bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-soft hover:shadow-card-hover transition duration-300 cursor-pointer flex flex-col justify-between"
         >
           <div class="aspect-[4/3] bg-gray-100 overflow-hidden">
-            <img src="${imgUrl}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+            ${cmsImg(imgKey, imgUrl, title, 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300')}
           </div>
           <div class="p-3.5">
-            <h3 class="text-xs font-black text-gallus-dark group-hover:text-gallus-primary transition">${title}</h3>
-            <p class="text-[11px] text-gray-500 mt-0.5 line-clamp-1">${desc}</p>
+            <h3 class="text-xs font-black text-gallus-dark group-hover:text-gallus-primary transition">${cmsText(titleKey, title)}</h3>
+            <p class="text-[11px] text-gray-500 mt-0.5 line-clamp-1">${cmsText(descKey, desc)}</p>
           </div>
         </div>
       `;
@@ -2112,11 +3016,11 @@
 
       return `
         <div class="product-card group bg-white rounded-2xl border ${appState.isAdmin && appState.visualEditMode ? 'border-amber-400 ring-2 ring-amber-300/60' : 'border-gray-200'} shadow-soft hover:shadow-card-hover transition-all duration-200 flex flex-col justify-between overflow-hidden">
-          <div class="relative aspect-[4/3] bg-gray-100 cursor-pointer overflow-hidden" onclick="navigate('/urun/${p.slug || p.id}', event)">
+          <div class="relative aspect-[4/3] bg-white cursor-pointer overflow-hidden p-1.5" onclick="navigate('/urun/${p.slug || p.id}', event)">
             <img 
-              src="${p.imageUrl}" 
-              alt="${p.name}" 
-              class="product-img-zoom w-full h-full object-cover" 
+              src="${resolveClientProductImage(p)}" 
+              alt="${escapeHtml(p.name)}" 
+              class="product-img-zoom w-full h-full object-contain rounded-xl" 
               onerror="this.onerror=null; this.src='${p.fallbackImageUrl || '/images/mutlu-patiler-banner.jpg'}';"
               loading="lazy"
             >
@@ -2272,12 +3176,13 @@
             ${subCategoryKey ? `<span>/</span><span class="text-gallus-accent font-bold">${subCategoryKey}</span>` : ''}
           </nav>
 
+          ${cmsSectionBar('sec_category_pages', 'Kategori Vitrini Başlığı')}
           <!-- Category Banner -->
           <div class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-soft mb-6 sm:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">Kategori Vitrini</span>
-              <h1 class="text-xl sm:text-3xl font-black text-gallus-dark mt-0.5 sm:mt-1">${title}</h1>
-              <p class="text-xs text-gray-500 mt-0.5">Toplam <strong>${list.length}</strong> ürün listeleniyor. Doğrudan Değirmenköy garantisiyle sevk edilir.</p>
+              <span class="text-xs font-bold uppercase tracking-wider text-gallus-accent">${cmsText('catBannerBadge', 'Kategori Vitrini')}</span>
+              <h1 class="text-xl sm:text-3xl font-black text-gallus-dark mt-0.5 sm:mt-1">${cmsText('catPageTitle_' + categoryKey, title)}</h1>
+              <p class="text-xs text-gray-500 mt-0.5">Toplam <strong>${list.length}</strong> ürün listeleniyor. ${cmsText('catBannerSub', 'Doğrudan Değirmenköy garantisiyle sevk edilir.')}</p>
             </div>
             
             <div class="flex items-center justify-between sm:justify-start gap-3 pt-2 sm:pt-0 border-t border-gray-100 sm:border-0">
@@ -2394,7 +3299,8 @@
         return;
       }
 
-      document.title = `${product.name} | Gallus Mama`;
+      document.title = `${product.name} - ${product.brand || 'Gallus Mama'} | En Uygun Fiyat & Hızlı Teslimat`;
+      updateGoogleShoppingProductSchema(product);
 
       let stockBadgeHtml = '';
       if (product.stock > 10) {
@@ -2405,7 +3311,7 @@
         stockBadgeHtml = `<span class="px-2.5 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-200">🚫 Tükendi</span>`;
       }
 
-      const gallery = (product.gallery && product.gallery.length) ? product.gallery : [product.imageUrl];
+      const resolvedMainImg = resolveClientProductImage(product); const gallery = [resolvedMainImg];
       const isFav = appState.favorites.includes(product.id);
       const related = appState.products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
@@ -2442,7 +3348,7 @@
               <!-- Gallery Left -->
               <div class="lg:col-span-6 space-y-4">
                 <div class="aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 relative">
-                  <img id="pdp-main-image" src="${gallery[0]}" alt="${product.name}" class="w-full h-full object-cover" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
+                  <img id="pdp-main-image" src="${gallery[0]}" alt="${escapeHtml(product.name)}" class="w-full h-full object-contain p-4 bg-white" onerror="this.src='/images/mutlu-patiler-banner.jpg'">
                 </div>
                 ${gallery.length > 1 ? `
                   <div class="flex gap-2 overflow-x-auto pb-1">
@@ -2555,35 +3461,103 @@
             </div>
           </div>
 
-          <!-- Tabs: Description, Ingredients, Specs -->
-          <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-card mb-12">
-            <h2 class="text-lg font-black text-gallus-dark mb-4">Ürün Detayları ve Besin Değerleri</h2>
-            <div class="space-y-4 text-xs sm:text-sm text-gray-700 leading-relaxed">
+          <!-- Comprehensive Product Details, Ingredients, Analysis, Usage & Google Shopping Specs -->
+          <div class="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-card mb-12 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-200 pb-4">
               <div>
-                <strong class="text-gallus-dark block mb-1">İçerik Bilgisi:</strong>
-                <p class="text-gray-600">${product.ingredients || 'Detaylı içerik bilgisi için ambalaj üzerindeki besin etiketini inceleyebilirsiniz.'}</p>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-gallus-accent">Tam Ürün Dosyası &amp; Rasyon Analizi</span>
+                <h2 class="text-lg sm:text-xl font-black text-gallus-dark">Detaylı Ürün Bilgisi, İçindekiler ve Garantili Analiz Değerleri</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold">
+                  <i data-lucide="badge-check" class="w-3.5 h-3.5 text-emerald-600"></i> Google Alışveriş Onaylı Ürün
+                </span>
+                ${appState.isAdmin ? `
+                  <button onclick="openProductEditModal('${product.id}', event)" class="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-black text-xs shadow transition flex items-center gap-1">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                    <span>İçerik &amp; Analizi Düzenle</span>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- 1. Detailed Description -->
+            <div class="p-5 rounded-2xl bg-[#FAF8F5] border border-gray-200/80 space-y-2">
+              <div class="flex items-center gap-2 text-gallus-primary font-black text-sm">
+                <i data-lucide="file-text" class="w-4 h-4 text-gallus-accent"></i>
+                <h3>1. Detaylı Ürün Açıklaması ve Faydaları</h3>
+              </div>
+              <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                ${escapeHtml(product.description || '')}
+              </p>
+            </div>
+
+            <!-- 2. Ingredients & Composition & 3. Guaranteed Analysis Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <!-- Ingredients -->
+              <div class="p-5 rounded-2xl bg-emerald-50/40 border border-emerald-200/80 space-y-2.5">
+                <div class="flex items-center gap-2 text-gallus-primary font-black text-sm">
+                  <i data-lucide="wheat" class="w-4 h-4 text-emerald-700"></i>
+                  <h3>2. İçindekiler ve Hammadde Bileşimi</h3>
+                </div>
+                <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                  ${escapeHtml(product.ingredients || '1. sınıf doğal hammaddeler, vitamin ve mineral kompleksleri ile dengeli olarak üretilmiştir.')}
+                </p>
               </div>
 
-              ${product.analysis ? `
-                <div class="pt-2">
-                  <strong class="text-gallus-dark block mb-1">Garantili Analiz Değerleri:</strong>
-                  <p class="text-gray-600 font-mono text-xs">${product.analysis}</p>
+              <!-- Guaranteed Analysis -->
+              <div class="p-5 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-2.5">
+                <div class="flex items-center gap-2 text-amber-950 font-black text-sm">
+                  <i data-lucide="activity" class="w-4 h-4 text-gallus-accent"></i>
+                  <h3>3. Garantili Analiz ve Besin Değerleri</h3>
                 </div>
-              ` : ''}
+                <div class="flex flex-wrap gap-1.5 pt-1">
+                  ${(product.analysis || 'Standart kalite ve besin değerleri garantilidir.').split('|').map(item => `
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-amber-200 text-xs font-bold text-gallus-dark shadow-sm">
+                      ${escapeHtml(item.trim())}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
 
-              ${product.specs && Object.keys(product.specs).length ? `
-                <div class="pt-4 border-t border-gray-100">
-                  <strong class="text-gallus-dark block mb-2">Teknik Özellikler:</strong>
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    ${Object.entries(product.specs).map(([k,v]) => `
-                      <div class="p-2.5 rounded-xl bg-gray-50 border border-gray-100 flex justify-between">
-                        <span class="text-gray-500 font-medium">${k}:</span>
-                        <span class="font-bold text-gallus-dark">${v}</span>
-                      </div>
-                    `).join('')}
-                  </div>
+            <!-- 4. Usage & Feeding Guide -->
+            <div class="p-5 rounded-2xl bg-blue-50/40 border border-blue-200/70 space-y-2">
+              <div class="flex items-center gap-2 text-blue-950 font-black text-sm">
+                <i data-lucide="book-open" class="w-4 h-4 text-blue-600"></i>
+                <h3>4. Günlük Kullanım, Porsiyon ve Saklama Rehberi</h3>
+              </div>
+              <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                ${escapeHtml(product.usage || 'Serin, kuru ve doğrudan güneş ışığı almayan bir ortamda ambalajı kapalı olarak muhafaza ediniz. Kullanım sırasında yanında daima taze içme suyu bulundurunuz.')}
+              </p>
+            </div>
+
+            <!-- 5. Technical Specs & Google Shopping Product Identity -->
+            <div class="pt-2">
+              <div class="flex items-center gap-2 text-gallus-dark font-black text-sm mb-3">
+                <i data-lucide="sliders" class="w-4 h-4 text-gallus-primary"></i>
+                <h3>5. Teknik Özellikler ve Ürün Kimlik Kartı</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-xs">
+                <div class="p-3 rounded-xl bg-gray-50 border border-gray-200 flex justify-between items-center gap-2">
+                  <span class="text-gray-500 font-medium">Marka / Üretici:</span>
+                  <span class="font-black text-gallus-primary text-right">${escapeHtml(product.brand || 'Gallus Mama')}</span>
                 </div>
-              ` : ''}
+                <div class="p-3 rounded-xl bg-gray-50 border border-gray-200 flex justify-between items-center gap-2">
+                  <span class="text-gray-500 font-medium">Birim / Ambalaj:</span>
+                  <span class="font-bold text-gallus-dark text-right">${escapeHtml(product.packaging || product.unit || 'Standart')}</span>
+                </div>
+                <div class="p-3 rounded-xl bg-gray-50 border border-gray-200 flex justify-between items-center gap-2">
+                  <span class="text-gray-500 font-medium">Stok Kodu (SKU / MPN):</span>
+                  <span class="font-mono font-bold text-gray-800 text-right">${escapeHtml(product.sku || product.id)}</span>
+                </div>
+                ${product.specs && Object.keys(product.specs).length ? Object.entries(product.specs).map(([k,v]) => `
+                  <div class="p-3 rounded-xl bg-gray-50 border border-gray-200 flex justify-between items-center gap-2">
+                    <span class="text-gray-500 font-medium">${escapeHtml(k)}:</span>
+                    <span class="font-bold text-gallus-dark text-right">${escapeHtml(String(v))}</span>
+                  </div>
+                `).join('') : ''}
+              </div>
             </div>
           </div>
 
@@ -2599,6 +3573,95 @@
 
         </div>
       `;
+    }
+
+
+    function updateGoogleShoppingProductSchema(product) {
+      if (!product) return;
+      try {
+        let scriptEl = document.getElementById('dynamic-google-shopping-schema');
+        if (!scriptEl) {
+          scriptEl = document.createElement('script');
+          scriptEl.id = 'dynamic-google-shopping-schema';
+          scriptEl.type = 'application/ld+json';
+          document.head.appendChild(scriptEl);
+        }
+        const imgUrl = resolveClientProductImage(product);
+        const fullImg = imgUrl.startsWith('http') ? imgUrl : (window.location.origin + imgUrl);
+        const prodUrl = window.location.origin + '/urun/' + (product.slug || product.id);
+        const schemaData = {
+          "@context": "https://schema.org/",
+          "@type": "Product",
+          "name": product.name,
+          "image": [fullImg],
+          "description": `${product.description || ''} İçindekiler: ${product.ingredients || ''} Analiz: ${product.analysis || ''}`.trim(),
+          "sku": product.sku || product.id,
+          "mpn": product.sku || `GL-${String(product.id).toUpperCase()}`,
+          "category": product.googleProductCategory || product.categoryName || "Evcil Hayvan ve Çiftlik Ürünleri",
+          "brand": {
+            "@type": "Brand",
+            "name": product.brand || "Gallus Mama"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "38",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "offers": {
+            "@type": "Offer",
+            "url": prodUrl,
+            "priceCurrency": "TRY",
+            "price": Number(product.price || 0).toFixed(2),
+            "priceValidUntil": "2027-12-31",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": Number(product.stock || 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "Gallus Mama & Yumurta (Silivri / Değirmenköy)"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": Number(product.price || 0) >= 750 ? "0.00" : "49.00",
+                "currency": "TRY"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "TR"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 1,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 1,
+                  "maxValue": 3,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "TR",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 14,
+              "returnMethod": "https://schema.org/ReturnByMail",
+              "returnFees": "https://schema.org/FreeReturn"
+            }
+          }
+        };
+        scriptEl.textContent = JSON.stringify(schemaData, null, 2);
+      } catch (e) {
+        console.warn("Schema update error:", e);
+      }
     }
 
     function incrementPdpQty(maxStock) {
@@ -3116,18 +4179,19 @@
 
       container.innerHTML = `
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          ${cmsSectionBar('sec_wholesale', 'Toptan Satış (B2B)')}
           <div class="text-center max-w-2xl mx-auto mb-10 space-y-3">
-            <span class="text-xs font-black uppercase tracking-wider text-gallus-accent bg-gallus-accent-light px-3 py-1 rounded-full">Kurumsal Tedarik</span>
-            <h1 class="text-3xl sm:text-4xl font-black text-gallus-dark tracking-tight">Toptan Yumurta ve Pet Shop Dağıtımı</h1>
+            <span class="text-xs font-black uppercase tracking-wider text-gallus-accent bg-gallus-accent-light px-3 py-1 rounded-full">${cmsText('b2bBadge', 'Kurumsal Tedarik')}</span>
+            <h1 class="text-3xl sm:text-4xl font-black text-gallus-dark tracking-tight">${cmsText('b2bTitle', 'Toptan Yumurta ve Pet Shop Dağıtımı')}</h1>
             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed font-normal">
-              Marketler, şarküteriler, oteller, fırınlar ve pet shop işletmeleri için doğrudan Değirmenköy çiftliğimizden paletli taze yumurta ve çuvallı karma yem tedariği sağlıyoruz.
+              ${cmsText('b2bSubtitle', 'Marketler, şarküteriler, oteller, fırınlar ve pet shop işletmeleri için doğrudan Değirmenköy çiftliğimizden paletli taze yumurta ve çuvallı karma yem tedariği sağlıyoruz.', true)}
             </p>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
             <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-soft">
-              <h2 class="text-base font-black text-gallus-dark mb-4">Toptan Fiyat Teklifi Talep Formu</h2>
+              <h2 class="text-base font-black text-gallus-dark mb-4">${cmsText('b2bFormTitle', 'Toptan Fiyat Teklifi Talep Formu')}</h2>
               <form onsubmit="handleWholesaleForm(event)" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -3169,26 +4233,26 @@
             <!-- Advantages Right -->
             <div class="lg:col-span-5 space-y-4">
               <div class="bg-emerald-50 p-6 rounded-3xl border border-emerald-200 space-y-3">
-                <h3 class="text-sm font-black text-gallus-primary">Neden Gallus Çiftlik B2B?</h3>
+                <h3 class="text-sm font-black text-gallus-primary">${cmsText('b2bWhyTitle', 'Neden Gallus Çiftlik B2B?')}</h3>
                 <ul class="space-y-2.5 text-xs text-gray-700">
                   <li class="flex items-start gap-2">
                     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
-                    <span><strong>Aracısız Üretici Fiyatı:</strong> Doğrudan çiftliğimizden birinci el toptan fiyat avantajı.</span>
+                    <span>${cmsText('b2bBullet1', 'Aracısız Üretici Fiyatı: Doğrudan çiftliğimizden birinci el toptan fiyat avantajı.', true)}</span>
                   </li>
                   <li class="flex items-start gap-2">
                     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
-                    <span><strong>Kendi Soğutmalı Araçlarımız:</strong> Silivri, Çorlu, Çerkezköy ve İstanbul Avrupa yakasına periyodik sevkiyat.</span>
+                    <span>${cmsText('b2bBullet2', 'Kendi Soğutmalı Araçlarımız: Silivri, Çorlu, Çerkezköy ve İstanbul Avrupa yakasına periyodik sevkiyat.', true)}</span>
                   </li>
                   <li class="flex items-start gap-2">
                     <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
-                    <span><strong>Düzenli Fatura & İrsaliye:</strong> Tarım ve Orman Bakanlığı işletme onaylı yasal güvence.</span>
+                    <span>${cmsText('b2bBullet3', 'Düzenli Fatura & İrsaliye: Tarım ve Orman Bakanlığı işletme onaylı yasal güvence.', true)}</span>
                   </li>
                 </ul>
               </div>
 
               <div class="bg-white p-6 rounded-3xl border border-gray-200 text-center space-y-2">
                 <span class="text-xs text-gray-500 font-medium block">Hemen Toptan Satış Temsilcisiyle Görüşün:</span>
-                <a href="tel:05516553637" class="text-base font-black text-gallus-primary block hover:underline">📞 0551 655 3637</a>
+                <a href="tel:${cmsVal('phone', '05516553637').replace(/[^0-9]/g, '')}" class="text-base font-black text-gallus-primary block hover:underline">📞 ${cmsText('phone', '0551 655 3637')}</a>
               </div>
             </div>
 
@@ -3227,19 +4291,20 @@
       document.title = "Markalarımız | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          ${cmsSectionBar('sec_brands', 'Markalarımız Sayfası')}
           <div class="text-center max-w-2xl mx-auto mb-10">
-            <h1 class="text-3xl font-black text-gallus-dark">Yetkili ve Tescilli Markalarımız</h1>
-            <p class="text-xs text-gray-500 mt-1">Sitemizde sadece faturalı, orijinal ve kalite standartlarından geçmiş markalar sunulur.</p>
+            <h1 class="text-3xl font-black text-gallus-dark">${cmsText('brandsPageTitle', 'Yetkili ve Tescilli Markalarımız')}</h1>
+            <p class="text-xs text-gray-500 mt-1">${cmsText('brandsPageSub', 'Sitemizde sadece faturalı, orijinal ve kalite standartlarından geçmiş markalar sunulur.')}</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            ${(appState.brands || []).map(b => `
+            ${(appState.brands || []).map((b, idx) => `
               <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-2">
                 <div class="flex items-center justify-between">
-                  <h3 class="font-black text-base text-gallus-primary">${b.name}</h3>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-600">${b.country}</span>
+                  <h3 class="font-black text-base text-gallus-primary">${cmsText('brand_name_' + idx, b.name)}</h3>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-600">${cmsText('brand_country_' + idx, b.country)}</span>
                 </div>
-                <p class="text-xs text-gray-600 leading-relaxed">${b.desc}</p>
+                <p class="text-xs text-gray-600 leading-relaxed">${cmsText('brand_desc_' + idx, b.desc || '', true)}</p>
                 <div class="pt-2">
                   <button onclick="appState.filterBrand = '${b.name}'; navigate('/kopek', event);" class="text-xs font-bold text-gallus-accent hover:underline">
                     Markanın Ürünlerini İncele →
@@ -3256,25 +4321,26 @@
       document.title = "Kampanyalar ve İndirimler | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+          ${cmsSectionBar('sec_campaigns', 'Kampanyalar Sayfası')}
           <div class="text-center max-w-xl mx-auto">
-            <span class="text-xs font-black uppercase text-rose-600 bg-rose-50 px-3 py-1 rounded-full">Fırsat Köşesi</span>
-            <h1 class="text-3xl font-black text-gallus-dark mt-2">Aktif İndirim ve Kampanyalar</h1>
+            <span class="text-xs font-black uppercase text-rose-600 bg-rose-50 px-3 py-1 rounded-full">${cmsText('campPageBadge', 'Fırsat Köşesi')}</span>
+            <h1 class="text-3xl font-black text-gallus-dark mt-2">${cmsText('campPageTitle', 'Aktif İndirim ve Kampanyalar')}</h1>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-3">
-              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Sürekli Kampanya</span>
-              <h2 class="text-lg font-black text-gallus-dark">750 ₺ ve Üzeri Ücretsiz Kargo</h2>
+              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">${cmsText('camp1Badge', 'Sürekli Kampanya')}</span>
+              <h2 class="text-lg font-black text-gallus-dark">${cmsText('camp1Title', '750 ₺ ve Üzeri Ücretsiz Kargo')}</h2>
               <p class="text-xs text-gray-600 leading-relaxed">
-                Tüm yumurta, kedi/köpek maması ve çiftlik yemlerinde sepet tutarınız 750 ₺'ye ulaştığında kargo ücreti tamamen sıfırlanır.
+                ${cmsText('camp1Desc', "Tüm yumurta, kedi/köpek maması ve çiftlik yemlerinde sepet tutarınız 750 ₺'ye ulaştığında kargo ücreti tamamen sıfırlanır.", true)}
               </p>
             </div>
 
             <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-soft space-y-3">
-              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">Kupon Kodu</span>
-              <h2 class="text-lg font-black text-gallus-dark">GALLUS10 ile %10 İndirim</h2>
+              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-800">${cmsText('camp2Badge', 'Kupon Kodu')}</span>
+              <h2 class="text-lg font-black text-gallus-dark">${cmsText('camp2Title', 'GALLUS10 ile %10 İndirim')}</h2>
               <p class="text-xs text-gray-600 leading-relaxed">
-                Sitemizden vereceğiniz ilk siparişinizde sepet adımında <strong>GALLUS10</strong> kodunu girerek anında %10 indirim kazanın.
+                ${cmsText('camp2Desc', 'Sitemizden vereceğiniz ilk siparişinizde sepet adımında GALLUS10 kodunu girerek anında %10 indirim kazanın.', true)}
               </p>
             </div>
           </div>
@@ -3289,28 +4355,29 @@
       document.title = "Çiftliğimiz ve Üretim Standartlarımız | Gallus Çiftlik";
       container.innerHTML = `
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+          ${cmsSectionBar('sec_farm', 'Çiftliğimiz Sayfası')}
           <div class="text-center max-w-2xl mx-auto space-y-2">
-            <span class="text-xs font-bold uppercase text-gallus-accent">Doğadan İlham Alan Teknoloji</span>
-            <h1 class="text-3xl sm:text-4xl font-black text-gallus-dark">Değirmenköy Gezen Tavuk Çiftliği</h1>
-            <p class="text-xs sm:text-sm text-gray-600">Biyogüvenlikli, geniş arazide serbest gezen tavuklarımız ve kaliteli üretim standartlarımız.</p>
+            <span class="text-xs font-bold uppercase text-gallus-accent">${cmsText('farmBadge', 'Doğadan İlham Alan Teknoloji')}</span>
+            <h1 class="text-3xl sm:text-4xl font-black text-gallus-dark">${cmsText('farmTitle', 'Değirmenköy Gezen Tavuk Çiftliği')}</h1>
+            <p class="text-xs sm:text-sm text-gray-600">${cmsText('farmSubtitle', 'Biyogüvenlikli, geniş arazide serbest gezen tavuklarımız ve kaliteli üretim standartlarımız.', true)}</p>
           </div>
 
           <div class="aspect-video rounded-3xl overflow-hidden shadow-card bg-gray-200">
-            <img src="/images/tavuklar.jpg" alt="Çiftlik Tavukları" class="w-full h-full object-cover">
+            ${cmsImg('farmMainImg', '/images/tavuklar.jpg', 'Çiftlik Tavukları', 'w-full h-full object-cover')}
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-gray-700">
             <div class="bg-white p-6 rounded-2xl border border-gray-200 space-y-2">
-              <h3 class="font-black text-sm text-gallus-primary">Serbest Otlama Alanları</h3>
-              <p class="text-gray-500 leading-relaxed">Tavuk başına 4 m²'den fazla açık mera arazisi ayrılarak hayvan refahı en üst düzeyde tutulur.</p>
+              <h3 class="font-black text-sm text-gallus-primary">${cmsText('farmCard1Title', 'Serbest Otlama Alanları')}</h3>
+              <p class="text-gray-500 leading-relaxed">${cmsText('farmCard1Desc', "Tavuk başına 4 m²'den fazla açık mera arazisi ayrılarak hayvan refahı en üst düzeyde tutulur.", true)}</p>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-gray-200 space-y-2">
-              <h3 class="font-black text-sm text-gallus-primary">Özel Tahıl Rasyonu</h3>
-              <p class="text-gray-500 leading-relaxed">Kendi rasyonumuz olan doğal mısır, buğday ve keten tohumu ile besleme yapılarak katkısız altın sarılık sağlanır.</p>
+              <h3 class="font-black text-sm text-gallus-primary">${cmsText('farmCard2Title', 'Özel Tahıl Rasyonu')}</h3>
+              <p class="text-gray-500 leading-relaxed">${cmsText('farmCard2Desc', 'Kendi rasyonumuz olan doğal mısır, buğday ve keten tohumu ile besleme yapılarak katkısız altın sarılık sağlanır.', true)}</p>
             </div>
             <div class="bg-white p-6 rounded-2xl border border-gray-200 space-y-2">
-              <h3 class="font-black text-sm text-gallus-primary">Veteriner Denetimi</h3>
-              <p class="text-gray-500 leading-relaxed">Rutin laboratuvar testleri ve veteriner kontrolleri ile salmonella ve antibiyotik riski sıfıra indirilir.</p>
+              <h3 class="font-black text-sm text-gallus-primary">${cmsText('farmCard3Title', 'Veteriner Denetimi')}</h3>
+              <p class="text-gray-500 leading-relaxed">${cmsText('farmCard3Desc', 'Rutin laboratuvar testleri ve veteriner kontrolleri ile salmonella ve antibiyotik riski sıfıra indirilir.', true)}</p>
             </div>
           </div>
         </div>
@@ -3321,10 +4388,17 @@
       document.title = "Hakkımızda | Gallus Mama & Yumurta";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('aboutTitle', 'Hakkımızda')}</h1>
+          ${cmsSectionBar('sec_about', 'Hakkımızda Sayfası')}
+          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('aboutTitle', "Değirmenköy'ün Bereketli Topraklarından Doğan Güven")}</h1>
+          <div class="aspect-[16/7] rounded-3xl overflow-hidden shadow-card bg-gray-200">
+            ${cmsImg('aboutPageImg', '/images/mutlu-patiler-banner.jpg', 'Hakkımızda Görsel', 'w-full h-full object-cover')}
+          </div>
           <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-soft text-xs sm:text-sm text-gray-700 leading-relaxed space-y-4">
             <p>
               ${cmsText('aboutText', "GALLUS MAMA & YUMURTA olarak 2018 yılından bu yana Silivri Değirmenköy Mahallesi PTT karşısındaki merkez mağazamız ve yüksek teknolojili biyogüvenlikli gezen tavuk çiftliğimizle hizmet veriyoruz. Temel misyonumuz; kahvaltı sofralarına en taze ve katkısız günlük gezen tavuk yumurtasını ulaştırırken, can dostlarımız için de yüksek kaliteli, besleyici ve veteriner onaylı mamaları dürüst üretici fiyatlarıyla sunmaktır.", true)}
+            </p>
+            <p>
+              ${cmsText('aboutMissionText', "Tüm kedi maması, köpek maması, güvercin ve kanatlı yemlerimiz doğrudan yetkili distribütörlerden ve kendi çiftlik üretim bandımızdan taze parti olarak temin edilmektedir.", true)}
             </p>
           </div>
         </div>
@@ -3333,11 +4407,13 @@
 
     function renderContactPage(container) {
       document.title = "İletişim & Konum | Gallus Mama";
+      const mapUrl = cmsVal('mapEmbedUrl', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str');
       container.innerHTML = `
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+          ${cmsSectionBar('sec_contact', 'İletişim & Konum')}
           <div class="text-center max-w-xl mx-auto">
-            <h1 class="text-3xl font-black text-gallus-dark">İletişim & Mağaza Bilgileri</h1>
-            <p class="text-xs text-gray-500 mt-1">Sorularınız, siparişleriniz veya ziyaretiniz için bize dilediğiniz zaman ulaşabilirsiniz.</p>
+            <h1 class="text-3xl font-black text-gallus-dark">${cmsText('contactPageTitle', 'İletişim & Mağaza Bilgileri')}</h1>
+            <p class="text-xs text-gray-500 mt-1">${cmsText('contactPageSub', 'Sorularınız, siparişleriniz veya ziyaretiniz için bize dilediğiniz zaman ulaşabilirsiniz.')}</p>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -3348,7 +4424,7 @@
               </div>
               <div>
                 <strong class="text-gray-500 block mb-0.5">Telefon & Sipariş Hattı:</strong>
-                <a href="tel:${appState.siteInfo.phone || '05516553637'}" class="font-black text-base text-gallus-primary hover:underline">${cmsText('phone', '0551 655 3637')}</a>
+                <a href="tel:${cmsVal('phone', '05516553637').replace(/[^0-9]/g, '')}" class="font-black text-base text-gallus-primary hover:underline">${cmsText('phone', '0551 655 3637')}</a>
               </div>
               <div>
                 <strong class="text-gray-500 block mb-0.5">Çalışma Saatlerimiz:</strong>
@@ -3358,8 +4434,12 @@
                 <strong class="text-gray-500 block mb-0.5">E-Posta:</strong>
                 <p class="font-medium text-gray-700">${cmsText('email', 'iletisim@gallusmama.com')}</p>
               </div>
+              <div>
+                <strong class="text-gray-500 block mb-0.5">Teslimat Bölgeleri:</strong>
+                <p class="font-medium text-gray-700">${cmsText('deliveryRegions', 'Silivri, Değirmenköy, Çantaköy, Gümüşyaka, Çerkezköy, Çorlu, Kapaklı ve Özel Korumalı Kargo İle Tüm Türkiye', true)}</p>
+              </div>
               <div class="pt-2">
-                <a href="${appState.siteInfo.whatsappUrl || 'https://wa.me/905516553637'}" target="_blank" rel="noopener noreferrer" class="block w-full py-3 rounded-xl text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow">
+                <a href="${escapeHtml(cmsVal('whatsappUrl', 'https://wa.me/905516553637'))}" target="_blank" rel="noopener noreferrer" class="block w-full py-3 rounded-xl text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition shadow">
                   WhatsApp Üzerinden Hemen Mesaj Gönder
                 </a>
               </div>
@@ -3367,7 +4447,7 @@
 
             <div class="lg:col-span-7 bg-white p-2 rounded-3xl border border-gray-200 shadow-soft aspect-[4/3] overflow-hidden">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48074.83274712066!2d28.02534575!3d41.13964895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b54e7d324b1d05%3A0x7d2e46bfbdf581b!2sDe%C4%9Firmenk%C3%B6y%2C%20Silivri%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1700000000000!5m2!1str!2str" 
+                src="${escapeHtml(mapUrl)}" 
                 class="w-full h-full rounded-2xl border-0" 
                 allowfullscreen="" 
                 loading="lazy" 
@@ -3383,30 +4463,38 @@
       document.title = "Yardım & SSS | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+          ${cmsSectionBar('sec_help', 'Yardım & SSS')}
           <div class="text-center">
-            <h1 class="text-3xl font-black text-gallus-dark">Sıkça Sorulan Sorular</h1>
-            <p class="text-xs text-gray-500 mt-1">Sipariş, kargo ve ürünlerimizle ilgili en çok merak edilenler.</p>
+            <h1 class="text-3xl font-black text-gallus-dark">${cmsText('helpTitle', 'Sıkça Sorulan Sorular')}</h1>
+            <p class="text-xs text-gray-500 mt-1">${cmsText('helpSub', 'Sipariş, kargo ve ürünlerimizle ilgili en çok merak edilenler.')}</p>
           </div>
 
           <div class="space-y-4 text-xs sm:text-sm">
             <div class="bg-white p-6 rounded-2xl border border-gray-200 space-y-1.5">
-              <h3 class="font-black text-gallus-dark">Yumurtalar kargoda kırılır mı? Nasıl paketleniyor?</h3>
+              <h3 class="font-black text-gallus-dark">${cmsText('faq1Q', 'Yumurtalar kargoda kırılır mı? Nasıl paketleniyor?')}</h3>
               <p class="text-gray-600 leading-relaxed">
-                Yumurtalarımız darbeye karşı özel üretilmiş kalın kraft koruyucu viyoller ve hava yastıklı şok emici ambalajlar içinde sevk edilir. Kırılma oranı %0.1'in altındadır. Olası bir hasarda fotoğrafını iletmeniz halinde anında telafi edilir.
+                ${cmsText('faq1A', "Yumurtalarımız darbeye karşı özel üretilmiş kalın kraft koruyucu viyoller ve hava yastıklı şok emici ambalajlar içinde sevk edilir. Kırılma oranı %0.1'in altındadır. Olası bir hasarda fotoğrafını iletmeniz halinde anında telafi edilir.", true)}
               </p>
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-gray-200 space-y-1.5">
-              <h3 class="font-black text-gallus-dark">Siparişim ne zaman kargoya verilir?</h3>
+              <h3 class="font-black text-gallus-dark">${cmsText('faq2Q', 'Siparişim ne zaman kargoya verilir?')}</h3>
               <p class="text-gray-600 leading-relaxed">
-                Hafta içi saat 15:00'e kadar verilen siparişler aynı gün kargoya teslim edilir. Silivri ve çevre bölgelere ise kendi servis araçlarımızla gün içi elden teslimat yapılmaktadır.
+                ${cmsText('faq2A', "Hafta içi saat 15:00'e kadar verilen siparişler aynı gün kargoya teslim edilir. Silivri ve çevre bölgelere ise kendi servis araçlarımızla gün içi elden teslimat yapılmaktadır.", true)}
               </p>
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-gray-200 space-y-1.5">
-              <h3 class="font-black text-gallus-dark">Kapıda ödeme yapabilir miyim?</h3>
+              <h3 class="font-black text-gallus-dark">${cmsText('faq3Q', 'Kapıda ödeme yapabilir miyim?')}</h3>
               <p class="text-gray-600 leading-relaxed">
-                Evet, sipariş tamamlama adımında kapıda nakit veya POS cihazı ile kredi kartı ödeme seçeneğini seçebilirsiniz.
+                ${cmsText('faq3A', 'Evet, sipariş tamamlama adımında kapıda nakit veya POS cihazı ile kredi kartı ödeme seçeneğini seçebilirsiniz.', true)}
+              </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-gray-200 space-y-1.5">
+              <h3 class="font-black text-gallus-dark">${cmsText('faq4Q', 'Mamalarınızın son kullanma tarihi ve orijinalliği garantili mi?')}</h3>
+              <p class="text-gray-600 leading-relaxed">
+                ${cmsText('faq4A', 'Mağazamızdaki tüm kedi, köpek, güvercin ve kümes yemleri %100 orijinal ambalajında, yeni üretim partisi ve faturalı olarak gönderilmektedir.', true)}
               </p>
             </div>
           </div>
@@ -3418,16 +4506,17 @@
       document.title = "Kargo ve İade Koşulları | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-          <h1 class="text-3xl font-black text-gallus-dark">Kargo ve İade Politikası</h1>
+          ${cmsSectionBar('sec_shipping', 'Kargo ve İade Politikası')}
+          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('shipPageTitle', 'Kargo ve İade Politikası')}</h1>
           <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-soft text-xs sm:text-sm text-gray-700 leading-relaxed space-y-4">
-            <h2 class="text-base font-black text-gallus-primary">1. Teslimat Süreçleri</h2>
-            <p>Siparişleriniz anlaşmalı kargo firmalarımızla Türkiye'nin her yerine 1-3 iş günü içerisinde ulaştırılır. 750 ₺ ve üzeri tüm alışverişlerde kargo bedavadır.</p>
+            <h2 class="text-base font-black text-gallus-primary">${cmsText('shipSec1Title', '1. Teslimat Süreçleri')}</h2>
+            <p>${cmsText('shipSec1Desc', "Siparişleriniz anlaşmalı kargo firmalarımızla Türkiye'nin her yerine 1-3 iş günü içerisinde ulaştırılır. 750 ₺ ve üzeri tüm alışverişlerde kargo bedavadır.", true)}</p>
 
-            <h2 class="text-base font-black text-gallus-primary">2. Kırılmaz Yumurta Güvencesi</h2>
-            <p>Doğal çiftlik yumurtalarımız darbe sönümleyici özel kalıplarla sevk edilir. Kargo tesliminde pakette belirgin hasar olması durumunda kurye nezaretinde tutanak tutturabilir veya WhatsApp hattımızdan fotoğraf göndererek yenisini talep edebilirsiniz.</p>
+            <h2 class="text-base font-black text-gallus-primary">${cmsText('shipSec2Title', '2. Kırılmaz Yumurta Güvencesi')}</h2>
+            <p>${cmsText('shipSec2Desc', 'Doğal çiftlik yumurtalarımız darbe sönümleyici özel kalıplarla sevk edilir. Kargo tesliminde pakette belirgin hasar olması durumunda kurye nezaretinde tutanak tutturabilir veya WhatsApp hattımızdan fotoğraf göndererek yenisini talep edebilirsiniz.', true)}</p>
 
-            <h2 class="text-base font-black text-gallus-primary">3. İade ve Değişim Şartları</h2>
-            <p>Ambalajı açılmamış kuru mama, kedi kumu ve ekipman ürünlerini 14 gün içerisinde yasal cayma hakkınız kapsamında koşulsuz iade edebilirsiniz. Çabuk bozulabilen taze yumurtalarda ise kalite güvencemiz geçerlidir.</p>
+            <h2 class="text-base font-black text-gallus-primary">${cmsText('shipSec3Title', '3. İade ve Değişim Şartları')}</h2>
+            <p>${cmsText('shipSec3Desc', 'Ambalajı açılmamış kuru mama, kedi kumu ve ekipman ürünlerini 14 gün içerisinde yasal cayma hakkınız kapsamında koşulsuz iade edebilirsiniz. Çabuk bozulabilen taze yumurtalarda ise kalite güvencemiz geçerlidir.', true)}</p>
           </div>
         </div>
       `;
@@ -3440,17 +4529,10 @@
       document.title = "Mesafeli Satış Sözleşmesi | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-          <h1 class="text-3xl font-black text-gallus-dark">Mesafeli Satış Sözleşmesi</h1>
+          ${cmsSectionBar('sec_legal', 'Yasal Sözleşmeler')}
+          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('legalDistTitle', 'Mesafeli Satış Sözleşmesi')}</h1>
           <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-soft text-xs text-gray-700 leading-relaxed space-y-4">
-            <h2 class="text-sm font-black text-gallus-primary">Madde 1 - Taraflar</h2>
-            <p><strong>Satıcı:</strong> GALLUS MAMA & YUMURTA (Değirmenköy Mah. PTT Karşısı, Silivri / İstanbul. Tel: 0551 655 3637)<br>
-            <strong>Alıcı:</strong> gallusmama.com üzerinden sipariş veren tüketici.</p>
-
-            <h2 class="text-sm font-black text-gallus-primary">Madde 2 - Sözleşmenin Konusu</h2>
-            <p>İşbu sözleşmenin konusu, ALICI'nın SATICI'ya ait internet sitesinden elektronik ortamda siparişini yaptığı ürünlerin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır.</p>
-
-            <h2 class="text-sm font-black text-gallus-primary">Madde 3 - Cayma Hakkı</h2>
-            <p>Tüketici, standart ürünlerde 14 gün içinde herhangi bir gerekçe göstermeksizin cayma hakkına sahiptir. Doğası gereği çabuk bozulabilen taze gıda (günlük çiftlik yumurtası) ürünlerinde cayma hakkı yönetmelik istisnaları kapsamındadır.</p>
+            <p>${cmsText('legalDistBody', "İşbu sözleşmenin konusu, ALICI'nın SATICI'ya ait internet sitesinden elektronik ortamda siparişini yaptığı ürünlerin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Mesafeli Sözleşmeler Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin saptanmasıdır. Tüketici, standart ürünlerde 14 gün içinde herhangi bir gerekçe göstermeksizin cayma hakkına sahiptir.", true)}</p>
           </div>
         </div>
       `;
@@ -3460,10 +4542,10 @@
       document.title = "Gizlilik ve KVKK Politikası | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-          <h1 class="text-3xl font-black text-gallus-dark">Gizlilik ve Kişisel Verilerin Korunması (KVKK)</h1>
+          ${cmsSectionBar('sec_legal', 'Yasal Sözleşmeler')}
+          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('legalPrivTitle', 'Gizlilik ve Kişisel Verilerin Korunması (KVKK)')}</h1>
           <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-soft text-xs text-gray-700 leading-relaxed space-y-4">
-            <p>Gallus Mama & Yumurta olarak müşterilerimizin kişisel verilerinin güvenliğine azami önem gösteriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında ad, telefon, teslimat adresi bilgileriniz sadece siparişinizin ulaştırılması ve faturalandırılması amacıyla işlenir.</p>
-            <p>Kredi kartı bilgileriniz sunucularımızda asla saklanmaz. Tüm ödeme işlemleri 256-bit SSL şifreleme ve banka 3D Secure altyapısı ile güvence altındadır.</p>
+            <p>${cmsText('legalPrivBody', 'Gallus Mama & Yumurta olarak müşterilerimizin kişisel verilerinin güvenliğine azami önem gösteriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında ad, telefon, teslimat adresi bilgileriniz sadece siparişinizin ulaştırılması ve faturalandırılması amacıyla işlenir. Kredi kartı bilgileriniz sunucularımızda asla saklanmaz.', true)}</p>
           </div>
         </div>
       `;
@@ -3473,9 +4555,10 @@
       document.title = "Teslimat Koşulları | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-          <h1 class="text-3xl font-black text-gallus-dark">Teslimat Koşulları</h1>
+          ${cmsSectionBar('sec_legal', 'Yasal Sözleşmeler')}
+          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('legalDelivTitle', 'Teslimat Koşulları')}</h1>
           <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-soft text-xs text-gray-700 leading-relaxed space-y-4">
-            <p>Siparişleriniz Değirmenköy ana sevkiyat merkezimizden çıkış yapmaktadır. Sipariş onayının ardından anlaşmalı kargo firmasına teslim edilen paketleriniz için SMS ve e-posta ile kargo takip bağlantısı gönderilir.</p>
+            <p>${cmsText('legalDelivBody', 'Siparişleriniz Değirmenköy ana sevkiyat merkezimizden çıkış yapmaktadır. Sipariş onayının ardından anlaşmalı kargo firmasına teslim edilen paketleriniz için SMS ve e-posta ile kargo takip bağlantısı gönderilir.', true)}</p>
           </div>
         </div>
       `;
@@ -3485,9 +4568,10 @@
       document.title = "Çerez Politikası | Gallus Mama";
       container.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-          <h1 class="text-3xl font-black text-gallus-dark">Çerez (Cookie) Politikası</h1>
+          ${cmsSectionBar('sec_legal', 'Yasal Sözleşmeler')}
+          <h1 class="text-3xl font-black text-gallus-dark">${cmsText('legalCookieTitle', 'Çerez (Cookie) Politikası')}</h1>
           <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-soft text-xs text-gray-700 leading-relaxed space-y-4">
-            <p>Web sitemizde alışveriş sepetinizin hatırlanması, oturum yönetimi ve site performansının iyileştirilmesi amacıyla zorunlu çerezler kullanılmaktadır. Sitemizi kullanarak çerez politikamızı kabul etmiş sayılırsınız.</p>
+            <p>${cmsText('legalCookieBody', 'Web sitemizde alışveriş sepetinizin hatırlanması, oturum yönetimi ve site performansının iyileştirilmesi amacıyla zorunlu çerezler kullanılmaktadır. Sitemizi kullanarak çerez politikamızı kabul etmiş sayılırsınız.', true)}</p>
           </div>
         </div>
       `;
@@ -3835,13 +4919,35 @@
         <div class="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-soft max-w-4xl mx-auto space-y-8">
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-gray-200 pb-4">
             <div>
-              <h2 class="text-lg font-black text-gallus-dark">✍️ Tüm Site Metinleri ve CMS Yönetimi</h2>
-              <p class="text-xs text-gray-500">Sitedeki tüm kurumsal bilgileri, sloganları ve iletişim alanlarını buradan kalıcı olarak düzenleyebilirsiniz.</p>
+              <h2 class="text-lg font-black text-gallus-dark">✍️ Tüm Site Bölümleri ve Görsel CMS Yönetimi (19 Bölüm)</h2>
+              <p class="text-xs text-gray-500">Sitedeki her bölümün başlıklarını, metinlerini ve görsellerini aşağıdan seçerek veya doğrudan sayfa üzerinde tıklayarak düzenleyebilirsiniz.</p>
             </div>
-            <button onclick="saveAllCmsChangesToServer()" class="px-5 py-2.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition flex items-center gap-1.5">
-              <i data-lucide="save" class="w-4 h-4"></i>
-              <span>Tüm Metinleri Sunucuya Kaydet</span>
-            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="openAllSectionsModal()" class="px-4 py-2.5 rounded-xl text-xs font-black text-black bg-amber-400 hover:bg-amber-300 shadow-md transition flex items-center gap-1.5">
+                <i data-lucide="layers" class="w-4 h-4"></i>
+                <span>📑 19 Bölümün Tamamını Düzenle</span>
+              </button>
+              <button onclick="saveAllCmsChangesToServer()" class="px-5 py-2.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition flex items-center gap-1.5">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Sunucuya Kaydet</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Grid of All 19 Website Sections -->
+          <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black text-amber-950 uppercase tracking-wider">⚡ Hızlı Bölüm Seçici (Düzenlemek İstediğiniz Bölüme Tıklayın)</span>
+              <span class="text-[11px] font-bold text-emerald-800">19 Bölüm Aktif</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              ${ALL_CMS_SECTIONS.map(sec => `
+                <button type="button" onclick="openAllSectionsModal('${sec.id}', event)" class="text-left p-2.5 rounded-xl bg-white hover:bg-amber-100/80 border border-amber-200/80 shadow-sm transition flex items-center justify-between gap-2 text-xs font-bold text-gallus-dark">
+                  <span class="truncate">${sec.title}</span>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-400 text-black font-black shrink-0">Düzenle</span>
+                </button>
+              `).join('')}
+            </div>
           </div>
 
           <form onsubmit="handleCmsFormSubmit(event)" class="space-y-6">

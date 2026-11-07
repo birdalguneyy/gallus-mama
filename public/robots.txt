@@ -4,3 +4,4 @@ Disallow: /admin
 Disallow: /api/
 
 Sitemap: https://gallusmama.com/sitemap.xml
+# Google Merchant Center Feed: https://gallusmama.com/google-shopping-feed.xml

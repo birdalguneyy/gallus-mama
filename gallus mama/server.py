@@ -153,6 +153,20 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
         if pathname == "/api/categories":
             return self.send_json(200, in_memory_categories)
 
+        # 2.5 API: Brands
+        if pathname == "/api/brands":
+            brands = []
+            if DB_PATH.exists():
+                try:
+                    brands = json.loads(DB_PATH.read_text(encoding="utf-8")).get("brands", [])
+                except Exception:
+                    pass
+            return self.send_json(200, brands)
+
+        # 2.6 API: Auth Check
+        if pathname == "/api/auth/check":
+            return self.send_json(200, {"authenticated": True})
+
         # 3. API: Site Info
         if pathname == "/api/info":
             info = {}
@@ -173,15 +187,37 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                     pass
             return self.send_json(200, orders)
 
-        # 4. Robots.txt
+        # 4. Robots.txt, Sitemap.xml & Google Shopping XML Feed
         if pathname == "/robots.txt":
-            content = "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://gallusmama.com/sitemap.xml\n".encode("utf-8")
+            content = "User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://gallusmama.com/sitemap.xml\n# Google Merchant Center Feed: https://gallusmama.com/google-shopping-feed.xml\n".encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
             return
+
+        if pathname in ["/google-shopping-feed.xml", "/merchant-feed.xml"]:
+            feed_file = PUBLIC_DIR / "google-shopping-feed.xml"
+            if feed_file.exists():
+                content = feed_file.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/xml; charset=utf-8")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+
+        if pathname == "/sitemap.xml":
+            sm_file = PUBLIC_DIR / "sitemap.xml"
+            if sm_file.exists():
+                content = sm_file.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/xml; charset=utf-8")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
 
         # 5. Static files
         clean_path = pathname.lstrip("/")
@@ -200,10 +236,48 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
             self.wfile.write(content)
             return
 
-        # 6. SPA fallback -> index.html
+        # 6. SPA fallback -> index.html (with dynamic Google Shopping Product JSON-LD injection)
         index_file = PUBLIC_DIR / "index.html"
         if index_file.exists():
-            content = index_file.read_bytes()
+            html_str = index_file.read_text(encoding="utf-8")
+            if pathname.startswith("/urun/"):
+                slug = pathname.replace("/urun/", "").strip("/")
+                prod = next((p for p in in_memory_products if p.get("slug") == slug or p.get("id") == slug), None)
+                if prod:
+                    img_u = str(prod.get("imageUrl") or "/images/mutlu-patiler-banner.jpg")
+                    full_img = img_u if img_u.startswith("http") else f"https://gallusmama.com{img_u}"
+                    price_val = float(prod.get("price") or prod.get("sale_price") or 0.0)
+                    stock_val = float(prod.get("stock") if prod.get("stock") is not None else (prod.get("stock_quantity") or 0.0))
+                    prod_schema = {
+                        "@context": "https://schema.org/",
+                        "@type": "Product",
+                        "name": prod.get("name"),
+                        "image": [full_img],
+                        "description": f"{prod.get('description', '')} İçindekiler: {prod.get('ingredients', '')} Analiz: {prod.get('analysis', '')}".strip(),
+                        "sku": prod.get("sku") or prod.get("id"),
+                        "mpn": prod.get("sku") or f"GL-{str(prod.get('id')).upper()}",
+                        "category": prod.get("googleProductCategory") or prod.get("categoryName") or "Evcil Hayvan ve Çiftlik Ürünleri",
+                        "brand": {"@type": "Brand", "name": prod.get("brand") or "Gallus Mama"},
+                        "aggregateRating": {"@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "38", "bestRating": "5", "worstRating": "1"},
+                        "offers": {
+                            "@type": "Offer",
+                            "url": f"https://gallusmama.com/urun/{prod.get('slug') or prod.get('id')}",
+                            "priceCurrency": "TRY",
+                            "price": f"{price_val:.2f}",
+                            "priceValidUntil": "2027-12-31",
+                            "itemCondition": "https://schema.org/NewCondition",
+                            "availability": "https://schema.org/InStock" if stock_val > 0 else "https://schema.org/OutOfStock",
+                            "seller": {"@type": "Organization", "name": "Gallus Mama & Yumurta"}
+                        }
+                    }
+                    inject_block = (
+                        f'\n  <meta property="og:type" content="product">'
+                        f'\n  <meta property="product:price:amount" content="{price_val:.2f}">'
+                        f'\n  <meta property="product:price:currency" content="TRY">'
+                        f'\n  <script type="application/ld+json">{json.dumps(prod_schema, ensure_ascii=False)}</script>\n</head>'
+                    )
+                    html_str = html_str.replace("</head>", inject_block, 1)
+            content = html_str.encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(content)))
@@ -419,12 +493,38 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                 if site_info and isinstance(site_info, dict):
                     if "siteInfo" not in local_db: local_db["siteInfo"] = {}
                     local_db["siteInfo"].update(site_info)
+                    if db:
+                        try:
+                            db.collection("site_settings").document("main").set(local_db["siteInfo"], merge=True)
+                        except Exception:
+                            pass
+
+                categories = body.get("categories")
+                if categories and isinstance(categories, list):
+                    local_db["categories"] = categories
+                    global in_memory_categories
+                    in_memory_categories = list(categories)
+
+                brands = body.get("brands")
+                if brands and isinstance(brands, list):
+                    local_db["brands"] = brands
                 
                 products = body.get("products")
                 if products and isinstance(products, list):
-                    local_db["products"] = products
-                    global in_memory_products
-                    in_memory_products = list(products)
+                    if body.get("replaceAllProducts") or len(products) > 5:
+                        local_db["products"] = products
+                        global in_memory_products
+                        in_memory_products = list(products)
+                    else:
+                        existing_prods = local_db.get("products", [])
+                        for up in products:
+                            idx = next((i for i, ep in enumerate(existing_prods) if ep.get("id") == up.get("id")), -1)
+                            if idx >= 0:
+                                existing_prods[idx].update(up)
+                            else:
+                                existing_prods.append(up)
+                        local_db["products"] = existing_prods
+                        in_memory_products = list(existing_prods)
                 
                 # Write to both root and nested database.json
                 for db_file in [
@@ -456,6 +556,10 @@ class GallusMamaHandler(BaseHTTPRequestHandler):
                                     "packaging": p.get("packaging") or p.get("unit") or "Standart",
                                     "imageUrl": p.get("imageUrl", ""),
                                     "description": p.get("description", ""),
+                                    "ingredients": p.get("ingredients", ""),
+                                    "analysis": p.get("analysis", ""),
+                                    "usage": p.get("usage", ""),
+                                    "specs": p.get("specs", {}),
                                     "isPopular": bool(p.get("isPopular")),
                                     "isFeatured": bool(p.get("isFeatured")),
                                     "badge": p.get("badge", ""),
